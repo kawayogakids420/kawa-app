@@ -2,9 +2,21 @@ import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import type { SensoryProfile } from '@/lib/data/course'
 
+// ─── TIPOS ────────────────────────────────────────────────────────────────────
+
+export interface ChildProfile {
+  id: string
+  name: string
+  age: number
+  gender: 'male' | 'female'
+  profile: SensoryProfile | null
+  profilePcts: Record<SensoryProfile, number> | null
+}
+
 interface SessionLog {
   weekId: number
-  date: string           // ISO string
+  childId: string
+  date: string
   completed: boolean
   mood: 'great' | 'good' | 'okay' | 'hard'
   notes: string
@@ -12,67 +24,48 @@ interface SessionLog {
 }
 
 interface AppState {
-  // Onboarding
+  // Multi-niño
   onboardingComplete: boolean
-  childName: string
-  childAge: number | null
-  activeProfile: SensoryProfile | null
+  children: ChildProfile[]
+  activeChildId: string | null
 
-  // Progress
+  // Progreso (por niño)
   currentWeek: number
   completedWeeks: number[]
   sessionLogs: SessionLog[]
 
-  // Session in progress
-  sessionActive: boolean
-  sessionWeekId: number | null
-  sessionStep: number           // which moment in the session
-  sessionPostureIndex: number   // which posture within step
-  audioPlaying: boolean
-  storyComplete: boolean
-
   // UI
-  sidebarOpen: boolean
+  audioPlaying: boolean
   activeTab: 'clase' | 'padres' | 'materiales' | 'progreso'
+
+  // Getters helper
+  activeChild: () => ChildProfile | null
 
   // Actions — onboarding
   completeOnboarding: (name: string, age: number, profile: SensoryProfile) => void
+  addChild: (child: ChildProfile) => void
+  setActiveChild: (id: string) => void
+  updateChildProfile: (id: string, profile: SensoryProfile, pcts: Record<SensoryProfile, number>) => void
 
-  // Actions — progress
+  // Actions — progreso
   setCurrentWeek: (week: number) => void
   completeWeek: (weekId: number) => void
   logSession: (log: Omit<SessionLog, 'date'>) => void
 
-  // Actions — session
-  startSession: (weekId: number) => void
-  endSession: () => void
-  nextStep: () => void
-  prevStep: () => void
-  nextPosture: () => void
-  toggleAudio: () => void
-  completeStory: () => void
-
   // Actions — UI
   setActiveTab: (tab: AppState['activeTab']) => void
-  toggleSidebar: () => void
+  toggleAudio: () => void
   reset: () => void
 }
 
 const initialState = {
   onboardingComplete: false,
-  childName: '',
-  childAge: null,
-  activeProfile: null,
+  children: [] as ChildProfile[],
+  activeChildId: null as string | null,
   currentWeek: 1,
-  completedWeeks: [],
-  sessionLogs: [],
-  sessionActive: false,
-  sessionWeekId: null,
-  sessionStep: 0,
-  sessionPostureIndex: 0,
+  completedWeeks: [] as number[],
+  sessionLogs: [] as SessionLog[],
   audioPlaying: false,
-  storyComplete: false,
-  sidebarOpen: false,
   activeTab: 'clase' as const,
 }
 
@@ -81,13 +74,44 @@ export const useAppStore = create<AppState>()(
     (set, get) => ({
       ...initialState,
 
-      completeOnboarding: (name, age, profile) =>
-        set({ onboardingComplete: true, childName: name, childAge: age, activeProfile: profile }),
+      activeChild: () => {
+        const { children, activeChildId } = get()
+        return children.find(c => c.id === activeChildId) ?? children[0] ?? null
+      },
+
+      completeOnboarding: (name, age, profile) => {
+        const child: ChildProfile = {
+          id: Date.now().toString(),
+          name, age, gender: 'male',
+          profile, profilePcts: null
+        }
+        set(s => ({
+          onboardingComplete: true,
+          children: s.children.length === 0 ? [child] : s.children,
+          activeChildId: s.activeChildId ?? child.id,
+        }))
+      },
+
+      addChild: (child) =>
+        set(s => ({
+          children: [...s.children, child],
+          activeChildId: s.activeChildId ?? child.id,
+          onboardingComplete: true,
+        })),
+
+      setActiveChild: (id) => set({ activeChildId: id }),
+
+      updateChildProfile: (id, profile, pcts) =>
+        set(s => ({
+          children: s.children.map(c =>
+            c.id === id ? { ...c, profile, profilePcts: pcts } : c
+          )
+        })),
 
       setCurrentWeek: (week) => set({ currentWeek: week }),
 
       completeWeek: (weekId) =>
-        set((s) => ({
+        set(s => ({
           completedWeeks: s.completedWeeks.includes(weekId)
             ? s.completedWeeks
             : [...s.completedWeeks, weekId],
@@ -95,37 +119,23 @@ export const useAppStore = create<AppState>()(
         })),
 
       logSession: (log) =>
-        set((s) => ({
-          sessionLogs: [...s.sessionLogs, { ...log, date: new Date().toISOString() }],
+        set(s => ({
+          sessionLogs: [...s.sessionLogs, { ...log, date: new Date().toISOString() }]
         })),
 
-      startSession: (weekId) =>
-        set({ sessionActive: true, sessionWeekId: weekId, sessionStep: 0, sessionPostureIndex: 0, storyComplete: false }),
-
-      endSession: () =>
-        set({ sessionActive: false, sessionWeekId: null, sessionStep: 0, sessionPostureIndex: 0, audioPlaying: false }),
-
-      nextStep: () => set((s) => ({ sessionStep: s.sessionStep + 1, sessionPostureIndex: 0 })),
-      prevStep: () => set((s) => ({ sessionStep: Math.max(0, s.sessionStep - 1) })),
-      nextPosture: () => set((s) => ({ sessionPostureIndex: s.sessionPostureIndex + 1 })),
-      toggleAudio: () => set((s) => ({ audioPlaying: !s.audioPlaying })),
-      completeStory: () => set({ storyComplete: true }),
-
       setActiveTab: (tab) => set({ activeTab: tab }),
-      toggleSidebar: () => set((s) => ({ sidebarOpen: !s.sidebarOpen })),
-
+      toggleAudio: () => set(s => ({ audioPlaying: !s.audioPlaying })),
       reset: () => set(initialState),
     }),
     {
       name: 'kawa-app-storage',
-      partialize: (state) => ({
-        onboardingComplete: state.onboardingComplete,
-        childName: state.childName,
-        childAge: state.childAge,
-        activeProfile: state.activeProfile,
-        currentWeek: state.currentWeek,
-        completedWeeks: state.completedWeeks,
-        sessionLogs: state.sessionLogs,
+      partialize: (s) => ({
+        onboardingComplete: s.onboardingComplete,
+        children: s.children,
+        activeChildId: s.activeChildId,
+        currentWeek: s.currentWeek,
+        completedWeeks: s.completedWeeks,
+        sessionLogs: s.sessionLogs,
       }),
     }
   )
