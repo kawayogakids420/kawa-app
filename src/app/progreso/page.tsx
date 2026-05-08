@@ -6,7 +6,9 @@ import { getMoodEmoji, getMoodLabel } from '@/lib/utils'
 
 export default function ProgresoPage() {
   const router = useRouter()
-  const { sessionLogs, completedWeeks, childName } = useAppStore()
+  const { sessionLogs, completedWeeks, children, activeChildId } = useAppStore()
+  const activeChild = children.find(c => c.id === activeChildId) ?? children[0] ?? null
+  const childName = activeChild?.name ?? 'Guardián'
 
   const totalSessions = sessionLogs.length
   const avgMood = (() => {
@@ -42,7 +44,7 @@ export default function ProgresoPage() {
           ))}
         </div>
 
-        {/* Week progress */}
+        {/* Semanas */}
         <div className="bg-white rounded-2xl p-5 shadow-sm">
           <p className="font-semibold text-gray-900 mb-4">Mundos completados</p>
           {COURSE_WEEKS.map(week => {
@@ -51,16 +53,12 @@ export default function ProgresoPage() {
             const weekSessions = sessionLogs.filter(l => l.weekId === week.id)
             return (
               <div key={week.id} className="flex items-center gap-3 mb-3 last:mb-0">
-                <div
-                  className="w-10 h-10 rounded-xl flex items-center justify-center text-lg flex-shrink-0"
-                  style={{ backgroundColor: done ? colors.main : colors.light }}
-                >
+                <div className="w-10 h-10 rounded-xl flex items-center justify-center text-lg flex-shrink-0"
+                  style={{ backgroundColor: done ? colors.main : colors.light }}>
                   {done ? <span className="text-white text-sm font-bold">✓</span> : week.elementEmoji}
                 </div>
                 <div className="flex-1">
-                  <p className="text-sm font-medium text-gray-900">
-                    Semana {week.id} · {week.element}
-                  </p>
+                  <p className="text-sm font-medium text-gray-900">Semana {week.id} · {week.element}</p>
                   <p className="text-xs text-gray-500">{weekSessions.length} sesiones registradas</p>
                 </div>
                 {!done && <span className="text-xs text-gray-300">Pendiente</span>}
@@ -69,25 +67,30 @@ export default function ProgresoPage() {
           })}
         </div>
 
-        {/* Session log */}
+        {/* Historial */}
         <div className="bg-white rounded-2xl p-5 shadow-sm">
           <p className="font-semibold text-gray-900 mb-4">Historial de sesiones</p>
           {sessionLogs.length === 0 ? (
-            <p className="text-sm text-gray-400 text-center py-6">Aún no hay sesiones registradas.<br/>¡Completa tu primera clase!</p>
+            <p className="text-sm text-gray-400 text-center py-6">
+              Aún no hay sesiones registradas.<br />¡Completa tu primera clase!
+            </p>
           ) : (
             <div className="space-y-3">
               {[...sessionLogs].reverse().map((log, i) => {
                 const week = COURSE_WEEKS.find(w => w.id === log.weekId)
                 const colors = WEEK_COLORS[log.weekId as keyof typeof WEEK_COLORS]
                 return (
-                  <div key={i} className="flex items-start gap-3 p-3 rounded-xl" style={{ backgroundColor: colors.light }}>
+                  <div key={i} className="flex items-start gap-3 p-3 rounded-xl"
+                    style={{ backgroundColor: colors.light }}>
                     <div className="text-2xl">{getMoodEmoji(log.mood)}</div>
                     <div className="flex-1">
                       <p className="text-sm font-medium" style={{ color: colors.main }}>
                         Semana {log.weekId} · {week?.element}
                       </p>
                       <p className="text-xs text-gray-500">
-                        {new Date(log.date).toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' })} · {getMoodLabel(log.mood)}
+                        {new Date(log.date).toLocaleDateString('es-ES', {
+                          day: 'numeric', month: 'long', year: 'numeric'
+                        })} · {getMoodLabel(log.mood)}
                       </p>
                       {log.notes && <p className="text-xs text-gray-600 mt-1">{log.notes}</p>}
                     </div>
@@ -99,7 +102,7 @@ export default function ProgresoPage() {
         </div>
       </div>
 
-      <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 flex">
+      <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 flex max-w-[430px] mx-auto">
         {[
           { href: '/home', icon: '🗺️', label: 'Inicio' },
           { href: `/semana/1`, icon: '🧘', label: 'Clase' },
@@ -107,7 +110,8 @@ export default function ProgresoPage() {
           { href: '/materiales', icon: '📦', label: 'Kit' },
           { href: '/perfil', icon: '👤', label: 'Perfil' },
         ].map(({ href, icon, label }) => (
-          <button key={href} onClick={() => router.push(href)} className="flex-1 py-3 flex flex-col items-center gap-0.5">
+          <button key={href} onClick={() => router.push(href)}
+            className="flex-1 py-3 flex flex-col items-center gap-0.5">
             <span className="text-xl">{icon}</span>
             <span className="text-[10px] text-gray-500">{label}</span>
           </button>
