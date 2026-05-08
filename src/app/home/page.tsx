@@ -128,7 +128,7 @@ export default function HomePage() {
             src="/images/mapa.png"
             alt="Mapa de los 5 mundos de Kawa"
             fill
-            style={{ objectFit: 'cover', objectFit: 'contain' }}
+            style={{ objectFit: 'contain' }}
             priority />
 
           {/* Overlay degradado abajo */}
