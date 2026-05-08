@@ -100,7 +100,7 @@ export default function HomePage() {
       </div>
 
       {/* ── STATS ── */}
-      <div className="grid grid-cols-3 gap-3 px-5 -mt-4 mb-5">
+      <div className="grid grid-cols-3 gap-3 px-5 mt-4 mb-5">
         {[
           { label: 'Mundos', value: `${completedWeeks.length}/5` },
           { label: 'Sesiones', value: sessionLogs.length },
