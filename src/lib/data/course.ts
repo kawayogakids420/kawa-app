@@ -356,7 +356,7 @@ const week1: Week = {
     benefit: 'Respiración diafragmática activa el parasimpático. El movimiento visible hace el concepto concreto para niños de 3-5 años.',
     whenToUse: 'Antes de dormir, antes de situaciones difíciles, en momentos de desregulación.'
   },
-  relaxationScript: 'Cierra los ojos suavemente y pon las manos en tu pancita.
+  relaxationScript: `Cierra los ojos suavemente y pon las manos en tu pancita.
 
 Siente que estás acostado sobre la tierra más suave del mundo, como si el suelo fuera una cama de musgo verde. Kawa también está acostada aquí, a tu lado.
 
@@ -366,7 +366,7 @@ Kawa susurra: Aquí estás seguro. La tierra te sostiene. No te vas a caer porqu
 
 Respira una vez más. Siente la piedra en tu mano. Esa piedra es tuya. Es el regalo de Oma. Es tu raíz, aunque estés en cualquier lugar del mundo.
 
-Cuando estés listo, mueve los dedos de los pies. Mueve los dedos de las manos. Abre los ojos despacio.',
+Cuando estés listo, mueve los dedos de los pies. Mueve los dedos de las manos. Abre los ojos despacio.`,
   profileAdaptations: perfilesBase,
   artActivity: {
     name: 'Mi Piedra de Oma — La Raíz que Llevo Conmigo',
@@ -510,7 +510,7 @@ const week2: Week = {
     benefit: 'La exhalación prolongada activa el nervio vago directamente. El sonido shhh añade vibración que amplifica el efecto vagal.',
     whenToUse: 'Momento de crisis, antes de situaciones difíciles, como práctica diaria preventiva.'
   },
-  relaxationScript: 'Cierra los ojos. Pon la tela azul sobre tu pecho si tienes una.
+  relaxationScript: `Cierra los ojos. Pon la tela azul sobre tu pecho si tienes una.
 
 Imagina que estás flotando en el océano más tranquilo del mundo. El agua es tibia y azul. No necesitas hacer nada. El océano te sostiene.
 
@@ -522,7 +522,7 @@ Iris nada muy cerca, brillando de un azul suave. Te cuida sin que tengas que ped
 
 Cada vez que exhalas, escuchas el shhh del mar. El mar dice shhh porque sabe que todo está bien.
 
-Cuando estés listo, mueve los dedos. Abre los ojos despacio.',
+Cuando estés listo, mueve los dedos. Abre los ojos despacio.`,
   profileAdaptations: {
     sensible: { icon: '🌸', name: 'Muy Sensible', color: '#AD1457', bgColor: '#FCE4EC', tips: ['Esta semana es perfecta — las posturas de calma son su especialidad', 'Tela azul: ofrecer, no imponer', 'Postura del Niño: postura de refugio', 'Shhh puede ser muy bajo, casi un susurro', 'Evitar cambios bruscos entre posturas', 'Bol de agua: si hay rechazo al tacto, respetar'] },
     buscador: { icon: '⚡', name: 'Buscador/a', color: '#E65100', bgColor: '#FFF3E0', tips: ['Puente: mantener más tiempo, contar hasta 10', 'Cobra: empujar fuerte con las manos', 'Jalea de Agua: movimiento exagerado', 'Shhh bien fuerte — catártico', 'Mariposa: contar aleteos', 'Agregar transiciones activas entre posturas'] },
@@ -679,7 +679,7 @@ const week3: Week = {
     benefit: 'Vacía los pulmones completamente. Activa el sistema nervioso simpático de manera controlada. Para buscadores: satisface necesidad de intensidad.',
     whenToUse: 'Al inicio de sesiones de alta energía, cuando el niño necesita descargar tensión. Siempre seguir con Respiración Estrella.'
   },
-  relaxationScript: 'Cierra los ojos. Imagina que estás en la cima de la montaña más alta del mundo. Hay viento, pero ya no te asusta. Lo sientes en tu cara como una caricia fresca.
+  relaxationScript: `Cierra los ojos. Imagina que estás en la cima de la montaña más alta del mundo. Hay viento, pero ya no te asusta. Lo sientes en tu cara como una caricia fresca.
 
 Kawa está parada a tu lado, con los brazos abiertos. Tiene la pluma de Inti en la mano y la suelta. La pluma vuela... vuela... vuela.
 
@@ -689,7 +689,7 @@ Inti vuela muy alto, tan alto que parece una estrella. Te dice desde el viento: 
 
 Siente la pluma en tu mano. Liviana. Sin esfuerzo. Así de liviano puede ser tu cuerpo cuando confía.
 
-Respira suave. Cuando quieras, mueve los dedos. Abre los ojos despacio.',
+Respira suave. Cuando quieras, mueve los dedos. Abre los ojos despacio.`,
   profileAdaptations: {
     sensible: { icon: '🌸', name: 'Muy Sensible', color: '#AD1457', bgColor: '#FCE4EC', tips: ['Guerrero: mostrar antes, luego invitar', 'HA puede ser muy suave al principio', 'La activación puede generar ansiedad: ir más despacio', 'Gaviota: junto al adulto con contacto', 'Cerrar con Postura del Niño después de activas', 'Pluma: puede ser estimulante — ofrecer sin imponer'] },
     buscador: { icon: '⚡', name: 'Buscador/a', color: '#E65100', bgColor: '#FFF3E0', tips: ['¡Esta semana es la favorita del Buscador!', 'Guerrero + Triángulo en circuito continuo', 'HA: MUY fuerte. Es la descarga que necesitan', 'Barco: objetivo de tiempo', 'Marioneta: JA dramático', 'Insistir en la relajación completa'] },
@@ -838,7 +838,7 @@ const week4: Week = {
     benefit: 'La retención breve activa levemente el simpático de forma controlada, creando energía y presencia. La mano en el pecho activa la conciencia interoceptiva.',
     whenToUse: 'Cuando el niño se siente sin energía. Antes de actividades que requieren esfuerzo. Como ritual de reconocimiento al inicio o final del día.'
   },
-  relaxationScript: 'Cierra los ojos. Pon las dos manos en tu pecho, una encima de la otra. Siente si hay algo tibio ahí.
+  relaxationScript: `Cierra los ojos. Pon las dos manos en tu pecho, una encima de la otra. Siente si hay algo tibio ahí.
 
 Hay algo tibio ahí. Siempre estuvo. Es tu llama.
 
@@ -850,7 +850,7 @@ Tu pecho sube al inhalar. Baja al exhalar. Como una pequeña llama que danza.
 
 Lumi dice: Eres fuego que piensa. Eres fuego que siente. Eres fuego que ama. Ningún viento puede apagarte porque eres tú quien decide arder.
 
-Respira. Siente tu calor. Cuando estés listo, acaricia suavemente tu propio pecho. Luego abre los ojos despacio.',
+Respira. Siente tu calor. Cuando estés listo, acaricia suavemente tu propio pecho. Luego abre los ojos despacio.`,
   profileAdaptations: {
     sensible: { icon: '🌸', name: 'Muy Sensible', color: '#AD1457', bgColor: '#FCE4EC', tips: ['Esta es la semana más emocional — puede haber llanto y está bien', 'Flor de Loto: postura más importante para ellos', 'Saludo al Sol: ir muy despacio', 'La piedra cálida es ideal para este perfil', 'El adulto puede cantar muy suavemente cerca del oído', 'Nunca apresurar el Shavasana'] },
     buscador: { icon: '⚡', name: 'Buscador/a', color: '#E65100', bgColor: '#FFF3E0', tips: ['Saludo al Sol: rápido en el 1er ciclo, lento en el 3ero', 'Guerrero I: contar los segundos', 'Cobra profunda: búsqueda de extensión máxima', 'HA del Guerrero I bien fuerte', 'La Flor de Loto es su mayor desafío — celebrarlo', 'Shavasana con piedra en el pecho: el peso ayuda'] },
@@ -983,7 +983,7 @@ const week5: Week = {
     benefit: 'Activa progresivamente el parasimpático y finaliza con la integración vibracional del OM. La práctica de autorregulación más completa del programa.',
     whenToUse: 'Como práctica diaria de 5 minutos después de completar el curso. Puede mantenerse como ritual matutino o nocturno de por vida.'
   },
-  relaxationScript: 'Cierra los ojos. Pon la piedra verde en una mano, la tela azul en la otra. La pluma sobre tu corazón. La piedra naranja en tu pancita.
+  relaxationScript: `Cierra los ojos. Pon la piedra verde en una mano, la tela azul en la otra. La pluma sobre tu corazón. La piedra naranja en tu pancita.
 
 Sientes el peso de cada objeto. Cuatro mundos que recorriste.
 
@@ -999,7 +999,7 @@ Eres tierra. Eres agua. Eres aire. Eres fuego. Eres espacio.
 
 Eres una semilla que contiene el universo entero.
 
-Cuando estés listo, mueve suavemente los dedos. Siente los objetos. Luego los pies. Estira el cuerpo completo. Abre los ojos. Bienvenido/a a casa.',
+Cuando estés listo, mueve suavemente los dedos. Siente los objetos. Luego los pies. Estira el cuerpo completo. Abre los ojos. Bienvenido/a a casa.`,
   profileAdaptations: {
     sensible: { icon: '🌸', name: 'Muy Sensible', color: '#AD1457', bgColor: '#FCE4EC', tips: ['Esta semana es su cierre más poderoso', 'El silencio inicial: contar con dedos para saber cuándo termina', 'Los 4 objetos sobre el cuerpo son profundamente reguladores', 'OM: comenzar muy suave', 'El diploma tiene máxima ceremonia para ellos', 'Tela oscura puede abrumar: ofrecer luz como alternativa'] },
     buscador: { icon: '⚡', name: 'Buscador/a', color: '#E65100', bgColor: '#FFF3E0', tips: ['La Secuencia Completa satisface necesidad de movimiento', 'Hacerla 3 veces: lento, rápido, lento', 'OM fuerte les encanta', 'Shavasana largo: los 4 objetos ayudan a quedarse', 'Diploma y ceremonia: importante el reconocimiento activo', 'Proponer que enseñen la Secuencia a alguien'] },
