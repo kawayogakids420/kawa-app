@@ -121,14 +121,14 @@ export default function HomePage() {
 
         <div
           className="relative w-full rounded-3xl overflow-hidden shadow-lg cursor-pointer"
-          style={{ aspectRatio: '1086/1448' }}
+          style={{ aspectRatio: '1086/1448', maxHeight: 600 }}
           onClick={() => router.push(`/semana/${currentWeek}`)}>
 
           <Image
             src="/images/mapa.png"
             alt="Mapa de los 5 mundos de Kawa"
             fill
-            style={{ objectFit: 'contain', width: '100%', height: 'auto' }}
+            style={{ objectFit: 'contain', width: '100%', width: '100%', height: 'auto' }}
             priority />
 
           {/* Overlay degradado abajo */}
