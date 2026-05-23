@@ -199,24 +199,6 @@ export default function ClaseTab({ week, weekColors, activeProfile }: Props) {
         </div>
       )}
 
-      {/* ── CANCIÓN ── */}
-      <SectionHeader id="cancion" title={`Canción: ${week.song.name}`} icon="🎵" />
-      {openSection === 'cancion' && (
-        <div className="bg-[#F3E5F5] rounded-2xl p-5 mb-3 shadow-sm">
-          <div className="space-y-1 mb-4">
-            {week.song.lyrics.map((line, i) => (
-              <p key={i} className={`text-sm ${line === '' ? 'h-3' : 'text-purple-900 italic'}`}>
-                {line}
-              </p>
-            ))}
-          </div>
-          <div className="border-t border-purple-200 pt-3 space-y-2">
-            <p className="text-xs text-purple-700"><strong>Cómo usarla:</strong> {week.song.howToUse}</p>
-            <p className="text-xs text-purple-700"><strong>Ritmo:</strong> {week.song.rhythm}</p>
-          </div>
-        </div>
-      )}
-
       {/* ── SESIÓN ── */}
       <SectionHeader id="sesion" title="Estructura de la sesión" icon="⏱️" />
       {openSection === 'sesion' && (
