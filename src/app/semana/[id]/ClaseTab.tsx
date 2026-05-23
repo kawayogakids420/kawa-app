@@ -1,5 +1,5 @@
 'use client'
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import type { Week, SensoryProfile } from '@/lib/data/course'
 import { PROFILES } from '@/lib/data/course'
 import { useAppStore } from '@/lib/store'
@@ -12,6 +12,128 @@ interface Props {
 
 type Section = 'historia' | 'sesion' | 'posturas' | 'respiracion' | 'relajacion' | 'cancion'
 
+// ── Componente reproductor de audio ──────────────────────────────────────────
+interface AudioPlayerProps {
+  src: string
+  label: string
+  forChild?: boolean
+  color?: string
+}
+
+function AudioPlayer({ src, label, forChild = false, color = '#2D6A4F' }: AudioPlayerProps) {
+  const audioRef = useRef<HTMLAudioElement>(null)
+  const [playing, setPlaying] = useState(false)
+  const [progress, setProgress] = useState(0)
+  const [duration, setDuration] = useState(0)
+  const [loaded, setLoaded] = useState(false)
+  const [error, setError] = useState(false)
+
+  useEffect(() => {
+    const audio = audioRef.current
+    if (!audio) return
+    const onTime = () => setProgress(audio.currentTime)
+    const onDuration = () => { setDuration(audio.duration); setLoaded(true) }
+    const onEnd = () => { setPlaying(false); setProgress(0) }
+    const onError = () => setError(true)
+    audio.addEventListener('timeupdate', onTime)
+    audio.addEventListener('loadedmetadata', onDuration)
+    audio.addEventListener('ended', onEnd)
+    audio.addEventListener('error', onError)
+    return () => {
+      audio.removeEventListener('timeupdate', onTime)
+      audio.removeEventListener('loadedmetadata', onDuration)
+      audio.removeEventListener('ended', onEnd)
+      audio.removeEventListener('error', onError)
+    }
+  }, [])
+
+  const togglePlay = () => {
+    const audio = audioRef.current
+    if (!audio) return
+    if (playing) { audio.pause(); setPlaying(false) }
+    else { audio.play(); setPlaying(true) }
+  }
+
+  const seek = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const audio = audioRef.current
+    if (!audio) return
+    audio.currentTime = Number(e.target.value)
+    setProgress(Number(e.target.value))
+  }
+
+  const fmt = (s: number) => {
+    if (!s || isNaN(s)) return '0:00'
+    const m = Math.floor(s / 60)
+    const sec = Math.floor(s % 60)
+    return `${m}:${sec.toString().padStart(2, '0')}`
+  }
+
+  if (error) return null
+
+  const bg = forChild ? '#FFF8E1' : '#F0F7F4'
+  const border = forChild ? '#FFD54F' : color
+  const icon = forChild ? '👦' : '👩'
+  const tagLabel = forChild ? 'Para el niño/a' : 'Para el adulto'
+  const tagBg = forChild ? '#FFF3CD' : '#E8F5E9'
+  const tagColor = forChild ? '#E65100' : '#2D6A4F'
+
+  return (
+    <div className="rounded-2xl p-3 mb-2"
+      style={{ background: bg, border: `1.5px solid ${border}30` }}>
+      <audio ref={audioRef} src={src} preload="metadata" />
+
+      {/* Tag de audiencia */}
+      <div className="flex items-center justify-between mb-2">
+        <span className="text-xs font-semibold px-2 py-1 rounded-full"
+          style={{ background: tagBg, color: tagColor }}>
+          {icon} {tagLabel}
+        </span>
+        <span className="text-xs text-gray-400">{fmt(duration)}</span>
+      </div>
+
+      {/* Label */}
+      <p className="text-sm font-medium text-gray-800 mb-2">{label}</p>
+
+      {/* Controles */}
+      <div className="flex items-center gap-3">
+        {/* Botón play/pause */}
+        <button
+          onClick={togglePlay}
+          className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 text-white"
+          style={{ background: forChild ? '#F57F17' : color }}>
+          {playing ? (
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+              <rect x="6" y="4" width="4" height="16" rx="1"/>
+              <rect x="14" y="4" width="4" height="16" rx="1"/>
+            </svg>
+          ) : (
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M8 5v14l11-7z"/>
+            </svg>
+          )}
+        </button>
+
+        {/* Barra de progreso */}
+        <div className="flex-1 flex items-center gap-2">
+          <input
+            type="range"
+            min={0}
+            max={duration || 100}
+            value={progress}
+            onChange={seek}
+            className="w-full h-1.5 rounded-full appearance-none cursor-pointer"
+            style={{
+              background: `linear-gradient(to right, ${forChild ? '#F57F17' : color} ${(progress/(duration||1))*100}%, #E0E0E0 0%)`
+            }}
+          />
+          <span className="text-xs text-gray-400 flex-shrink-0 w-8">{fmt(progress)}</span>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ── Componente principal ──────────────────────────────────────────────────────
 export default function ClaseTab({ week, weekColors, activeProfile }: Props) {
   const [openSection, setOpenSection] = useState<Section | null>('historia')
   const [openPosture, setOpenPosture] = useState<string | null>(null)
@@ -22,6 +144,7 @@ export default function ClaseTab({ week, weekColors, activeProfile }: Props) {
   const [notes, setNotes] = useState('')
 
   const profile = activeProfile ? PROFILES[activeProfile] : null
+  const s = week.id  // número de semana
 
   const SectionHeader = ({ id, title, icon }: { id: Section; title: string; icon: string }) => (
     <button
@@ -35,38 +158,56 @@ export default function ClaseTab({ week, weekColors, activeProfile }: Props) {
     </button>
   )
 
+  // Mapeo de posturas a nombres de archivo
+  const postureAudioMap: Record<string, string> = {
+    montana: 'montana',
+    indio: 'posturaindio',
+    tortuga: 'posturatortuga',
+    gato: 'gatolYII',
+    arbol: 'posturaarbol',
+  }
+
   return (
     <div className="space-y-1">
 
-      {/* Historia */}
+      {/* ── HISTORIA ── */}
       <SectionHeader id="historia" title="La historia de Kawa" icon="📖" />
       {openSection === 'historia' && (
-        <div className="bg-[#FFFDE7] rounded-2xl p-5 mb-3 shadow-sm">
-          {Object.entries(week.story).map(([key, act]) => (
-            <div key={key} className="mb-5 last:mb-0">
-              <p className="text-xs font-semibold uppercase tracking-wide mb-2" style={{ color: weekColors.main }}>
-                {key === 'inicio' ? 'Inicio' : key === 'desequilibrio' ? 'Desequilibrio' :
-                 key === 'accion' ? 'Acción' : key === 'catarsis' ? 'Catarsis' : 'Enseñanza'}
-                {' — '}{act.title}
-              </p>
-              <p className="text-gray-800 text-sm leading-relaxed italic">{act.text}</p>
-            </div>
-          ))}
-          <div className="mt-4 p-3 rounded-xl" style={{ backgroundColor: weekColors.light }}>
-            <p className="text-xs font-medium" style={{ color: weekColors.main }}>
-              🎵 Canción: "{week.song.name}"
-            </p>
+        <div className="mb-3 space-y-2">
+          {/* Audio historia — para el adulto */}
+          <AudioPlayer
+            src={`/audio/semana-${s}/s${s}historiadekawa.m4a`}
+            label="Historia completa de Kawa — narrar mientras el niño escucha"
+            forChild={false}
+            color={weekColors.main}
+          />
+
+          {/* Texto de la historia */}
+          <div className="bg-[#FFFDE7] rounded-2xl p-5 shadow-sm">
+            {Object.entries(week.story).map(([key, act]) => (
+              <div key={key} className="mb-5 last:mb-0">
+                <p className="text-xs font-semibold uppercase tracking-wide mb-2"
+                  style={{ color: weekColors.main }}>
+                  {key === 'inicio' ? 'Inicio' : key === 'desequilibrio' ? 'Desequilibrio' :
+                   key === 'accion' ? 'Acción' : key === 'catarsis' ? 'Catarsis' : 'Enseñanza'}
+                  {' — '}{act.title}
+                </p>
+                <p className="text-gray-800 text-sm leading-relaxed italic">{act.text}</p>
+              </div>
+            ))}
           </div>
         </div>
       )}
 
-      {/* Canción */}
+      {/* ── CANCIÓN ── */}
       <SectionHeader id="cancion" title={`Canción: ${week.song.name}`} icon="🎵" />
       {openSection === 'cancion' && (
         <div className="bg-[#F3E5F5] rounded-2xl p-5 mb-3 shadow-sm">
           <div className="space-y-1 mb-4">
             {week.song.lyrics.map((line, i) => (
-              <p key={i} className={`text-sm ${line === '' ? 'h-3' : 'text-purple-900 italic'}`}>{line}</p>
+              <p key={i} className={`text-sm ${line === '' ? 'h-3' : 'text-purple-900 italic'}`}>
+                {line}
+              </p>
             ))}
           </div>
           <div className="border-t border-purple-200 pt-3 space-y-2">
@@ -76,7 +217,7 @@ export default function ClaseTab({ week, weekColors, activeProfile }: Props) {
         </div>
       )}
 
-      {/* Sesión */}
+      {/* ── SESIÓN ── */}
       <SectionHeader id="sesion" title="Estructura de la sesión" icon="⏱️" />
       {openSection === 'sesion' && (
         <div className="bg-white rounded-2xl p-4 mb-3 shadow-sm space-y-3">
@@ -99,7 +240,7 @@ export default function ClaseTab({ week, weekColors, activeProfile }: Props) {
         </div>
       )}
 
-      {/* Posturas */}
+      {/* ── POSTURAS ── */}
       <SectionHeader id="posturas" title="Las posturas de Kawa" icon="🧘" />
       {openSection === 'posturas' && (
         <div className="space-y-2 mb-3">
@@ -113,53 +254,91 @@ export default function ClaseTab({ week, weekColors, activeProfile }: Props) {
             </button>
           )}
 
-          {week.posturas.map((posture) => (
-            <div key={posture.id}>
-              <button
-                onClick={() => setOpenPosture(openPosture === posture.id ? null : posture.id)}
-                className="w-full flex items-center gap-3 p-4 bg-white rounded-2xl shadow-sm text-left">
-                <span className="text-2xl">{posture.emoji}</span>
-                <div className="flex-1">
-                  <p className="font-semibold text-gray-900 text-sm">{posture.name}</p>
-                  <p className="text-xs text-gray-400">"{posture.magicName}"</p>
-                </div>
-                <span className="text-gray-400">{openPosture === posture.id ? '↑' : '↓'}</span>
-              </button>
+          {week.posturas.map((posture) => {
+            const audioKey = postureAudioMap[posture.id] || posture.id
+            return (
+              <div key={posture.id}>
+                <button
+                  onClick={() => setOpenPosture(openPosture === posture.id ? null : posture.id)}
+                  className="w-full flex items-center gap-3 p-4 bg-white rounded-2xl shadow-sm text-left">
+                  <span className="text-2xl">{posture.emoji}</span>
+                  <div className="flex-1">
+                    <p className="font-semibold text-gray-900 text-sm">{posture.name}</p>
+                    <p className="text-xs text-gray-400">"{posture.magicName}"</p>
+                  </div>
+                  <span className="text-gray-400">{openPosture === posture.id ? '↑' : '↓'}</span>
+                </button>
 
-              {openPosture === posture.id && (
-                <div className="bg-white rounded-2xl px-4 pb-4 -mt-2 pt-2 shadow-sm mb-1"
-                  style={{ borderLeft: `4px solid ${weekColors.main}` }}>
-                  <p className="text-xs italic text-gray-500 mb-3 leading-relaxed">{posture.storyNarration}</p>
+                {openPosture === posture.id && (
+                  <div className="bg-white rounded-2xl px-4 pb-4 -mt-2 pt-3 shadow-sm mb-1"
+                    style={{ borderLeft: `4px solid ${weekColors.main}` }}>
 
-                  {showProfileTips && activeProfile ? (
-                    <div className="p-3 rounded-xl text-sm" style={{ backgroundColor: profile!.bg }}>
-                      <p className="font-medium mb-1" style={{ color: profile!.color }}>
-                        {profile!.icon} Para {profile!.name}:
-                      </p>
-                      <p style={{ color: profile!.color }}>{posture.profiles[activeProfile]}</p>
-                    </div>
-                  ) : (
-                    <div className="space-y-2">
-                      <p className="text-sm text-gray-700 leading-relaxed">{posture.howTo}</p>
-                      <p className="text-xs font-medium" style={{ color: weekColors.main }}>⏱️ {posture.duration}</p>
-                      <div className="space-y-1">
-                        {posture.sensoryBenefits.map((b, i) => (
-                          <p key={i} className="text-xs text-gray-500">• {b}</p>
-                        ))}
+                    {/* Audio narrativa — para el niño */}
+                    <AudioPlayer
+                      src={`/audio/semana-${s}/s${s}postura${audioKey}historia.m4a`}
+                      label={`Narración mágica — leer mientras el niño hace la postura`}
+                      forChild={true}
+                      color={weekColors.main}
+                    />
+
+                    {/* Audio how-to — para el adulto */}
+                    <AudioPlayer
+                      src={`/audio/semana-${s}/s${s}howto${audioKey}.m4a`}
+                      label={`Instrucciones paso a paso — cómo hacer la postura`}
+                      forChild={false}
+                      color={weekColors.main}
+                    />
+
+                    {/* Narración en texto */}
+                    <p className="text-xs italic text-gray-500 mb-3 leading-relaxed mt-2">
+                      {posture.storyNarration}
+                    </p>
+
+                    {showProfileTips && activeProfile ? (
+                      <div className="p-3 rounded-xl text-sm" style={{ backgroundColor: profile!.bg }}>
+                        <p className="font-medium mb-1" style={{ color: profile!.color }}>
+                          {profile!.icon} Para {profile!.name}:
+                        </p>
+                        <p style={{ color: profile!.color }}>{posture.profiles[activeProfile]}</p>
                       </div>
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-          ))}
+                    ) : (
+                      <div className="space-y-2">
+                        <p className="text-sm text-gray-700 leading-relaxed">{posture.howTo}</p>
+                        <p className="text-xs font-medium" style={{ color: weekColors.main }}>
+                          ⏱️ {posture.duration}
+                        </p>
+                        <div className="space-y-1">
+                          {posture.sensoryBenefits.map((b, i) => (
+                            <p key={i} className="text-xs text-gray-500">• {b}</p>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            )
+          })}
         </div>
       )}
 
-      {/* Respiración */}
+      {/* ── RESPIRACIÓN ── */}
       <SectionHeader id="respiracion" title={week.breathing.name} icon="🌬️" />
       {openSection === 'respiracion' && (
         <div className="bg-white rounded-2xl p-4 mb-3 shadow-sm space-y-3">
+          {/* Audio respiración — para el adulto */}
+          <AudioPlayer
+            src={`/audio/semana-${s}/s${s}respiracionraiz.m4a`}
+            label="Guía de respiración — seguir junto al niño/a"
+            forChild={false}
+            color={weekColors.main}
+          />
+          <AudioPlayer
+            src={`/audio/semana-${s}/s${s}howtorespiacionraiz.m4a`}
+            label="Cómo enseñar la respiración — instrucciones para el adulto"
+            forChild={false}
+            color={weekColors.main}
+          />
           <p className="text-sm italic text-gray-500">{week.breathing.storyNarration}</p>
           <div className="p-3 rounded-xl" style={{ backgroundColor: weekColors.light }}>
             <p className="text-sm font-medium mb-1" style={{ color: weekColors.main }}>Cómo:</p>
@@ -170,20 +349,32 @@ export default function ClaseTab({ week, weekColors, activeProfile }: Props) {
         </div>
       )}
 
-      {/* Relajación */}
+      {/* ── RELAJACIÓN ── */}
       <SectionHeader id="relajacion" title="Relajación guiada de Kawa" icon="☁️" />
       {openSection === 'relajacion' && (
-        <div className="bg-[#E8EAF6] rounded-2xl p-5 mb-3 shadow-sm">
-          <p className="text-xs text-indigo-700 mb-3 font-medium">
-            Leer en voz baja mientras el niño está acostado:
-          </p>
-          {week.relaxationScript.split('\n\n').map((paragraph, i) => (
-            <p key={i} className="text-sm text-indigo-900 italic leading-relaxed mb-3">{paragraph}</p>
-          ))}
+        <div className="space-y-2 mb-3">
+          {/* Audio relajación — para el niño */}
+          <AudioPlayer
+            src={`/audio/semana-${s}/s${s}relajacion.m4a`}
+            label="Relajación guiada — reproducir mientras el niño está acostado"
+            forChild={true}
+            color={weekColors.main}
+          />
+
+          <div className="bg-[#E8EAF6] rounded-2xl p-5 shadow-sm">
+            <p className="text-xs text-indigo-700 mb-3 font-medium">
+              Leer en voz baja mientras el niño está acostado:
+            </p>
+            {week.relaxationScript.split('\n\n').map((paragraph, i) => (
+              <p key={i} className="text-sm text-indigo-900 italic leading-relaxed mb-3">
+                {paragraph}
+              </p>
+            ))}
+          </div>
         </div>
       )}
 
-      {/* Adaptaciones por perfil */}
+      {/* ── ADAPTACIONES ── */}
       <div className="bg-white rounded-2xl p-4 shadow-sm mb-3">
         <p className="font-semibold text-gray-900 mb-3">Adaptaciones por perfil</p>
         <div className="grid grid-cols-2 gap-2">
@@ -202,7 +393,7 @@ export default function ClaseTab({ week, weekColors, activeProfile }: Props) {
         </div>
       </div>
 
-      {/* Registrar sesión */}
+      {/* ── REGISTRAR SESIÓN ── */}
       <button
         onClick={() => setLogOpen(true)}
         className="w-full py-3 rounded-2xl text-sm font-medium border-2 mb-3"
@@ -210,7 +401,6 @@ export default function ClaseTab({ week, weekColors, activeProfile }: Props) {
         📝 Registrar esta sesión
       </button>
 
-      {/* Modal registro */}
       {logOpen && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-end">
           <div className="bg-white w-full rounded-t-3xl p-6">
@@ -233,7 +423,8 @@ export default function ClaseTab({ week, weekColors, activeProfile }: Props) {
               value={notes}
               onChange={e => setNotes(e.target.value)}
               placeholder="Notas opcionales sobre la sesión..."
-              className="w-full border border-gray-200 rounded-xl p-3 text-sm h-20 resize-none focus:outline-none focus:ring-2 focus:ring-[#2D6A4F] mb-4" />
+              className="w-full border border-gray-200 rounded-xl p-3 text-sm h-20 resize-none focus:outline-none focus:ring-2 focus:ring-[#2D6A4F] mb-4"
+            />
             <div className="flex gap-3">
               <button onClick={() => setLogOpen(false)}
                 className="flex-1 py-3 rounded-xl border border-gray-200 text-gray-600 text-sm">
