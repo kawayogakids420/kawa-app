@@ -5,7 +5,7 @@ import { useAppStore } from '@/lib/store'
 import type { SensoryProfile } from '@/lib/data/course'
 import { PROFILES } from '@/lib/data/course'
 
-type Step = 'welcome' | 'children_list' | 'add_child' | 'test_intro' | 'test' | 'result' | 'done'
+type Step = 'welcome' | 'rol' | 'children_list' | 'add_child' | 'test_intro' | 'test' | 'result' | 'done'
 
 // ─── TIPOS ────────────────────────────────────────────────────────────────────
 interface Child {
@@ -129,19 +129,17 @@ const PROFILE_ORDER: SensoryProfile[] = ['sensible','buscador','bajo_registro','
 export default function OnboardingPage() {
   const router = useRouter()
   const completeOnboarding = useAppStore(s => s.completeOnboarding)
+  const setUserType = useAppStore(s => s.setUserType)
 
   const [step, setStep]           = useState<Step>('welcome')
   const [children, setChildren]   = useState<Child[]>([])
   const [activeChild, setActive]  = useState<Child | null>(null)
-  // form campos
   const [name, setName]           = useState('')
   const [age, setAge]             = useState<number|null>(null)
   const [gender, setGender]       = useState<'male'|'female'|null>(null)
-  // test
   const [answers, setAnswers]     = useState<number[]>(Array(QUESTIONS.length).fill(-1))
   const [secIdx, setSecIdx]       = useState(0)
 
-  // ── helpers ──
   const resetForm = () => { setName(''); setAge(null); setGender(null) }
   const resetTest = () => { setAnswers(Array(QUESTIONS.length).fill(-1)); setSecIdx(0) }
 
@@ -176,8 +174,7 @@ export default function OnboardingPage() {
     router.replace('/home')
   }
 
-  // ── pronombre según género ──
-  const pro = (child: Child) => child.gender==='female' ? 'ella' : 'él'
+  const pro    = (child: Child) => child.gender==='female' ? 'ella' : 'él'
   const proPos = (child: Child) => child.gender==='female' ? 'su' : 'su'
   const artDef = (child: Child) => child.gender==='female' ? 'la' : 'el'
 
@@ -206,7 +203,7 @@ export default function OnboardingPage() {
         <p className="text-center italic text-green-200 mb-10" style={{fontFamily:"'Nunito',system-ui,sans-serif",fontSize:15}}>
           que te llevarán de vuelta a ti.
         </p>
-        <button onClick={()=>setStep('children_list')}
+        <button onClick={()=>setStep('rol')}
           className="bg-white font-bold px-8 py-4 rounded-2xl text-lg w-full mb-3"
           style={{color:'#2D6A4F',fontFamily:"'Livvic',system-ui,sans-serif"}}>
           Comenzar el viaje
@@ -215,6 +212,68 @@ export default function OnboardingPage() {
           Para familias y profesionales · Integración Sensorial
         </p>
       </div>
+    </div>
+  )
+
+  // ════════════════════════════════════════════════════════════════════════════
+  // SELECCIÓN DE ROL
+  if (step==='rol') return (
+    <div className="min-h-screen bg-white flex flex-col p-6">
+      <div className="mt-10 mb-8">
+        <div className="text-4xl mb-3">👋</div>
+        <h2 className="text-2xl font-bold text-gray-900" style={{fontFamily:"'Livvic',system-ui,sans-serif"}}>
+          ¿Cómo vas a usar Kawa?
+        </h2>
+        <p className="text-gray-500 mt-2 text-sm leading-relaxed">
+          Esto nos ayuda a mostrarte el contenido más útil para ti.
+          Podrás cambiarlo después desde tu perfil.
+        </p>
+      </div>
+
+      <div className="space-y-4 flex-1">
+        {/* Opción familia */}
+        <button
+          onClick={() => { setUserType('familia'); setStep('children_list') }}
+          className="w-full flex items-start gap-4 p-5 rounded-2xl border-2 text-left transition-all hover:border-[#2D6A4F]"
+          style={{ borderColor: '#E5E7EB' }}>
+          <div className="text-4xl flex-shrink-0">👨‍👩‍👧</div>
+          <div>
+            <p className="font-semibold text-gray-900 text-base mb-1">
+              Soy padre, madre o cuidador/a
+            </p>
+            <p className="text-sm text-gray-500 leading-relaxed">
+              Quiero practicar Kawa en casa con mi hijo o hija. Busco actividades
+              simples y acompañamiento cotidiano.
+            </p>
+          </div>
+        </button>
+
+        {/* Opción profesional */}
+        <button
+          onClick={() => { setUserType('profesional'); setStep('children_list') }}
+          className="w-full flex items-start gap-4 p-5 rounded-2xl border-2 text-left transition-all hover:border-[#1D9E75]"
+          style={{ borderColor: '#E5E7EB' }}>
+          <div className="text-4xl flex-shrink-0">🩺</div>
+          <div>
+            <p className="font-semibold text-gray-900 text-base mb-1">
+              Soy profesional de la salud o educación
+            </p>
+            <p className="text-sm text-gray-500 leading-relaxed">
+              Soy terapeuta ocupacional, psicólogo/a, docente u otro profesional.
+              Necesito protocolos clínicos, base científica y herramientas de registro.
+            </p>
+            <span className="inline-block mt-2 text-xs font-medium px-3 py-1 rounded-full"
+              style={{ backgroundColor: '#E1F5EE', color: '#085041' }}>
+              Incluye protocolo clínico TO por guardián
+            </span>
+          </div>
+        </button>
+      </div>
+
+      <button onClick={() => setStep('welcome')}
+        className="mt-6 text-gray-400 text-sm text-center">
+        ← Volver
+      </button>
     </div>
   )
 
@@ -234,7 +293,6 @@ export default function OnboardingPage() {
         </p>
       </div>
 
-      {/* Lista de niños ya agregados */}
       {children.length > 0 && (
         <div className="space-y-3 mb-5">
           {children.map(child => {
@@ -268,14 +326,12 @@ export default function OnboardingPage() {
         </div>
       )}
 
-      {/* Botón agregar niño */}
       <button onClick={()=>{resetForm();setStep('add_child')}}
         className="w-full flex items-center justify-center gap-2 py-4 rounded-2xl border-2 border-dashed border-[#2D6A4F] text-[#2D6A4F] font-medium mb-4">
         <span className="text-xl">+</span>
         <span>{children.length===0 ? 'Agregar niño o niña' : 'Agregar otro niño o niña'}</span>
       </button>
 
-      {/* Comenzar si hay al menos 1 con perfil */}
       {children.some(c=>c.profile) && (
         <button onClick={finishAll}
           className="w-full py-4 rounded-2xl text-white font-semibold text-lg"
@@ -302,7 +358,6 @@ export default function OnboardingPage() {
       </div>
 
       <div className="flex-1 space-y-6">
-        {/* Nombre */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">¿Cómo se llama?</label>
           <input type="text" value={name} onChange={e=>setName(e.target.value)}
@@ -310,7 +365,6 @@ export default function OnboardingPage() {
             className="w-full border border-gray-200 rounded-xl px-4 py-3 text-lg focus:outline-none focus:ring-2 focus:ring-[#2D6A4F]"/>
         </div>
 
-        {/* Género */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-3">¿Es niño o niña?</label>
           <div className="grid grid-cols-2 gap-3">
@@ -333,7 +387,6 @@ export default function OnboardingPage() {
           </div>
         </div>
 
-        {/* Edad */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">¿Cuántos años tiene?</label>
           <div className="grid grid-cols-6 gap-2">
@@ -421,7 +474,6 @@ export default function OnboardingPage() {
     const sec = SECTIONS[secIdx]
     return (
       <div className="min-h-screen bg-gray-50 flex flex-col pb-24">
-        {/* Header sticky */}
         <div className="bg-white px-5 pt-10 pb-4 shadow-sm sticky top-0 z-10">
           <div className="flex items-center justify-between mb-2">
             <span className="text-sm font-medium text-gray-500">
@@ -443,7 +495,6 @@ export default function OnboardingPage() {
           </div>
         </div>
 
-        {/* Preguntas */}
         <div className="flex-1 px-5 py-4 space-y-3">
           {sectionQs.map(q=>(
             <div key={q.index} className="bg-white rounded-2xl p-4 shadow-sm">
@@ -465,7 +516,6 @@ export default function OnboardingPage() {
           ))}
         </div>
 
-        {/* Botón siguiente fijo */}
         <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 p-4 max-w-[430px] mx-auto">
           <button onClick={nextSec} disabled={!sectionDone}
             className="w-full py-4 rounded-2xl font-semibold text-white disabled:opacity-40 transition-all"
@@ -486,7 +536,6 @@ export default function OnboardingPage() {
 
     return (
       <div className="min-h-screen bg-gray-50 flex flex-col pb-32">
-        {/* Header con perfil dominante */}
         <div className="px-5 pt-12 pb-6 text-white text-center"
           style={{background:`linear-gradient(160deg,${domP.color}DD,${domP.color})`}}>
           <div className="text-5xl mb-2">{activeChild.gender==='female'?'👧':'👦'}</div>
@@ -501,7 +550,6 @@ export default function OnboardingPage() {
         </div>
 
         <div className="px-5 mt-5 space-y-4">
-          {/* Nota explicativa */}
           <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4">
             <p className="text-sm font-semibold text-amber-800 mb-1">💡 Importante entender</p>
             <p className="text-xs text-amber-700 leading-relaxed">
@@ -511,7 +559,6 @@ export default function OnboardingPage() {
             </p>
           </div>
 
-          {/* Las 4 barras de perfil */}
           <div className="bg-white rounded-3xl p-5 shadow-sm">
             <p className="font-semibold text-gray-900 mb-1"
               style={{fontFamily:"'Livvic',system-ui,sans-serif"}}>
@@ -552,7 +599,6 @@ export default function OnboardingPage() {
             </div>
           </div>
 
-          {/* Qué incluye el curso para este niño */}
           <div className="bg-white rounded-3xl p-5 shadow-sm">
             <p className="font-semibold text-gray-900 mb-3"
               style={{fontFamily:"'Livvic',system-ui,sans-serif"}}>
@@ -576,7 +622,6 @@ export default function OnboardingPage() {
             </ul>
           </div>
 
-          {/* Nota clínica */}
           <div className="bg-gray-50 border border-gray-200 rounded-2xl p-4">
             <p className="text-xs text-gray-500 leading-relaxed">
               🔍 Este test es una herramienta de observación, no un diagnóstico clínico.
@@ -586,21 +631,17 @@ export default function OnboardingPage() {
           </div>
         </div>
 
-        {/* Botones fijos */}
         <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 p-4 max-w-[430px] mx-auto space-y-2">
-          {/* Agregar otro niño */}
           <button onClick={()=>{resetForm();setStep('add_child')}}
             className="w-full py-3 rounded-2xl border-2 font-semibold text-sm"
             style={{borderColor:domP.color,color:domP.color}}>
             + Agregar otro niño o niña
           </button>
-          {/* Comenzar */}
           <button onClick={finishAll}
             className="w-full py-4 rounded-2xl font-semibold text-white text-base"
             style={{background:domP.color,fontFamily:"'Livvic',system-ui,sans-serif"}}>
             Comenzar el viaje de {children.length>1?'mis niños':activeChild.name} 🌱
           </button>
-          {/* Repetir test */}
           <button onClick={()=>{resetTest();setStep('test')}}
             className="w-full text-gray-400 text-xs underline py-1">
             Repetir el test de {activeChild.name}
