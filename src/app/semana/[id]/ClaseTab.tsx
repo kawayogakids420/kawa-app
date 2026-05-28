@@ -3,6 +3,7 @@ import { useState, useRef, useEffect } from 'react'
 import type { Week, SensoryProfile } from '@/lib/data/course'
 import { PROFILES } from '@/lib/data/course'
 import { useAppStore } from '@/lib/store'
+import ProtocoloTO from './ProtocoloTO'
 
 interface Props {
   week: Week
@@ -96,7 +97,6 @@ function AudioPlayer({ src, label, forChild = false, color = '#2D6A4F' }: AudioP
 
       {/* Controles */}
       <div className="flex items-center gap-3">
-        {/* Botón play/pause */}
         <button
           onClick={togglePlay}
           className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 text-white"
@@ -113,7 +113,6 @@ function AudioPlayer({ src, label, forChild = false, color = '#2D6A4F' }: AudioP
           )}
         </button>
 
-        {/* Barra de progreso */}
         <div className="flex-1 flex items-center gap-2">
           <input
             type="range"
@@ -138,13 +137,13 @@ export default function ClaseTab({ week, weekColors, activeProfile }: Props) {
   const [openSection, setOpenSection] = useState<Section | null>('historia')
   const [openPosture, setOpenPosture] = useState<string | null>(null)
   const [showProfileTips, setShowProfileTips] = useState(false)
-  const { logSession, activeChildId } = useAppStore()
+  const { logSession, activeChildId, userType } = useAppStore()
   const [logOpen, setLogOpen] = useState(false)
   const [mood, setMood] = useState<'great'|'good'|'okay'|'hard'>('good')
   const [notes, setNotes] = useState('')
 
   const profile = activeProfile ? PROFILES[activeProfile] : null
-  const s = week.id  // número de semana
+  const s = week.id
 
   const SectionHeader = ({ id, title, icon }: { id: Section; title: string; icon: string }) => (
     <button
@@ -158,7 +157,6 @@ export default function ClaseTab({ week, weekColors, activeProfile }: Props) {
     </button>
   )
 
-  // Mapeo de posturas a nombres de archivo
   const postureAudioMap: Record<string, string> = {
     montana: 'montana',
     indio: 'posturaindio',
@@ -174,15 +172,12 @@ export default function ClaseTab({ week, weekColors, activeProfile }: Props) {
       <SectionHeader id="historia" title="La historia de Kawa" icon="📖" />
       {openSection === 'historia' && (
         <div className="mb-3 space-y-2">
-          {/* Audio historia — para el adulto */}
           <AudioPlayer
             src={`/audio/semana-${s}/s${s}historiadekawa.m4a`}
             label="Historia completa de Kawa — narrar mientras el niño escucha"
             forChild={false}
             color={weekColors.main}
           />
-
-          {/* Texto de la historia */}
           <div className="bg-[#FFFDE7] rounded-2xl p-5 shadow-sm">
             {Object.entries(week.story).map(([key, act]) => (
               <div key={key} className="mb-5 last:mb-0">
@@ -254,28 +249,21 @@ export default function ClaseTab({ week, weekColors, activeProfile }: Props) {
                 {openPosture === posture.id && (
                   <div className="bg-white rounded-2xl px-4 pb-4 -mt-2 pt-3 shadow-sm mb-1"
                     style={{ borderLeft: `4px solid ${weekColors.main}` }}>
-
-                    {/* Audio narrativa — para el niño */}
                     <AudioPlayer
                       src={`/audio/semana-${s}/s${s}postura${audioKey}historia.m4a`}
-                      label={`Narración mágica — leer mientras el niño hace la postura`}
+                      label="Narración mágica — leer mientras el niño hace la postura"
                       forChild={true}
                       color={weekColors.main}
                     />
-
-                    {/* Audio how-to — para el adulto */}
                     <AudioPlayer
                       src={`/audio/semana-${s}/s${s}howto${audioKey}.m4a`}
-                      label={`Instrucciones paso a paso — cómo hacer la postura`}
+                      label="Instrucciones paso a paso — cómo hacer la postura"
                       forChild={false}
                       color={weekColors.main}
                     />
-
-                    {/* Narración en texto */}
                     <p className="text-xs italic text-gray-500 mb-3 leading-relaxed mt-2">
                       {posture.storyNarration}
                     </p>
-
                     {showProfileTips && activeProfile ? (
                       <div className="p-3 rounded-xl text-sm" style={{ backgroundColor: profile!.bg }}>
                         <p className="font-medium mb-1" style={{ color: profile!.color }}>
@@ -308,7 +296,6 @@ export default function ClaseTab({ week, weekColors, activeProfile }: Props) {
       <SectionHeader id="respiracion" title={week.breathing.name} icon="🌬️" />
       {openSection === 'respiracion' && (
         <div className="bg-white rounded-2xl p-4 mb-3 shadow-sm space-y-3">
-          {/* Audio respiración — para el adulto */}
           <AudioPlayer
             src={`/audio/semana-${s}/s${s}respiracionraiz.m4a`}
             label="Guía de respiración — seguir junto al niño/a"
@@ -335,14 +322,12 @@ export default function ClaseTab({ week, weekColors, activeProfile }: Props) {
       <SectionHeader id="relajacion" title="Relajación guiada de Kawa" icon="☁️" />
       {openSection === 'relajacion' && (
         <div className="space-y-2 mb-3">
-          {/* Audio relajación — para el niño */}
           <AudioPlayer
             src={`/audio/semana-${s}/s${s}relajacion.m4a`}
             label="Relajación guiada — reproducir mientras el niño está acostado"
             forChild={true}
             color={weekColors.main}
           />
-
           <div className="bg-[#E8EAF6] rounded-2xl p-5 shadow-sm">
             <p className="text-xs text-indigo-700 mb-3 font-medium">
               Leer en voz baja mientras el niño está acostado:
@@ -374,6 +359,11 @@ export default function ClaseTab({ week, weekColors, activeProfile }: Props) {
           ))}
         </div>
       </div>
+
+      {/* ── PROTOCOLO TO — solo visible para profesionales ── */}
+      {userType === 'profesional' && (
+        <ProtocoloTO week={week} weekColors={weekColors} />
+      )}
 
       {/* ── REGISTRAR SESIÓN ── */}
       <button

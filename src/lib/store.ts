@@ -29,6 +29,9 @@ interface AppState {
   children: ChildProfile[]
   activeChildId: string | null
 
+  // Tipo de usuario
+  userType: 'familia' | 'profesional' | null
+
   // Progreso (por niño)
   currentWeek: number
   completedWeeks: number[]
@@ -47,6 +50,9 @@ interface AppState {
   setActiveChild: (id: string) => void
   updateChildProfile: (id: string, profile: SensoryProfile, pcts: Record<SensoryProfile, number>) => void
 
+  // Actions — tipo de usuario
+  setUserType: (type: 'familia' | 'profesional') => void
+
   // Actions — progreso
   setCurrentWeek: (week: number) => void
   completeWeek: (weekId: number) => void
@@ -62,6 +68,7 @@ const initialState = {
   onboardingComplete: false,
   children: [] as ChildProfile[],
   activeChildId: null as string | null,
+  userType: null as 'familia' | 'profesional' | null,
   currentWeek: 1,
   completedWeeks: [] as number[],
   sessionLogs: [] as SessionLog[],
@@ -108,6 +115,8 @@ export const useAppStore = create<AppState>()(
           )
         })),
 
+      setUserType: (type) => set({ userType: type }),
+
       setCurrentWeek: (week) => set({ currentWeek: week }),
 
       completeWeek: (weekId) =>
@@ -133,6 +142,7 @@ export const useAppStore = create<AppState>()(
         onboardingComplete: s.onboardingComplete,
         children: s.children,
         activeChildId: s.activeChildId,
+        userType: s.userType,
         currentWeek: s.currentWeek,
         completedWeeks: s.completedWeeks,
         sessionLogs: s.sessionLogs,
