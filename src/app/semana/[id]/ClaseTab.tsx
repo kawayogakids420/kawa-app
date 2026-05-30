@@ -4,6 +4,7 @@ import type { Week, SensoryProfile } from '@/lib/data/course'
 import { PROFILES } from '@/lib/data/course'
 import { useAppStore } from '@/lib/store'
 import ProtocoloTO from './ProtocoloTO'
+import { useRouter } from 'next/navigation'
 
 interface Props {
   week: Week
@@ -11,528 +12,793 @@ interface Props {
   activeProfile: SensoryProfile | null
 }
 
-// Canción eliminada de esta versión
-type Section = 'historia' | 'sesion' | 'posturas' | 'respiracion' | 'relajacion'
+type Section = 'historia' | 'posturas' | 'respiracion' | 'relajacion'
+const SECTIONS: Section[] = ['historia', 'posturas', 'respiracion', 'relajacion']
 
-const SECTIONS_ORDER: Section[] = ['historia', 'sesion', 'posturas', 'respiracion', 'relajacion']
-
-const SECTION_LABELS: Record<Section, { title: string; icon: string; star: string }> = {
-  historia:    { title: 'La historia de Kawa',      icon: '📖', star: 'Historia' },
-  sesion:      { title: 'Estructura de la sesión',  icon: '⏱️', star: 'Sesión' },
-  posturas:    { title: 'Las posturas de Kawa',     icon: '🧘', star: 'Posturas' },
-  respiracion: { title: '',                          icon: '🌬️', star: 'Respiración' },
-  relajacion:  { title: 'Relajación guiada de Kawa',icon: '☁️', star: 'Relajación' },
+const SECTION_META: Record<Section, { label: string; icon: string }> = {
+  historia:    { label: 'Historia',    icon: '📖' },
+  posturas:    { label: 'Posturas',    icon: '🧘' },
+  respiracion: { label: 'Respiración', icon: '🌬️' },
+  relajacion:  { label: 'Relajación',  icon: '☁️' },
 }
 
-// ── Reproductor de audio ──────────────────────────────────────────────────────
-interface AudioPlayerProps {
-  src: string
-  label: string
-  forChild?: boolean
-  color?: string
-}
-
-function AudioPlayer({ src, label, forChild = false, color = '#2D6A4F' }: AudioPlayerProps) {
-  const audioRef = useRef<HTMLAudioElement>(null)
-  const [playing, setPlaying]   = useState(false)
-  const [progress, setProgress] = useState(0)
-  const [duration, setDuration] = useState(0)
-  const [error, setError]       = useState(false)
+// ── Reproductor de audio compacto ────────────────────────────────────────────
+function AudioBtn({
+  src, label, forChild = false, color = '#2D6A4F'
+}: { src: string; label: string; forChild?: boolean; color?: string }) {
+  const audioRef                    = useRef<HTMLAudioElement>(null)
+  const [playing, setPlaying]       = useState(false)
+  const [progress, setProgress]     = useState(0)
+  const [duration, setDuration]     = useState(0)
+  const [error, setError]           = useState(false)
 
   useEffect(() => {
-    const audio = audioRef.current
-    if (!audio) return
-    const onTime     = () => setProgress(audio.currentTime)
-    const onDuration = () => setDuration(audio.duration)
-    const onEnd      = () => { setPlaying(false); setProgress(0) }
-    const onError    = () => setError(true)
-    audio.addEventListener('timeupdate', onTime)
-    audio.addEventListener('loadedmetadata', onDuration)
-    audio.addEventListener('ended', onEnd)
-    audio.addEventListener('error', onError)
+    const a = audioRef.current
+    if (!a) return
+    const t  = () => setProgress(a.currentTime)
+    const d  = () => setDuration(a.duration)
+    const e  = () => { setPlaying(false); setProgress(0) }
+    const er = () => setError(true)
+    a.addEventListener('timeupdate', t)
+    a.addEventListener('loadedmetadata', d)
+    a.addEventListener('ended', e)
+    a.addEventListener('error', er)
     return () => {
-      audio.removeEventListener('timeupdate', onTime)
-      audio.removeEventListener('loadedmetadata', onDuration)
-      audio.removeEventListener('ended', onEnd)
-      audio.removeEventListener('error', onError)
+      a.removeEventListener('timeupdate', t)
+      a.removeEventListener('loadedmetadata', d)
+      a.removeEventListener('ended', e)
+      a.removeEventListener('error', er)
     }
   }, [])
 
-  const togglePlay = () => {
-    const audio = audioRef.current
-    if (!audio) return
-    if (playing) { audio.pause(); setPlaying(false) }
-    else { audio.play(); setPlaying(true) }
-  }
-
-  const seek = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const audio = audioRef.current
-    if (!audio) return
-    audio.currentTime = Number(e.target.value)
-    setProgress(Number(e.target.value))
-  }
-
-  const fmt = (s: number) => {
-    if (!s || isNaN(s)) return '0:00'
-    const m = Math.floor(s / 60)
-    const sec = Math.floor(s % 60)
-    return `${m}:${sec.toString().padStart(2, '0')}`
-  }
-
   if (error) return null
 
-  const bg       = forChild ? '#FFF8E1' : '#F0F7F4'
-  const border   = forChild ? '#FFD54F' : color
-  const tagLabel = forChild ? 'Para el niño/a' : 'Para el adulto'
-  const tagBg    = forChild ? '#FFF3CD' : '#E8F5E9'
-  const tagColor = forChild ? '#E65100' : '#2D6A4F'
-  const btnColor = forChild ? '#F57F17' : color
+  const pct    = duration ? (progress / duration) * 100 : 0
+  const fmt    = (s: number) => isNaN(s)||!s ? '0:00' : `${Math.floor(s/60)}:${String(Math.floor(s%60)).padStart(2,'0')}`
+  const accent = forChild ? '#F57F17' : color
 
   return (
-    <div className="rounded-2xl p-3 mb-2"
-      style={{ background: bg, border: `1.5px solid ${border}30` }}>
+    <div style={{
+      background: forChild ? '#FFF8E1' : '#F0F9F4',
+      border: `1.5px solid ${accent}30`,
+      borderRadius: 14, padding: '10px 12px', marginBottom: 8
+    }}>
       <audio ref={audioRef} src={src} preload="metadata" />
-      <div className="flex items-center justify-between mb-2">
-        <span className="text-xs font-semibold px-2 py-1 rounded-full"
-          style={{ background: tagBg, color: tagColor }}>
-          {forChild ? '👦' : '👩'} {tagLabel}
-        </span>
-        <span className="text-xs text-gray-400">{fmt(duration)}</span>
-      </div>
-      <p className="text-sm font-medium text-gray-800 mb-2">{label}</p>
-      <div className="flex items-center gap-3">
-        <button onClick={togglePlay}
-          className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 text-white"
-          style={{ background: btnColor }}>
-          {playing ? (
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-              <rect x="6" y="4" width="4" height="16" rx="1"/>
-              <rect x="14" y="4" width="4" height="16" rx="1"/>
-            </svg>
-          ) : (
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M8 5v14l11-7z"/>
-            </svg>
-          )}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+        <button onClick={() => {
+          const a = audioRef.current; if (!a) return
+          if (playing) { a.pause(); setPlaying(false) } else { a.play(); setPlaying(true) }
+        }} style={{
+          width: 36, height: 36, borderRadius: '50%',
+          background: accent, border: 'none', cursor: 'pointer',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          flexShrink: 0, color: 'white', fontSize: 14
+        }}>
+          {playing
+            ? <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></svg>
+            : <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>}
         </button>
-        <div className="flex-1 flex items-center gap-2">
-          <input type="range" min={0} max={duration || 100} value={progress}
-            onChange={seek}
-            className="w-full h-1.5 rounded-full appearance-none cursor-pointer"
-            style={{
-              background: `linear-gradient(to right, ${btnColor} ${(progress/(duration||1))*100}%, #E0E0E0 0%)`
-            }}
-          />
-          <span className="text-xs text-gray-400 flex-shrink-0 w-8">{fmt(progress)}</span>
+        <div style={{ flex: 1 }}>
+          <p style={{ fontSize: 11, fontWeight: 500, color: '#374151', margin: '0 0 4px' }}>{label}</p>
+          <div style={{ height: 4, background: '#E5E7EB', borderRadius: 2, overflow: 'hidden' }}>
+            <div style={{ height: '100%', width: `${pct}%`, background: accent, borderRadius: 2, transition: 'width 0.3s' }} />
+          </div>
+        </div>
+        <span style={{ fontSize: 10, color: '#9CA3AF', flexShrink: 0 }}>{fmt(progress)}</span>
+      </div>
+    </div>
+  )
+}
+
+// ── Tarjeta de historia — estilo Brain Activation for Kids ────────────────────
+function StoryCard({
+  stepKey, step, weekColors, weekId
+}: { stepKey: string; step: { title: string; text: string }; weekColors: { main: string; light: string }; weekId: number }) {
+  const stepLabels: Record<string, { label: string; emoji: string; bg: string }> = {
+    inicio:        { label: 'Inicio',        emoji: '🌱', bg: '#E8F5E9' },
+    desequilibrio: { label: 'Desequilibrio', emoji: '🌀', bg: '#FFF3E0' },
+    accion:        { label: 'Acción',        emoji: '⚡', bg: '#E3F2FD' },
+    catarsis:      { label: 'Catarsis',      emoji: '💧', bg: '#F3E5F5' },
+    ensenanza:     { label: 'Enseñanza',     emoji: '✨', bg: '#FFFDE7' },
+  }
+  const meta = stepLabels[stepKey] || { label: stepKey, emoji: '📖', bg: '#F5F5F5' }
+
+  return (
+    <div style={{
+      background: 'white',
+      borderRadius: 16,
+      overflow: 'hidden',
+      marginBottom: 10,
+      border: '1.5px solid #F0EDE8',
+      boxShadow: '0 2px 8px rgba(0,0,0,0.06)'
+    }}>
+      {/* Header de la tarjeta */}
+      <div style={{
+        background: meta.bg,
+        padding: '10px 14px',
+        display: 'flex', alignItems: 'center', gap: 8,
+        borderBottom: '1.5px solid #F0EDE8'
+      }}>
+        <div style={{
+          width: 32, height: 32, borderRadius: 10,
+          background: weekColors.main,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          fontSize: 16, flexShrink: 0
+        }}>
+          {meta.emoji}
+        </div>
+        <div>
+          <p style={{ fontSize: 9, color: '#9CA3AF', margin: 0, textTransform: 'uppercase', letterSpacing: '0.06em', fontWeight: 500 }}>
+            {meta.label}
+          </p>
+          <p style={{ fontSize: 13, fontWeight: 500, color: '#111', margin: 0 }}>
+            {step.title}
+          </p>
         </div>
       </div>
+      {/* Texto */}
+      <div style={{ padding: '12px 14px' }}>
+        <p style={{
+          fontSize: 13, color: '#374151', lineHeight: 1.7,
+          fontStyle: 'italic', margin: 0,
+          fontFamily: "'Georgia', serif"
+        }}>
+          "{step.text}"
+        </p>
+      </div>
+    </div>
+  )
+}
+
+// ── Tarjeta de postura — estilo Brain Activation for Kids ─────────────────────
+function PostureCard({
+  posture, weekColors, weekId, activeProfile, profile, showProfileTips
+}: {
+  posture: any; weekColors: { main: string; light: string }; weekId: number
+  activeProfile: SensoryProfile | null; profile: any; showProfileTips: boolean
+}) {
+  const [open, setOpen] = useState(false)
+  const audioMap: Record<string, string> = {
+    montana: 'montana', indio: 'posturaindio', tortuga: 'posturatortuga',
+    gato: 'gatolYII', arbol: 'posturaarbol',
+  }
+  const audioKey = audioMap[posture.id] || posture.id
+  const s = weekId
+
+  return (
+    <div style={{
+      background: 'white', borderRadius: 16, overflow: 'hidden',
+      marginBottom: 10, border: '1.5px solid #F0EDE8',
+      boxShadow: '0 2px 8px rgba(0,0,0,0.06)'
+    }}>
+      {/* Header postura */}
+      <button onClick={() => setOpen(!open)} style={{
+        width: '100%', padding: '12px 14px',
+        display: 'flex', alignItems: 'center', gap: 12,
+        background: open ? weekColors.light : 'white',
+        border: 'none', cursor: 'pointer', textAlign: 'left',
+        borderBottom: open ? `1.5px solid ${weekColors.main}30` : 'none'
+      }}>
+        <div style={{
+          width: 44, height: 44, borderRadius: 12,
+          background: open ? weekColors.main : '#F3F4F6',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          fontSize: 24, flexShrink: 0, transition: 'all 0.2s'
+        }}>
+          {posture.emoji}
+        </div>
+        <div style={{ flex: 1 }}>
+          <p style={{ fontSize: 14, fontWeight: 500, color: '#111', margin: 0 }}>{posture.name}</p>
+          <p style={{ fontSize: 11, color: '#9CA3AF', margin: 0 }}>"{posture.magicName}"</p>
+        </div>
+        <div style={{
+          width: 28, height: 28, borderRadius: '50%',
+          background: weekColors.main + '20',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          fontSize: 14, color: weekColors.main, flexShrink: 0,
+          transition: 'transform 0.2s', transform: open ? 'rotate(180deg)' : 'none'
+        }}>↓</div>
+      </button>
+
+      {open && (
+        <div style={{ padding: '14px' }}>
+          {/* Audios */}
+          <p style={{
+            fontSize: 10, fontWeight: 500, color: '#9CA3AF', margin: '0 0 8px',
+            textTransform: 'uppercase', letterSpacing: '0.06em'
+          }}>Audio de la postura</p>
+          <AudioBtn
+            src={`/audio/semana-${s}/s${s}postura${audioKey}historia.m4a`}
+            label="Narración mágica — para el niño/a"
+            forChild={true}
+            color={weekColors.main}
+          />
+          <AudioBtn
+            src={`/audio/semana-${s}/s${s}howto${audioKey}.m4a`}
+            label="Cómo hacer la postura — para el adulto"
+            forChild={false}
+            color={weekColors.main}
+          />
+
+          {/* Divider */}
+          <div style={{ height: 1, background: '#F3F4F6', margin: '10px 0' }} />
+
+          {/* Narración */}
+          <div style={{
+            background: '#FFFDE7', borderRadius: 10, padding: '10px 12px', marginBottom: 10
+          }}>
+            <p style={{ fontSize: 9, color: '#9CA3AF', margin: '0 0 4px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+              Narración
+            </p>
+            <p style={{ fontSize: 12, color: '#374151', fontStyle: 'italic', lineHeight: 1.6, margin: 0 }}>
+              "{posture.storyNarration}"
+            </p>
+          </div>
+
+          {/* Instrucciones o adaptaciones */}
+          {showProfileTips && activeProfile && profile ? (
+            <div style={{ background: profile.bg, borderRadius: 10, padding: '10px 12px' }}>
+              <p style={{ fontSize: 12, fontWeight: 500, color: profile.color, margin: '0 0 4px' }}>
+                {profile.icon} Para {profile.name}:
+              </p>
+              <p style={{ fontSize: 12, color: profile.color, margin: 0 }}>{posture.profiles[activeProfile]}</p>
+            </div>
+          ) : (
+            <div>
+              <div style={{ background: weekColors.light, borderRadius: 10, padding: '10px 12px', marginBottom: 8 }}>
+                <p style={{ fontSize: 9, color: '#9CA3AF', margin: '0 0 4px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                  Cómo hacerla
+                </p>
+                <p style={{ fontSize: 12, color: '#374151', lineHeight: 1.6, margin: 0 }}>{posture.howTo}</p>
+                <p style={{ fontSize: 11, fontWeight: 500, color: weekColors.main, margin: '6px 0 0' }}>
+                  ⏱️ {posture.duration}
+                </p>
+              </div>
+              <div style={{ background: '#F8F7F4', borderRadius: 10, padding: '10px 12px' }}>
+                <p style={{ fontSize: 9, color: '#9CA3AF', margin: '0 0 6px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                  Beneficios sensoriales
+                </p>
+                {posture.sensoryBenefits.map((b: string, i: number) => (
+                  <div key={i} style={{ display: 'flex', gap: 6, marginBottom: 3 }}>
+                    <span style={{ color: weekColors.main, fontSize: 11, flexShrink: 0 }}>•</span>
+                    <p style={{ fontSize: 11, color: '#6B7280', margin: 0, lineHeight: 1.5 }}>{b}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   )
 }
 
 // ── Componente principal ──────────────────────────────────────────────────────
 export default function ClaseTab({ week, weekColors, activeProfile }: Props) {
-  const [openSection, setOpenSection]     = useState<Section | null>('historia')
-  const [openPosture, setOpenPosture]     = useState<string | null>(null)
-  const [showProfileTips, setShowProfileTips] = useState(false)
+  const router = useRouter()
+  const [activeSection, setActiveSection] = useState<Section>('historia')
   const [completedSections, setCompleted] = useState<Set<Section>>(new Set())
-  const { logSession, activeChildId, userType } = useAppStore()
+  const [showProfileTips, setShowProfileTips]   = useState(false)
+  const { logSession, activeChildId, userType }  = useAppStore()
   const [logOpen, setLogOpen] = useState(false)
   const [mood, setMood]       = useState<'great'|'good'|'okay'|'hard'>('good')
   const [notes, setNotes]     = useState('')
 
-  const profile = activeProfile ? PROFILES[activeProfile] : null
-  const s = week.id
+  const profile    = activeProfile ? PROFILES[activeProfile] : null
+  const s          = week.id
+  const doneCount  = completedSections.size
+  const totalSecs  = SECTIONS.length
+  const progressPct = Math.round((doneCount / totalSecs) * 100)
 
-  // Marcar sección como completada al cerrarla
-  const toggleSection = (id: Section) => {
-    if (openSection === id) {
-      // Al cerrar, marcar como completada
-      setCompleted(prev => new Set([...prev, id]))
-      setOpenSection(null)
-    } else {
-      setOpenSection(id)
-    }
-  }
-
-  const totalSections  = SECTIONS_ORDER.length
-  const doneCount      = completedSections.size
-  const progressPct    = Math.round((doneCount / totalSections) * 100)
-
-  const SectionHeader = ({ id }: { id: Section }) => {
-    const { title: baseTitle, icon } = SECTION_LABELS[id]
-    const title = id === 'respiracion' ? week.breathing.name : baseTitle
-    const isDone = completedSections.has(id)
-    const isOpen = openSection === id
-
-    return (
-      <button
-        onClick={() => toggleSection(id)}
-        className="w-full flex items-center justify-between p-4 bg-white rounded-2xl shadow-sm mb-2 text-left">
-        <div className="flex items-center gap-3">
-          <span className="text-xl">{icon}</span>
-          <span className="font-semibold text-gray-900">{title}</span>
-        </div>
-        <div className="flex items-center gap-2">
-          {isDone && !isOpen && (
-            <span className="text-xs px-2 py-0.5 rounded-full font-medium"
-              style={{ backgroundColor: weekColors.main + '20', color: weekColors.main }}>
-              ⭐ Hecho
-            </span>
-          )}
-          <span className="text-gray-400 text-lg">{isOpen ? '↑' : '↓'}</span>
-        </div>
-      </button>
-    )
-  }
-
-  const postureAudioMap: Record<string, string> = {
-    montana: 'montana',
-    indio: 'posturaindio',
-    tortuga: 'posturatortuga',
-    gato: 'gatolYII',
-    arbol: 'posturaarbol',
+  const markDone = (sec: Section) => {
+    setCompleted(prev => new Set([...prev, sec]))
+    // Avanzar a la siguiente sección automáticamente
+    const idx = SECTIONS.indexOf(sec)
+    if (idx < SECTIONS.length - 1) setActiveSection(SECTIONS[idx + 1])
   }
 
   return (
-    <div className="space-y-1">
-
-      {/* ── BARRA DE PROGRESO DE SESIÓN ── */}
-      <div className="bg-white rounded-2xl p-4 shadow-sm mb-2">
-        <div className="flex items-center justify-between mb-2">
-          <p className="text-sm font-semibold text-gray-900">Progreso de esta sesión</p>
-          <p className="text-sm font-bold" style={{ color: weekColors.main }}>
-            {doneCount}/{totalSections}
+    <div>
+      {/* ── BARRA DE PROGRESO SUPERIOR ── */}
+      <div style={{
+        background: 'white', borderRadius: 16, padding: '14px 16px',
+        marginBottom: 12, border: '0.5px solid #E5E7EB'
+      }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
+          <p style={{ fontSize: 13, fontWeight: 500, color: '#111', margin: 0 }}>
+            Progreso de esta sesión
+          </p>
+          <p style={{ fontSize: 13, fontWeight: 500, color: weekColors.main, margin: 0 }}>
+            {doneCount}/{totalSecs}
           </p>
         </div>
-        <div className="h-2.5 bg-gray-100 rounded-full overflow-hidden mb-2">
-          <div className="h-full rounded-full transition-all duration-500"
-            style={{ width: `${progressPct}%`, backgroundColor: weekColors.main }} />
+        <div style={{ height: 8, background: '#F3F4F6', borderRadius: 4, overflow: 'hidden', marginBottom: 10 }}>
+          <div style={{
+            height: '100%', borderRadius: 4, transition: 'width 0.5s',
+            width: `${progressPct}%`, background: weekColors.main
+          }} />
         </div>
-        <div className="flex gap-1.5">
-          {SECTIONS_ORDER.map(sec => (
-            <div key={sec} className="flex-1 flex flex-col items-center gap-1">
-              <div className="w-6 h-6 rounded-full flex items-center justify-center text-xs"
-                style={{
-                  backgroundColor: completedSections.has(sec)
-                    ? weekColors.main
-                    : openSection === sec
-                    ? weekColors.main + '40'
-                    : '#F3F4F6',
-                  color: completedSections.has(sec) ? 'white' : '#9CA3AF'
+        {/* Tabs de sección */}
+        <div style={{ display: 'flex', gap: 6 }}>
+          {SECTIONS.map(sec => {
+            const done   = completedSections.has(sec)
+            const active = activeSection === sec
+            const meta   = SECTION_META[sec]
+            return (
+              <button key={sec} onClick={() => setActiveSection(sec)} style={{
+                flex: 1, padding: '6px 4px', borderRadius: 10, border: 'none',
+                cursor: 'pointer', display: 'flex', flexDirection: 'column',
+                alignItems: 'center', gap: 3, transition: 'all 0.2s',
+                background: done
+                  ? weekColors.main
+                  : active
+                  ? weekColors.light
+                  : '#F8F7F4'
+              }}>
+                <span style={{ fontSize: 16 }}>
+                  {done ? '⭐' : meta.icon}
+                </span>
+                <span style={{
+                  fontSize: 9, fontWeight: 500,
+                  color: done ? 'white' : active ? weekColors.main : '#9CA3AF'
                 }}>
-                {completedSections.has(sec) ? '⭐' : SECTION_LABELS[sec].icon}
-              </div>
-              <span className="text-[9px] text-gray-400 text-center leading-tight">
-                {SECTION_LABELS[sec].star}
-              </span>
-            </div>
-          ))}
+                  {meta.label}
+                </span>
+              </button>
+            )
+          })}
         </div>
-        {doneCount === totalSections && (
-          <div className="mt-3 text-center py-2 rounded-xl text-sm font-semibold"
-            style={{ backgroundColor: weekColors.main + '15', color: weekColors.main }}>
-            🌟 ¡Sesión completa! Ya puedes registrarla
+        {doneCount === totalSecs && (
+          <div style={{
+            marginTop: 10, background: weekColors.light, borderRadius: 10,
+            padding: '8px 12px', textAlign: 'center'
+          }}>
+            <p style={{ fontSize: 13, fontWeight: 500, color: weekColors.main, margin: 0 }}>
+              🌟 ¡Sesión completa! Ya puedes registrarla
+            </p>
           </div>
         )}
       </div>
 
-      {/* ── HISTORIA ── */}
-      <SectionHeader id="historia" />
-      {openSection === 'historia' && (
-        <div className="mb-3 space-y-2">
-          <AudioPlayer
-            src={`/audio/semana-${s}/s${s}historiadekawa.m4a`}
-            label="Historia completa de Kawa — narrar mientras el niño escucha"
-            forChild={false}
-            color={weekColors.main}
-          />
-          <div className="bg-[#FFFDE7] rounded-2xl p-5 shadow-sm">
+      {/* ── BOTÓN MATERIALES ── */}
+      <button onClick={() => router.push('/materiales')} style={{
+        width: '100%', padding: '12px 16px', borderRadius: 14, marginBottom: 12,
+        background: '#FFF8E1', border: '1.5px solid #FDE68A',
+        display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer',
+        boxSizing: 'border-box'
+      }}>
+        <span style={{ fontSize: 22 }}>🎒</span>
+        <div style={{ flex: 1, textAlign: 'left' }}>
+          <p style={{ fontSize: 13, fontWeight: 500, color: '#92400E', margin: 0 }}>
+            Prepara los materiales
+          </p>
+          <p style={{ fontSize: 11, color: '#B45309', margin: 0 }}>
+            {week.physicalObject.name} · Colchoneta · {week.tactileObject}
+          </p>
+        </div>
+        <div style={{
+          background: '#F59E0B', color: 'white', borderRadius: 10,
+          padding: '6px 12px', fontSize: 12, fontWeight: 500, flexShrink: 0
+        }}>
+          Ver materiales →
+        </div>
+      </button>
+
+      {/* ══════════════════════════════════════════════════════════
+          SECCIÓN: HISTORIA
+      ══════════════════════════════════════════════════════════ */}
+      {activeSection === 'historia' && (
+        <div>
+          {/* Header estilo Brain Activation */}
+          <div style={{
+            background: weekColors.main, borderRadius: '16px 16px 0 0',
+            padding: '14px 16px', display: 'flex', alignItems: 'center', gap: 10
+          }}>
+            <div style={{
+              width: 36, height: 36, borderRadius: 10, background: 'rgba(255,255,255,0.2)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20
+            }}>📖</div>
+            <div>
+              <p style={{ fontSize: 10, color: 'rgba(255,255,255,0.7)', margin: 0, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+                Guardián {week.id} · {week.element}
+              </p>
+              <p style={{ fontSize: 15, fontWeight: 500, color: 'white', margin: 0 }}>
+                La historia de Kawa
+              </p>
+            </div>
+          </div>
+
+          {/* Enseñanza del guardián */}
+          <div style={{
+            background: weekColors.light,
+            padding: '10px 16px', marginBottom: 10,
+            borderRadius: '0 0 0 0',
+            border: `1.5px solid ${weekColors.main}30`,
+            borderTop: 'none'
+          }}>
+            <p style={{ fontSize: 11, color: '#6B7280', margin: 0 }}>
+              🌟 <strong style={{ color: weekColors.main }}>Enseñanza:</strong>{' '}
+              <em>{week.teaching}</em>
+            </p>
+          </div>
+
+          {/* Audio de la historia */}
+          <div style={{
+            background: 'white', borderRadius: 14, padding: '12px 14px',
+            marginBottom: 10, border: '1.5px solid #F0EDE8'
+          }}>
+            <p style={{ fontSize: 10, color: '#9CA3AF', margin: '0 0 8px', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+              Audio de la historia
+            </p>
+            <AudioBtn
+              src={`/audio/semana-${s}/s${s}historiadekawa.m4a`}
+              label="Historia completa de Kawa — narrar mientras el niño escucha"
+              forChild={false}
+              color={weekColors.main}
+            />
+          </div>
+
+          {/* Tarjetas de la historia — estilo Brain Activation */}
+          <div>
             {Object.entries(week.story).map(([key, act]) => (
-              <div key={key} className="mb-5 last:mb-0">
-                <p className="text-xs font-semibold uppercase tracking-wide mb-2"
-                  style={{ color: weekColors.main }}>
-                  {key === 'inicio' ? 'Inicio' : key === 'desequilibrio' ? 'Desequilibrio' :
-                   key === 'accion' ? 'Acción' : key === 'catarsis' ? 'Catarsis' : 'Enseñanza'}
-                  {' — '}{act.title}
-                </p>
-                <p className="text-gray-800 text-sm leading-relaxed italic">{act.text}</p>
-              </div>
+              <StoryCard
+                key={key}
+                stepKey={key}
+                step={act}
+                weekColors={weekColors}
+                weekId={week.id}
+              />
             ))}
           </div>
-          <button onClick={() => toggleSection('historia')}
-            className="w-full py-2.5 rounded-xl text-sm font-medium text-white"
-            style={{ backgroundColor: weekColors.main }}>
-            ⭐ Marcar historia como completada
+
+          {/* Botón completar */}
+          <button onClick={() => markDone('historia')} style={{
+            width: '100%', padding: '14px', borderRadius: 14, marginTop: 4,
+            background: completedSections.has('historia') ? '#E8F5E9' : weekColors.main,
+            border: 'none', cursor: 'pointer', color: completedSections.has('historia') ? weekColors.main : 'white',
+            fontSize: 14, fontWeight: 500, boxSizing: 'border-box'
+          }}>
+            {completedSections.has('historia') ? '⭐ Historia completada' : '⭐ Marcar historia como completada'}
           </button>
         </div>
       )}
 
-      {/* ── SESIÓN ── */}
-      <SectionHeader id="sesion" />
-      {openSection === 'sesion' && (
-        <div className="mb-3">
-          <div className="bg-white rounded-2xl p-4 shadow-sm space-y-3">
-            <div className="flex gap-3 text-sm text-gray-600 pb-3 border-b border-gray-100">
-              <span>⏰ {week.sessionStructure.duration}</span>
+      {/* ══════════════════════════════════════════════════════════
+          SECCIÓN: POSTURAS
+      ══════════════════════════════════════════════════════════ */}
+      {activeSection === 'posturas' && (
+        <div>
+          {/* Header */}
+          <div style={{
+            background: weekColors.main, borderRadius: '16px 16px 0 0',
+            padding: '14px 16px', display: 'flex', alignItems: 'center', gap: 10,
+            marginBottom: 10
+          }}>
+            <div style={{
+              width: 36, height: 36, borderRadius: 10, background: 'rgba(255,255,255,0.2)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20
+            }}>🧘</div>
+            <div style={{ flex: 1 }}>
+              <p style={{ fontSize: 10, color: 'rgba(255,255,255,0.7)', margin: 0, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+                {week.posturas.length} posturas de Kawa
+              </p>
+              <p style={{ fontSize: 15, fontWeight: 500, color: 'white', margin: 0 }}>
+                Las posturas de Kawa
+              </p>
             </div>
-            <p className="text-xs text-gray-500 italic">{week.sessionStructure.preparation}</p>
-            {week.sessionStructure.moments
-              .filter(m => !m.name.toLowerCase().includes('canción') && !m.name.toLowerCase().includes('cancion'))
-              .map((m, i) => (
-                <div key={i} className="flex gap-3 items-start">
-                  <span className="text-xs font-bold text-white px-2 py-1 rounded-lg flex-shrink-0"
-                    style={{ backgroundColor: weekColors.main }}>
-                    {m.duration}
-                  </span>
-                  <div>
-                    <p className="text-sm font-medium text-gray-900">{m.name}</p>
-                    <p className="text-xs text-gray-500 mt-0.5">{m.description}</p>
-                  </div>
-                </div>
-              ))}
-          </div>
-          <button onClick={() => toggleSection('sesion')}
-            className="w-full py-2.5 rounded-xl text-sm font-medium text-white mt-2"
-            style={{ backgroundColor: weekColors.main }}>
-            ⭐ Marcar estructura como revisada
-          </button>
-        </div>
-      )}
-
-      {/* ── POSTURAS ── */}
-      <SectionHeader id="posturas" />
-      {openSection === 'posturas' && (
-        <div className="mb-3">
-          <div className="space-y-2">
+            {/* Toggle perfil */}
             {profile && (
-              <button
-                onClick={() => setShowProfileTips(!showProfileTips)}
-                className="w-full py-2.5 px-4 rounded-xl text-sm font-medium flex items-center justify-center gap-2"
-                style={{ backgroundColor: profile.bg, color: profile.color }}>
-                <span>{profile.icon}</span>
-                <span>{showProfileTips ? 'Ver instrucciones generales' : `Ver adaptaciones para ${profile.name}`}</span>
+              <button onClick={() => setShowProfileTips(!showProfileTips)} style={{
+                background: 'rgba(255,255,255,0.2)', border: 'none', borderRadius: 10,
+                padding: '6px 10px', color: 'white', fontSize: 11, cursor: 'pointer'
+              }}>
+                {showProfileTips ? 'General' : `${profile.icon} ${profile.name}`}
               </button>
             )}
-
-            {week.posturas.map((posture) => {
-              const audioKey = postureAudioMap[posture.id] || posture.id
-              return (
-                <div key={posture.id}>
-                  <button
-                    onClick={() => setOpenPosture(openPosture === posture.id ? null : posture.id)}
-                    className="w-full flex items-center gap-3 p-4 bg-white rounded-2xl shadow-sm text-left">
-                    <span className="text-2xl">{posture.emoji}</span>
-                    <div className="flex-1">
-                      <p className="font-semibold text-gray-900 text-sm">{posture.name}</p>
-                      <p className="text-xs text-gray-400">"{posture.magicName}"</p>
-                    </div>
-                    <span className="text-gray-400">{openPosture === posture.id ? '↑' : '↓'}</span>
-                  </button>
-
-                  {openPosture === posture.id && (
-                    <div className="bg-white rounded-2xl px-4 pb-4 -mt-2 pt-3 shadow-sm mb-1"
-                      style={{ borderLeft: `4px solid ${weekColors.main}` }}>
-                      <AudioPlayer
-                        src={`/audio/semana-${s}/s${s}postura${audioKey}historia.m4a`}
-                        label="Narración mágica — leer mientras el niño hace la postura"
-                        forChild={true}
-                        color={weekColors.main}
-                      />
-                      <AudioPlayer
-                        src={`/audio/semana-${s}/s${s}howto${audioKey}.m4a`}
-                        label="Instrucciones paso a paso — cómo hacer la postura"
-                        forChild={false}
-                        color={weekColors.main}
-                      />
-                      <p className="text-xs italic text-gray-500 mb-3 leading-relaxed mt-2">
-                        {posture.storyNarration}
-                      </p>
-                      {showProfileTips && activeProfile ? (
-                        <div className="p-3 rounded-xl text-sm" style={{ backgroundColor: profile!.bg }}>
-                          <p className="font-medium mb-1" style={{ color: profile!.color }}>
-                            {profile!.icon} Para {profile!.name}:
-                          </p>
-                          <p style={{ color: profile!.color }}>{posture.profiles[activeProfile]}</p>
-                        </div>
-                      ) : (
-                        <div className="space-y-2">
-                          <p className="text-sm text-gray-700 leading-relaxed">{posture.howTo}</p>
-                          <p className="text-xs font-medium" style={{ color: weekColors.main }}>
-                            ⏱️ {posture.duration}
-                          </p>
-                          <div className="space-y-1">
-                            {posture.sensoryBenefits.map((b, i) => (
-                              <p key={i} className="text-xs text-gray-500">• {b}</p>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </div>
-              )
-            })}
           </div>
-          <button onClick={() => toggleSection('posturas')}
-            className="w-full py-2.5 rounded-xl text-sm font-medium text-white mt-2"
-            style={{ backgroundColor: weekColors.main }}>
-            ⭐ Marcar posturas como completadas
+
+          {/* Posturas */}
+          {week.posturas.map(posture => (
+            <PostureCard
+              key={posture.id}
+              posture={posture}
+              weekColors={weekColors}
+              weekId={week.id}
+              activeProfile={activeProfile}
+              profile={profile}
+              showProfileTips={showProfileTips}
+            />
+          ))}
+
+          {/* Adaptaciones por perfil */}
+          <div style={{
+            background: 'white', borderRadius: 14, padding: '14px',
+            marginBottom: 10, border: '1.5px solid #F0EDE8'
+          }}>
+            <p style={{ fontSize: 12, fontWeight: 500, color: '#111', margin: '0 0 10px' }}>
+              Adaptaciones por perfil
+            </p>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+              {Object.values(week.profileAdaptations).map((pa: any) => (
+                <div key={pa.name} style={{ borderRadius: 10, padding: '10px 10px', background: pa.bgColor }}>
+                  <p style={{ fontSize: 11, fontWeight: 500, color: pa.color, margin: '0 0 6px' }}>
+                    {pa.icon} {pa.name}
+                  </p>
+                  {pa.tips.slice(0, 2).map((tip: string, i: number) => (
+                    <p key={i} style={{ fontSize: 10, color: pa.color, margin: '0 0 2px' }}>• {tip}</p>
+                  ))}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <button onClick={() => markDone('posturas')} style={{
+            width: '100%', padding: '14px', borderRadius: 14,
+            background: completedSections.has('posturas') ? '#E8F5E9' : weekColors.main,
+            border: 'none', cursor: 'pointer',
+            color: completedSections.has('posturas') ? weekColors.main : 'white',
+            fontSize: 14, fontWeight: 500, boxSizing: 'border-box'
+          }}>
+            {completedSections.has('posturas') ? '⭐ Posturas completadas' : '⭐ Marcar posturas como completadas'}
           </button>
         </div>
       )}
 
-      {/* ── RESPIRACIÓN ── */}
-      <SectionHeader id="respiracion" />
-      {openSection === 'respiracion' && (
-        <div className="mb-3">
-          <div className="bg-white rounded-2xl p-4 shadow-sm space-y-3">
-            <AudioPlayer
+      {/* ══════════════════════════════════════════════════════════
+          SECCIÓN: RESPIRACIÓN
+      ══════════════════════════════════════════════════════════ */}
+      {activeSection === 'respiracion' && (
+        <div>
+          <div style={{
+            background: weekColors.main, borderRadius: '16px 16px 0 0',
+            padding: '14px 16px', display: 'flex', alignItems: 'center', gap: 10,
+            marginBottom: 10
+          }}>
+            <div style={{
+              width: 36, height: 36, borderRadius: 10, background: 'rgba(255,255,255,0.2)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20
+            }}>🌬️</div>
+            <div>
+              <p style={{ fontSize: 10, color: 'rgba(255,255,255,0.7)', margin: 0, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+                Técnica de respiración
+              </p>
+              <p style={{ fontSize: 15, fontWeight: 500, color: 'white', margin: 0 }}>
+                {week.breathing.name}
+              </p>
+            </div>
+          </div>
+
+          {/* Audios */}
+          <div style={{
+            background: 'white', borderRadius: 14, padding: '12px 14px',
+            marginBottom: 10, border: '1.5px solid #F0EDE8'
+          }}>
+            <AudioBtn
               src={`/audio/semana-${s}/s${s}respiracionraiz.m4a`}
               label="Guía de respiración — seguir junto al niño/a"
               forChild={false}
               color={weekColors.main}
             />
-            <AudioPlayer
+            <AudioBtn
               src={`/audio/semana-${s}/s${s}howtorespiacionraiz.m4a`}
               label="Cómo enseñar la respiración — instrucciones para el adulto"
               forChild={false}
               color={weekColors.main}
             />
-            <p className="text-sm italic text-gray-500">{week.breathing.storyNarration}</p>
-            <div className="p-3 rounded-xl" style={{ backgroundColor: weekColors.light }}>
-              <p className="text-sm font-medium mb-1" style={{ color: weekColors.main }}>Cómo:</p>
-              <p className="text-sm text-gray-700">{week.breathing.howTo}</p>
-            </div>
-            <p className="text-xs text-green-700"><strong>Beneficio:</strong> {week.breathing.benefit}</p>
-            <p className="text-xs text-gray-500"><strong>Cuándo usarla:</strong> {week.breathing.whenToUse}</p>
           </div>
-          <button onClick={() => toggleSection('respiracion')}
-            className="w-full py-2.5 rounded-xl text-sm font-medium text-white mt-2"
-            style={{ backgroundColor: weekColors.main }}>
-            ⭐ Marcar respiración como completada
+
+          {/* Narración */}
+          <div style={{
+            background: '#FFFDE7', borderRadius: 14, padding: '12px 14px',
+            marginBottom: 10, border: '1.5px solid #FDE68A'
+          }}>
+            <p style={{ fontSize: 9, color: '#9CA3AF', margin: '0 0 6px', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+              Narración
+            </p>
+            <p style={{ fontSize: 13, color: '#374151', fontStyle: 'italic', lineHeight: 1.7, margin: 0, fontFamily: "'Georgia',serif" }}>
+              "{week.breathing.storyNarration}"
+            </p>
+          </div>
+
+          {/* Cómo */}
+          <div style={{
+            background: weekColors.light, borderRadius: 14, padding: '12px 14px',
+            marginBottom: 10, border: `1.5px solid ${weekColors.main}30`
+          }}>
+            <p style={{ fontSize: 9, color: '#9CA3AF', margin: '0 0 6px', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+              Cómo hacerla
+            </p>
+            <p style={{ fontSize: 13, color: '#374151', lineHeight: 1.6, margin: 0 }}>{week.breathing.howTo}</p>
+          </div>
+
+          {/* Beneficio y cuándo */}
+          <div style={{
+            background: 'white', borderRadius: 14, padding: '12px 14px',
+            marginBottom: 10, border: '1.5px solid #F0EDE8'
+          }}>
+            <div style={{ marginBottom: 8 }}>
+              <p style={{ fontSize: 9, color: '#9CA3AF', margin: '0 0 3px', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Beneficio</p>
+              <p style={{ fontSize: 12, color: '#374151', margin: 0 }}>{week.breathing.benefit}</p>
+            </div>
+            <div style={{ borderTop: '1px solid #F3F4F6', paddingTop: 8 }}>
+              <p style={{ fontSize: 9, color: '#9CA3AF', margin: '0 0 3px', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Cuándo usarla</p>
+              <p style={{ fontSize: 12, color: '#374151', margin: 0 }}>{week.breathing.whenToUse}</p>
+            </div>
+          </div>
+
+          <button onClick={() => markDone('respiracion')} style={{
+            width: '100%', padding: '14px', borderRadius: 14,
+            background: completedSections.has('respiracion') ? '#E8F5E9' : weekColors.main,
+            border: 'none', cursor: 'pointer',
+            color: completedSections.has('respiracion') ? weekColors.main : 'white',
+            fontSize: 14, fontWeight: 500, boxSizing: 'border-box'
+          }}>
+            {completedSections.has('respiracion') ? '⭐ Respiración completada' : '⭐ Marcar respiración como completada'}
           </button>
         </div>
       )}
 
-      {/* ── RELAJACIÓN ── */}
-      <SectionHeader id="relajacion" />
-      {openSection === 'relajacion' && (
-        <div className="mb-3">
-          <div className="space-y-2">
-            <AudioPlayer
+      {/* ══════════════════════════════════════════════════════════
+          SECCIÓN: RELAJACIÓN
+      ══════════════════════════════════════════════════════════ */}
+      {activeSection === 'relajacion' && (
+        <div>
+          <div style={{
+            background: weekColors.main, borderRadius: '16px 16px 0 0',
+            padding: '14px 16px', display: 'flex', alignItems: 'center', gap: 10,
+            marginBottom: 10
+          }}>
+            <div style={{
+              width: 36, height: 36, borderRadius: 10, background: 'rgba(255,255,255,0.2)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20
+            }}>☁️</div>
+            <div>
+              <p style={{ fontSize: 10, color: 'rgba(255,255,255,0.7)', margin: 0, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+                Cierre de sesión
+              </p>
+              <p style={{ fontSize: 15, fontWeight: 500, color: 'white', margin: 0 }}>
+                Relajación guiada de Kawa
+              </p>
+            </div>
+          </div>
+
+          {/* Audio relajación */}
+          <div style={{
+            background: 'white', borderRadius: 14, padding: '12px 14px',
+            marginBottom: 10, border: '1.5px solid #F0EDE8'
+          }}>
+            <AudioBtn
               src={`/audio/semana-${s}/s${s}relajacion.m4a`}
               label="Relajación guiada — reproducir mientras el niño está acostado"
               forChild={true}
               color={weekColors.main}
             />
-            <div className="bg-[#E8EAF6] rounded-2xl p-5 shadow-sm">
-              <p className="text-xs text-indigo-700 mb-3 font-medium">
-                Leer en voz baja mientras el niño está acostado:
-              </p>
-              {week.relaxationScript.split('\n\n').map((paragraph, i) => (
-                <p key={i} className="text-sm text-indigo-900 italic leading-relaxed mb-3">
-                  {paragraph}
-                </p>
-              ))}
-            </div>
           </div>
-          <button onClick={() => toggleSection('relajacion')}
-            className="w-full py-2.5 rounded-xl text-sm font-medium text-white mt-2"
-            style={{ backgroundColor: weekColors.main }}>
-            ⭐ Marcar relajación como completada
+
+          {/* Script de relajación */}
+          <div style={{
+            background: '#E8EAF6', borderRadius: 14, padding: '14px',
+            marginBottom: 10, border: '1.5px solid #C5CAE9'
+          }}>
+            <p style={{ fontSize: 10, color: '#5C6BC0', margin: '0 0 10px', textTransform: 'uppercase', letterSpacing: '0.06em', fontWeight: 500 }}>
+              Leer en voz baja mientras el niño está acostado
+            </p>
+            {week.relaxationScript.split('\n\n').map((paragraph, i) => (
+              <p key={i} style={{
+                fontSize: 13, color: '#283593', fontStyle: 'italic',
+                lineHeight: 1.7, margin: '0 0 10px', fontFamily: "'Georgia',serif"
+              }}>
+                {paragraph}
+              </p>
+            ))}
+          </div>
+
+          <button onClick={() => markDone('relajacion')} style={{
+            width: '100%', padding: '14px', borderRadius: 14,
+            background: completedSections.has('relajacion') ? '#E8F5E9' : weekColors.main,
+            border: 'none', cursor: 'pointer',
+            color: completedSections.has('relajacion') ? weekColors.main : 'white',
+            fontSize: 14, fontWeight: 500, boxSizing: 'border-box'
+          }}>
+            {completedSections.has('relajacion') ? '⭐ Relajación completada' : '⭐ Marcar relajación como completada'}
           </button>
         </div>
       )}
 
-      {/* ── ADAPTACIONES ── */}
-      <div className="bg-white rounded-2xl p-4 shadow-sm mb-3">
-        <p className="font-semibold text-gray-900 mb-3">Adaptaciones por perfil</p>
-        <div className="grid grid-cols-2 gap-2">
-          {Object.values(week.profileAdaptations).map((pa) => (
-            <div key={pa.name} className="rounded-xl p-3" style={{ backgroundColor: pa.bgColor }}>
-              <p className="text-xs font-semibold mb-2" style={{ color: pa.color }}>
-                {pa.icon} {pa.name}
-              </p>
-              <ul className="space-y-1">
-                {pa.tips.slice(0, 3).map((tip, i) => (
-                  <li key={i} className="text-[10px]" style={{ color: pa.color }}>• {tip}</li>
-                ))}
-              </ul>
-            </div>
-          ))}
-        </div>
-      </div>
-
       {/* ── PROTOCOLO TO — solo profesionales ── */}
       {userType === 'profesional' && (
-        <ProtocoloTO week={week} weekColors={weekColors} />
+        <div style={{ marginTop: 12 }}>
+          <ProtocoloTO week={week} weekColors={weekColors} />
+        </div>
       )}
 
       {/* ── REGISTRAR SESIÓN ── */}
-      <button
-        onClick={() => setLogOpen(true)}
-        className="w-full py-3 rounded-2xl text-sm font-medium border-2 mb-3"
-        style={{ borderColor: weekColors.main, color: weekColors.main }}>
-        📝 Registrar esta sesión {doneCount === totalSections ? '🌟' : `(${doneCount}/${totalSections} completadas)`}
+      <button onClick={() => setLogOpen(true)} style={{
+        width: '100%', padding: '14px', borderRadius: 14,
+        background: 'white', marginTop: 12,
+        border: `2px solid ${weekColors.main}`,
+        color: weekColors.main, fontSize: 14, fontWeight: 500,
+        cursor: 'pointer', boxSizing: 'border-box'
+      }}>
+        📝 Registrar esta sesión {doneCount === totalSecs ? '🌟' : `(${doneCount}/${totalSecs} completadas)`}
       </button>
 
+      {/* Modal registro */}
       {logOpen && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-end">
-          <div className="bg-white w-full rounded-t-3xl p-6">
-            <h3 className="text-lg font-bold text-gray-900 mb-4">¿Cómo fue la sesión?</h3>
+        <div style={{
+          position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)',
+          zIndex: 50, display: 'flex', alignItems: 'flex-end'
+        }}>
+          <div style={{
+            background: 'white', width: '100%', maxWidth: 430,
+            margin: '0 auto', borderRadius: '24px 24px 0 0', padding: 24
+          }}>
+            <h3 style={{ fontSize: 18, fontWeight: 500, color: '#111', margin: '0 0 16px' }}>
+              ¿Cómo fue la sesión?
+            </h3>
 
-            {/* Estrellas ganadas */}
             {doneCount > 0 && (
-              <div className="flex items-center gap-2 mb-4 p-3 rounded-xl"
-                style={{ backgroundColor: weekColors.light }}>
-                <span className="text-2xl">{'⭐'.repeat(doneCount)}</span>
-                <p className="text-sm font-medium" style={{ color: weekColors.main }}>
+              <div style={{
+                display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16,
+                padding: '10px 12px', borderRadius: 12, background: weekColors.light
+              }}>
+                <span style={{ fontSize: 22 }}>{'⭐'.repeat(doneCount)}</span>
+                <p style={{ fontSize: 13, fontWeight: 500, color: weekColors.main, margin: 0 }}>
                   {doneCount} estrella{doneCount > 1 ? 's' : ''} ganada{doneCount > 1 ? 's' : ''} hoy
                 </p>
               </div>
             )}
 
-            <div className="grid grid-cols-4 gap-2 mb-5">
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 8, marginBottom: 16 }}>
               {(['great','good','okay','hard'] as const).map(m => (
-                <button key={m} onClick={() => setMood(m)}
-                  className={`py-3 rounded-xl text-center border-2 transition-all ${
-                    mood === m ? 'border-[#2D6A4F] bg-[#E8F5E9]' : 'border-gray-200'}`}>
-                  <div className="text-2xl">
+                <button key={m} onClick={() => setMood(m)} style={{
+                  padding: '12px 4px', borderRadius: 12, cursor: 'pointer',
+                  border: `2px solid ${mood === m ? '#2D6A4F' : '#E5E7EB'}`,
+                  background: mood === m ? '#E8F5E9' : 'white',
+                  display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4
+                }}>
+                  <span style={{ fontSize: 24 }}>
                     {m === 'great' ? '🌟' : m === 'good' ? '😊' : m === 'okay' ? '😐' : '😔'}
-                  </div>
-                  <div className="text-xs text-gray-600 mt-1">
+                  </span>
+                  <span style={{ fontSize: 10, color: '#6B7280' }}>
                     {m === 'great' ? 'Increíble' : m === 'good' ? 'Bien' : m === 'okay' ? 'Regular' : 'Difícil'}
-                  </div>
+                  </span>
                 </button>
               ))}
             </div>
-            <textarea
-              value={notes}
-              onChange={e => setNotes(e.target.value)}
-              placeholder="Notas opcionales sobre la sesión..."
-              className="w-full border border-gray-200 rounded-xl p-3 text-sm h-20 resize-none focus:outline-none focus:ring-2 focus:ring-[#2D6A4F] mb-4"
+
+            <textarea value={notes} onChange={e => setNotes(e.target.value)}
+              placeholder="Notas opcionales..."
+              style={{
+                width: '100%', border: '1px solid #E5E7EB', borderRadius: 12,
+                padding: 12, fontSize: 13, height: 72, resize: 'none',
+                marginBottom: 12, boxSizing: 'border-box', fontFamily: 'inherit'
+              }}
             />
-            <div className="flex gap-3">
-              <button onClick={() => setLogOpen(false)}
-                className="flex-1 py-3 rounded-xl border border-gray-200 text-gray-600 text-sm">
+
+            <div style={{ display: 'flex', gap: 10 }}>
+              <button onClick={() => setLogOpen(false)} style={{
+                flex: 1, padding: 12, borderRadius: 12,
+                border: '1px solid #E5E7EB', background: 'white',
+                color: '#6B7280', fontSize: 14, cursor: 'pointer'
+              }}>
                 Cancelar
               </button>
-              <button
-                onClick={() => {
-                  logSession({
-                    weekId: week.id,
-                    childId: activeChildId ?? '',
-                    completed: doneCount === totalSections,
-                    mood,
-                    notes,
-                    posturesCompleted: week.posturas.map(p => p.id)
-                  })
-                  setLogOpen(false)
-                  setNotes('')
-                }}
-                className="flex-1 py-3 rounded-xl text-white text-sm font-medium"
-                style={{ backgroundColor: weekColors.main }}>
+              <button onClick={() => {
+                logSession({
+                  weekId: week.id,
+                  childId: activeChildId ?? '',
+                  completed: doneCount === totalSecs,
+                  mood, notes,
+                  posturesCompleted: week.posturas.map(p => p.id)
+                })
+                setLogOpen(false)
+                setNotes('')
+              }} style={{
+                flex: 1, padding: 12, borderRadius: 12,
+                border: 'none', background: weekColors.main,
+                color: 'white', fontSize: 14, fontWeight: 500, cursor: 'pointer'
+              }}>
                 Guardar sesión
               </button>
             </div>
