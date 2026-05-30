@@ -1,10 +1,74 @@
 'use client'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAppStore } from '@/lib/store'
 import { COURSE_WEEKS, PROFILES, WEEK_COLORS } from '@/lib/data/course'
 import { getWeekProgress } from '@/lib/utils'
 import Image from 'next/image'
 
+// ── Coach screen — aparece solo la primera vez ────────────────────────────────
+function CoachScreen({ onClose }: { onClose: () => void }) {
+  const steps = [
+    { icon: '🗺️', title: 'El mapa es tu guía', desc: 'Toca el mapa para ir directo a tu clase de esta semana. Kawa avanza un mundo cada semana.' },
+    { icon: '🧘', title: 'Cada clase toma 45 min', desc: 'Sigue el orden: Historia → Posturas → Respiración → Relajación. Puedes hacerla en partes.' },
+    { icon: '📝', title: 'Registra cada sesión', desc: 'Al terminar, toca "Registrar sesión". Así construyes el historial de progreso de tu hijo/a.' },
+  ]
+  const [idx, setIdx] = useState(0)
+  const isLast = idx === steps.length - 1
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-end"
+      style={{ background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)' }}>
+      <div className="bg-white w-full rounded-t-3xl p-6 pb-10 max-w-[430px] mx-auto">
+
+        {/* Dots */}
+        <div className="flex justify-center gap-1.5 mb-6">
+          {steps.map((_, i) => (
+            <div key={i} className="h-1.5 rounded-full transition-all"
+              style={{
+                width: i === idx ? 24 : 8,
+                backgroundColor: i === idx ? '#2D6A4F' : '#E5E7EB'
+              }} />
+          ))}
+        </div>
+
+        {/* Contenido */}
+        <div className="text-center mb-8">
+          <div className="text-5xl mb-4">{steps[idx].icon}</div>
+          <h3 className="text-xl font-bold text-gray-900 mb-2"
+            style={{ fontFamily: "'Livvic', 'Georgia', serif" }}>
+            {steps[idx].title}
+          </h3>
+          <p className="text-gray-500 text-sm leading-relaxed max-w-xs mx-auto">
+            {steps[idx].desc}
+          </p>
+        </div>
+
+        {/* Botones */}
+        <div className="flex gap-3">
+          {!isLast && (
+            <button onClick={onClose}
+              className="flex-1 py-3 rounded-2xl border border-gray-200 text-gray-500 text-sm">
+              Saltar
+            </button>
+          )}
+          <button
+            onClick={() => isLast ? onClose() : setIdx(idx + 1)}
+            className="py-3 rounded-2xl text-white text-sm font-semibold"
+            style={{
+              backgroundColor: '#2D6A4F',
+              flex: isLast ? 1 : 2,
+              fontFamily: "'Livvic', system-ui, sans-serif"
+            }}>
+            {isLast ? 'Comenzar el viaje 🌱' : 'Siguiente →'}
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ── Página principal ──────────────────────────────────────────────────────────
 export default function HomePage() {
   const router = useRouter()
   const { children, activeChildId, currentWeek, completedWeeks, sessionLogs, setActiveChild } = useAppStore()
@@ -13,7 +77,29 @@ export default function HomePage() {
   const profile = activeChild?.profile ? PROFILES[activeChild.profile] : null
   const progress = getWeekProgress(completedWeeks)
   const lastLog = sessionLogs[sessionLogs.length - 1]
+  const currentWeekData = COURSE_WEEKS.find(w => w.id === currentWeek)
+  const currentColors = WEEK_COLORS[currentWeek as keyof typeof WEEK_COLORS]
 
+  // Coach screen — solo primera vez
+  const [showCoach, setShowCoach] = useState(false)
+  useEffect(() => {
+    const seen = localStorage.getItem('kawa-coach-seen')
+    if (!seen) setShowCoach(true)
+  }, [])
+  const closeCoach = () => {
+    localStorage.setItem('kawa-coach-seen', '1')
+    setShowCoach(false)
+  }
+
+  // ¿Ya practicó hoy?
+  const practicedToday = (() => {
+    if (!sessionLogs.length) return false
+    const last = new Date(sessionLogs[sessionLogs.length - 1].date)
+    const today = new Date()
+    return last.toDateString() === today.toDateString()
+  })()
+
+  // Racha
   const streak = (() => {
     if (sessionLogs.length === 0) return 0
     let count = 0
@@ -30,19 +116,18 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-gray-50 pb-24">
 
-      {/* ── HEADER con degradado igual al onboarding ── */}
+      {/* Coach screen */}
+      {showCoach && <CoachScreen onClose={closeCoach} />}
+
+      {/* ── HEADER ── */}
       <div className="px-5 pt-12 pb-6 relative overflow-hidden"
         style={{ background: 'linear-gradient(160deg, #1B4332 0%, #2D6A4F 55%, #1A237E 100%)' }}>
-
-        {/* Estrellitas decorativas */}
         <div className="absolute inset-0 pointer-events-none overflow-hidden">
-          {[
-            [15,20],[30,60],[70,15],[85,40],[92,70],[8,80],[50,10],[60,75],[40,50],
-            [75,85],[20,35],[95,25],[55,55],[10,90],[80,15]
-          ].map(([x,y],i) => (
+          {[[15,20],[30,60],[70,15],[85,40],[92,70],[8,80],[50,10],[60,75],[40,50],
+            [75,85],[20,35],[95,25],[55,55],[10,90],[80,15]].map(([x,y],i) => (
             <div key={i} className="absolute rounded-full bg-white"
               style={{ width: i%3===0?2:1, height: i%3===0?2:1,
-                left:`${x}%`, top:`${y}%`, opacity: 0.3 + (i%4)*0.1 }} />
+                left:`${x}%`, top:`${y}%`, opacity: 0.3+(i%4)*0.1 }} />
           ))}
         </div>
 
@@ -57,12 +142,10 @@ export default function HomePage() {
               </h1>
             </div>
             <div className="flex items-center gap-2">
-              {/* Selector multi-niño */}
               {children.length > 1 && (
                 <div className="flex gap-1">
                   {children.map(child => (
-                    <button key={child.id}
-                      onClick={() => setActiveChild(child.id)}
+                    <button key={child.id} onClick={() => setActiveChild(child.id)}
                       className="w-8 h-8 rounded-full flex items-center justify-center text-sm border-2 transition-all"
                       style={{
                         borderColor: child.id === activeChildId ? 'white' : 'transparent',
@@ -85,7 +168,6 @@ export default function HomePage() {
             </div>
           </div>
 
-          {/* Barra de progreso */}
           <div className="mt-4">
             <div className="flex justify-between text-xs text-green-200 mb-1.5">
               <span>Progreso del viaje</span>
@@ -113,32 +195,90 @@ export default function HomePage() {
         ))}
       </div>
 
+      {/* ── TARJETA: TU PRÁCTICA DE HOY ── */}
+      <div className="px-5 mb-5">
+        {practicedToday ? (
+          // Ya practicó hoy
+          <div className="rounded-2xl p-4 flex items-center gap-4"
+            style={{ backgroundColor: currentColors.light, border: `1.5px solid ${currentColors.main}30` }}>
+            <div className="w-12 h-12 rounded-xl flex items-center justify-center text-2xl flex-shrink-0"
+              style={{ backgroundColor: currentColors.main }}>
+              <span className="text-white text-xl font-bold">✓</span>
+            </div>
+            <div className="flex-1">
+              <p className="font-semibold text-sm" style={{ color: currentColors.main }}>
+                ¡Hoy ya practicaste! 🌟
+              </p>
+              <p className="text-xs text-gray-500 mt-0.5">
+                {currentWeekData?.element && `Mundo de la ${currentWeekData.element} · `}
+                Vuelve mañana para continuar
+              </p>
+            </div>
+            <button onClick={() => router.push(`/semana/${currentWeek}`)}
+              className="text-xs px-3 py-1.5 rounded-xl font-medium flex-shrink-0"
+              style={{ backgroundColor: currentColors.main, color: 'white' }}>
+              Ver clase
+            </button>
+          </div>
+        ) : (
+          // No ha practicado hoy
+          <button
+            onClick={() => router.push(`/semana/${currentWeek}`)}
+            className="w-full rounded-2xl p-4 text-left transition-all active:scale-[0.98] shadow-md"
+            style={{ background: `linear-gradient(135deg, ${currentColors.main} 0%, ${currentColors.main}DD 100%)` }}>
+            <div className="flex items-center justify-between mb-3">
+              <div>
+                <p className="text-xs font-medium mb-0.5" style={{ color: 'rgba(255,255,255,0.7)' }}>
+                  Tu práctica de hoy
+                </p>
+                <p className="text-white font-bold text-lg"
+                  style={{ fontFamily: "'Livvic', 'Georgia', serif" }}>
+                  {currentWeekData?.element
+                    ? `Mundo de la ${currentWeekData.element}`
+                    : 'Comenzar el viaje'}
+                </p>
+              </div>
+              <div className="text-4xl">{currentWeekData?.elementEmoji || '🌱'}</div>
+            </div>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <span className="text-xs px-2 py-1 rounded-lg font-medium"
+                  style={{ background: 'rgba(255,255,255,0.2)', color: 'white' }}>
+                  ⏱ 45 min
+                </span>
+                <span className="text-xs px-2 py-1 rounded-lg font-medium"
+                  style={{ background: 'rgba(255,255,255,0.2)', color: 'white' }}>
+                  {currentWeekData?.posturas.length || 5} posturas
+                </span>
+              </div>
+              <div className="flex items-center gap-1.5 px-4 py-2 rounded-xl font-semibold text-sm"
+                style={{ background: 'rgba(255,255,255,0.25)', color: 'white' }}>
+                Ir a la clase →
+              </div>
+            </div>
+          </button>
+        )}
+      </div>
+
       {/* ── MAPA ── */}
       <div className="px-5 mb-5">
-        <div className="flex items-center justify-between mb-3">
-          <h2 className="text-base font-semibold text-gray-700">El mapa de los 5 mundos</h2>
-        </div>
-
-        <div
-          className="relative w-full rounded-3xl overflow-hidden shadow-lg cursor-pointer"
+        <h2 className="text-base font-semibold text-gray-700 mb-3">El mapa de los 5 mundos</h2>
+        <div className="relative w-full rounded-3xl overflow-hidden shadow-lg cursor-pointer"
           style={{ aspectRatio: '1086/1448' }}
           onClick={() => router.push(`/semana/${currentWeek}`)}>
-
           <Image
             src="/images/mapa.png"
             alt="Mapa de los 5 mundos de Kawa"
             fill
             style={{ objectFit: 'cover', objectPosition: 'top' }}
             priority />
-
-          {/* Overlay degradado abajo */}
           <div className="absolute bottom-0 left-0 right-0 p-4"
             style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.75) 0%, transparent 100%)' }}>
             <p className="text-white text-xs opacity-80 mb-0.5">Esta semana</p>
             <p className="text-white font-bold text-xl"
               style={{ fontFamily: "'Livvic', 'Georgia', serif" }}>
-              {COURSE_WEEKS.find(w => w.id === currentWeek)?.element
-                ? `Mundo de la ${COURSE_WEEKS.find(w => w.id === currentWeek)?.element}`
+              {currentWeekData?.element
+                ? `Mundo de la ${currentWeekData.element}`
                 : 'Comenzar el viaje'}
             </p>
             <div className="mt-2 inline-flex items-center gap-2 px-4 py-2 rounded-xl"
@@ -175,7 +315,7 @@ export default function HomePage() {
                 <div className="flex-1 min-w-0">
                   <p className="text-xs font-medium mb-0.5"
                     style={{ color: isCompleted || isCurrent ? 'rgba(255,255,255,0.7)' : '#9CA3AF' }}>
-                    Semana {week.id}
+                    Semana {week.id} · {week.sessionStructure.duration}
                   </p>
                   <p className="font-semibold text-sm truncate"
                     style={{ color: isCompleted || isCurrent ? 'white' : '#111827' }}>
@@ -183,7 +323,7 @@ export default function HomePage() {
                   </p>
                   <p className="text-xs truncate"
                     style={{ color: isCompleted || isCurrent ? 'rgba(255,255,255,0.7)' : '#6B7280' }}>
-                    {week.guardian} {week.guardianSpecies}
+                    {week.guardian} {week.guardianSpecies} · {week.posturas.length} posturas
                   </p>
                 </div>
                 {isCurrent && !isCompleted && <div className="text-white text-lg">→</div>}
@@ -223,11 +363,11 @@ export default function HomePage() {
       {/* ── NAV ── */}
       <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 flex max-w-[430px] mx-auto">
         {[
-          { href: '/home',                    icon: '🗺️', label: 'Inicio' },
-          { href: `/semana/${currentWeek}`,   icon: '🧘', label: 'Clase' },
-          { href: '/progreso',                icon: '📈', label: 'Progreso' },
-          { href: '/materiales',              icon: '📦', label: 'Kit' },
-          { href: '/perfil',                  icon: '👤', label: 'Perfil' },
+          { href: '/home',                  icon: '🗺️', label: 'Inicio' },
+          { href: `/semana/${currentWeek}`, icon: '🧘', label: 'Clase' },
+          { href: '/progreso',              icon: '📈', label: 'Progreso' },
+          { href: '/materiales',            icon: '📦', label: 'Kit' },
+          { href: '/perfil',                icon: '👤', label: 'Perfil' },
         ].map(({ href, icon, label }) => (
           <button key={href} onClick={() => router.push(href)}
             className="flex-1 py-3 flex flex-col items-center gap-0.5">
