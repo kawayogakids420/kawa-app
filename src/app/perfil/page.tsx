@@ -5,7 +5,7 @@ import { PROFILES } from '@/lib/data/course'
 
 export default function PerfilPage() {
   const router = useRouter()
-  const { children, activeChildId, setActiveChild, reset } = useAppStore()
+  const { children, activeChildId, setActiveChild, reset, userType, setUserType } = useAppStore()
   const activeChild = children.find(c => c.id === activeChildId) ?? children[0] ?? null
   const profile = activeChild?.profile ? PROFILES[activeChild.profile] : null
 
@@ -19,7 +19,66 @@ export default function PerfilPage() {
 
       <div className="px-5 mt-5 space-y-4">
 
-        {/* Lista de niños */}
+        {/* ── SELECTOR DE ROL ── */}
+        <div className="bg-white rounded-2xl p-5 shadow-sm">
+          <p className="font-semibold text-gray-900 mb-1">¿Cómo usas Kawa?</p>
+          <p className="text-xs text-gray-400 mb-4">
+            Esto determina el contenido que ves en cada clase.
+          </p>
+          <div className="grid grid-cols-2 gap-3">
+            <button
+              onClick={() => setUserType('familia')}
+              className="flex flex-col items-center gap-2 py-4 px-3 rounded-2xl border-2 transition-all"
+              style={{
+                borderColor: userType === 'familia' ? '#2D6A4F' : '#E5E7EB',
+                backgroundColor: userType === 'familia' ? '#E8F5E9' : 'white',
+              }}>
+              <span className="text-3xl">👨‍👩‍👧</span>
+              <span className="text-xs font-semibold text-center leading-tight"
+                style={{ color: userType === 'familia' ? '#2D6A4F' : '#6B7280' }}>
+                Familia o cuidador/a
+              </span>
+              {userType === 'familia' && (
+                <span className="text-[10px] px-2 py-0.5 rounded-full font-medium"
+                  style={{ backgroundColor: '#2D6A4F', color: 'white' }}>
+                  Activo
+                </span>
+              )}
+            </button>
+
+            <button
+              onClick={() => setUserType('profesional')}
+              className="flex flex-col items-center gap-2 py-4 px-3 rounded-2xl border-2 transition-all"
+              style={{
+                borderColor: userType === 'profesional' ? '#1D9E75' : '#E5E7EB',
+                backgroundColor: userType === 'profesional' ? '#E1F5EE' : 'white',
+              }}>
+              <span className="text-3xl">🩺</span>
+              <span className="text-xs font-semibold text-center leading-tight"
+                style={{ color: userType === 'profesional' ? '#085041' : '#6B7280' }}>
+                Profesional de salud o educación
+              </span>
+              {userType === 'profesional' && (
+                <span className="text-[10px] px-2 py-0.5 rounded-full font-medium"
+                  style={{ backgroundColor: '#1D9E75', color: 'white' }}>
+                  Activo
+                </span>
+              )}
+            </button>
+          </div>
+          {userType === 'profesional' && (
+            <p className="text-xs text-center mt-3" style={{ color: '#085041' }}>
+              ✓ Verás el protocolo clínico TO en cada guardián
+            </p>
+          )}
+          {userType === 'familia' && (
+            <p className="text-xs text-center mt-3" style={{ color: '#2D6A4F' }}>
+              ✓ Verás actividades y guías para practicar en casa
+            </p>
+          )}
+        </div>
+
+        {/* ── LISTA DE NIÑOS ── */}
         {children.map(child => {
           const p = child.profile ? PROFILES[child.profile] : null
           const isActive = child.id === activeChildId
@@ -51,7 +110,7 @@ export default function PerfilPage() {
           )
         })}
 
-        {/* Perfil sensorial del niño activo */}
+        {/* ── MAPA SENSORIAL ── */}
         {activeChild?.profilePcts && profile && (
           <div className="bg-white rounded-2xl p-5 shadow-sm">
             <p className="font-semibold text-gray-900 mb-4">
@@ -81,7 +140,7 @@ export default function PerfilPage() {
           </div>
         )}
 
-        {/* Perfil IS */}
+        {/* ── PERFIL PREDOMINANTE ── */}
         {profile && (
           <div className="rounded-2xl p-5 shadow-sm" style={{ backgroundColor: profile.bg }}>
             <h3 className="font-semibold mb-2" style={{ color: profile.color }}>
@@ -91,7 +150,7 @@ export default function PerfilPage() {
           </div>
         )}
 
-        {/* Los 4 perfiles explicados */}
+        {/* ── LOS 4 PERFILES ── */}
         <div className="bg-white rounded-2xl p-5 shadow-sm">
           <p className="font-semibold text-gray-900 mb-3">Los 4 perfiles sensoriales</p>
           <div className="space-y-3">
@@ -109,7 +168,7 @@ export default function PerfilPage() {
           </div>
         </div>
 
-        {/* Info del curso */}
+        {/* ── INFO DEL CURSO ── */}
         <div className="bg-white rounded-2xl p-5 shadow-sm">
           <p className="font-semibold text-gray-900 mb-3">Sobre Kawa Yoga Kids</p>
           <div className="space-y-2 text-sm text-gray-600">
@@ -120,20 +179,22 @@ export default function PerfilPage() {
           </div>
         </div>
 
+        {/* ── RESETEAR ── */}
         <button
           onClick={() => { if (confirm('¿Resetear todo el progreso?')) reset() }}
           className="w-full py-3 rounded-2xl text-red-500 border border-red-200 text-sm">
           Resetear progreso
         </button>
+
       </div>
 
       <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 flex max-w-[430px] mx-auto">
         {[
-          { href: '/home', icon: '🗺️', label: 'Inicio' },
-          { href: `/semana/1`, icon: '🧘', label: 'Clase' },
+          { href: '/home',     icon: '🗺️', label: 'Inicio' },
+          { href: '/semana/1', icon: '🧘', label: 'Clase' },
           { href: '/progreso', icon: '📈', label: 'Progreso' },
-          { href: '/materiales', icon: '📦', label: 'Kit' },
-          { href: '/perfil', icon: '👤', label: 'Perfil' },
+          { href: '/materiales',icon: '📦', label: 'Kit' },
+          { href: '/perfil',   icon: '👤', label: 'Perfil' },
         ].map(({ href, icon, label }) => (
           <button key={href} onClick={() => router.push(href)}
             className="flex-1 py-3 flex flex-col items-center gap-0.5">
