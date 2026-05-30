@@ -1,256 +1,222 @@
 'use client'
-import { useState } from 'react'
+import { useState, useRef, useEffect, useCallback } from 'react'
 import type { Week } from '@/lib/data/course'
 
-interface AudioBtnProps {
-  src: string
-  label: string
-  forChild?: boolean
-  color?: string
-}
+// ── Reproductor de audio ──────────────────────────────────────────────────────
+function AudioBtn({ src, label, forChild = false, color = '#2D6A4F' }: {
+  src: string; label: string; forChild?: boolean; color?: string
+}) {
+  const audioRef               = useRef<HTMLAudioElement>(null)
+  const [playing, setPlaying]  = useState(false)
+  const [progress, setProgress]= useState(0)
+  const [duration, setDuration]= useState(0)
+  const [error, setError]      = useState(false)
 
-function AudioBtn({ src, label, forChild = false, color = '#2D6A4F' }: AudioBtnProps) {
-  const [playing, setPlaying] = useState(false)
-  const [progress, setProgress] = useState(0)
-  const [duration, setDuration] = useState(0)
-  const [error, setError] = useState(false)
-  const audioRef = { current: null as HTMLAudioElement | null }
-
-  const mount = (el: HTMLAudioElement | null) => {
-    if (!el || audioRef.current === el) return
-    audioRef.current = el
-    el.addEventListener('timeupdate', () => setProgress(el.currentTime))
-    el.addEventListener('loadedmetadata', () => setDuration(el.duration))
-    el.addEventListener('ended', () => { setPlaying(false); setProgress(0) })
-    el.addEventListener('error', () => setError(true))
-  }
+  useEffect(() => {
+    const a = audioRef.current; if (!a) return
+    const t  = () => setProgress(a.currentTime)
+    const d  = () => setDuration(a.duration)
+    const e  = () => { setPlaying(false); setProgress(0) }
+    const er = () => setError(true)
+    a.addEventListener('timeupdate', t)
+    a.addEventListener('loadedmetadata', d)
+    a.addEventListener('ended', e)
+    a.addEventListener('error', er)
+    return () => {
+      a.removeEventListener('timeupdate', t)
+      a.removeEventListener('loadedmetadata', d)
+      a.removeEventListener('ended', e)
+      a.removeEventListener('error', er)
+    }
+  }, [])
 
   if (error) return null
-  const pct = duration ? (progress / duration) * 100 : 0
-  const fmt = (s: number) => isNaN(s) || !s ? '0:00' : `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, '0')}`
+
+  const pct    = duration ? (progress / duration) * 100 : 0
+  const fmt    = (s: number) => isNaN(s)||!s ? '0:00' : `${Math.floor(s/60)}:${String(Math.floor(s%60)).padStart(2,'0')}`
   const accent = forChild ? '#E65100' : color
 
   return (
-    <div style={{
-      background: forChild ? 'rgba(255,243,205,0.8)' : 'rgba(255,255,255,0.7)',
-      borderRadius: 12, padding: '10px 12px', marginBottom: 6,
-      border: `1.5px solid ${accent}40`,
-      backdropFilter: 'blur(4px)'
-    }}>
-      <audio ref={mount} src={src} preload="metadata" />
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-        <button onClick={() => {
-          const a = audioRef.current
-          if (!a) return
-          if (playing) { a.pause(); setPlaying(false) } else { a.play(); setPlaying(true) }
-        }} style={{
-          width: 38, height: 38, borderRadius: '50%',
-          background: accent, border: 'none', cursor: 'pointer',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          color: 'white', fontSize: 14, flexShrink: 0,
-          boxShadow: `0 3px 8px ${accent}50`
-        }}>
-          {playing
-            ? <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></svg>
-            : <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>}
-        </button>
-        <div style={{ flex: 1 }}>
-          <p style={{ fontSize: 11, fontWeight: 600, color: accent, margin: '0 0 5px', letterSpacing: '0.01em' }}>{label}</p>
-          <div style={{ height: 5, background: 'rgba(0,0,0,0.1)', borderRadius: 3, overflow: 'hidden' }}>
-            <div style={{ height: '100%', width: `${pct}%`, background: accent, borderRadius: 3, transition: 'width 0.3s' }} />
-          </div>
-        </div>
-        <span style={{ fontSize: 10, color: '#888', flexShrink: 0 }}>{fmt(progress)}</span>
-      </div>
-    </div>
-  )
-}
-
-// ── Tarjeta de parte de la historia ──────────────────────────────────────────
-const STEP_CONFIG = {
-  inicio: {
-    label: 'INICIO',
-    emoji: '🌱',
-    bg: '#E8F5E9',
-    accent: '#2D6A4F',
-    dark: '#1B4332',
-    illustration: `
-      <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <circle cx="40" cy="40" r="38" fill="#C8E6C9"/>
-        <ellipse cx="40" cy="58" rx="18" ry="6" fill="#A5D6A7"/>
-        <path d="M40 52 C40 52 28 42 30 30 C32 20 40 18 40 18 C40 18 48 20 50 30 C52 42 40 52 40 52Z" fill="#4CAF50"/>
-        <path d="M40 40 C40 40 32 34 34 26" stroke="#2E7D32" strokeWidth="1.5" strokeLinecap="round"/>
-        <path d="M40 44 C40 44 48 38 46 30" stroke="#2E7D32" strokeWidth="1.5" strokeLinecap="round"/>
-        <circle cx="40" cy="56" r="5" fill="#795548"/>
-        <path d="M35 56 Q40 52 45 56" stroke="#5D4037" strokeWidth="1.5" fill="none"/>
-      </svg>`,
-  },
-  desequilibrio: {
-    label: 'DESEQUILIBRIO',
-    emoji: '🌀',
-    bg: '#FFF3E0',
-    accent: '#E65100',
-    dark: '#BF360C',
-    illustration: `
-      <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <circle cx="40" cy="40" r="38" fill="#FFE0B2"/>
-        <path d="M20 50 Q30 30 40 35 Q50 40 55 25" stroke="#FF6D00" strokeWidth="3" strokeLinecap="round" fill="none"/>
-        <path d="M25 55 Q35 35 45 40 Q52 43 58 28" stroke="#FF8F00" strokeWidth="2" strokeLinecap="round" fill="none" strokeDasharray="4 3"/>
-        <circle cx="40" cy="38" r="8" fill="#FF8F00"/>
-        <circle cx="38" cy="36" r="2" fill="#BF360C"/>
-        <circle cx="43" cy="36" r="2" fill="#BF360C"/>
-        <path d="M37 41 Q40 39 43 41" stroke="#BF360C" strokeWidth="1.5" fill="none" strokeLinecap="round"/>
-      </svg>`,
-  },
-  accion: {
-    label: 'ACCIÓN',
-    emoji: '⚡',
-    bg: '#E3F2FD',
-    accent: '#1565C0',
-    dark: '#0D47A1',
-    illustration: `
-      <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <circle cx="40" cy="40" r="38" fill="#BBDEFB"/>
-        <circle cx="40" cy="32" r="10" fill="#FFCC02"/>
-        <circle cx="38" cy="30" r="2" fill="#333"/>
-        <circle cx="43" cy="30" r="2" fill="#333"/>
-        <path d="M37 35 Q40 38 43 35" stroke="#333" strokeWidth="1.5" fill="none" strokeLinecap="round"/>
-        <rect x="33" y="42" width="14" height="18" rx="4" fill="#1976D2"/>
-        <rect x="22" y="43" width="10" height="5" rx="2.5" fill="#1976D2"/>
-        <rect x="48" y="43" width="10" height="5" rx="2.5" fill="#1976D2"/>
-        <rect x="33" y="60" width="5" height="10" rx="2.5" fill="#1565C0"/>
-        <rect x="42" y="60" width="5" height="10" rx="2.5" fill="#1565C0"/>
-        <path d="M44 20 L46 26 L52 24 L46 30 L48 36" stroke="#FFD600" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
-      </svg>`,
-  },
-  catarsis: {
-    label: 'CATARSIS',
-    emoji: '💧',
-    bg: '#F3E5F5',
-    accent: '#6A1B9A',
-    dark: '#4A148C',
-    illustration: `
-      <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <circle cx="40" cy="40" r="38" fill="#E1BEE7"/>
-        <circle cx="40" cy="32" r="10" fill="#FFCC02"/>
-        <circle cx="38" cy="30" r="2" fill="#333"/>
-        <circle cx="43" cy="30" r="2" fill="#333"/>
-        <path d="M37 35 Q40 33 43 35" stroke="#333" strokeWidth="1.5" fill="none" strokeLinecap="round"/>
-        <rect x="33" y="42" width="14" height="16" rx="4" fill="#9C27B0"/>
-        <rect x="22" y="43" width="10" height="5" rx="2.5" fill="#9C27B0"/>
-        <rect x="48" y="43" width="10" height="5" rx="2.5" fill="#9C27B0"/>
-        <ellipse cx="37" cy="38" rx="1.5" ry="3" fill="#64B5F6"/>
-        <ellipse cx="43" cy="39" rx="1.5" ry="3" fill="#64B5F6"/>
-        <ellipse cx="40" cy="55" rx="8" ry="4" fill="#CE93D8" opacity="0.5"/>
-      </svg>`,
-  },
-  ensenanza: {
-    label: 'ENSEÑANZA',
-    emoji: '✨',
-    bg: '#FFFDE7',
-    accent: '#F57F17',
-    dark: '#E65100',
-    illustration: `
-      <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <circle cx="40" cy="40" r="38" fill="#FFF9C4"/>
-        <circle cx="40" cy="30" r="10" fill="#FFCC02"/>
-        <circle cx="38" cy="28" r="2" fill="#333"/>
-        <circle cx="43" cy="28" r="2" fill="#333"/>
-        <path d="M37 33 Q40 37 43 33" stroke="#333" strokeWidth="1.5" fill="none" strokeLinecap="round"/>
-        <rect x="33" y="40" width="14" height="16" rx="4" fill="#FF8F00"/>
-        <rect x="22" y="41" width="10" height="5" rx="2.5" fill="#FF8F00"/>
-        <rect x="48" y="41" width="10" height="5" rx="2.5" fill="#FF8F00"/>
-        <path d="M40 12 L41.5 16 L46 16 L42.5 18.5 L44 23 L40 20.5 L36 23 L37.5 18.5 L34 16 L38.5 16 Z" fill="#FFD600" stroke="#F57F17" strokeWidth="0.5"/>
-        <path d="M54 22 L55 25 L58 25 L55.5 26.8 L56.5 30 L54 28.2 L51.5 30 L52.5 26.8 L50 25 L53 25 Z" fill="#FFD600" stroke="#F57F17" strokeWidth="0.5"/>
-        <path d="M26 22 L27 25 L30 25 L27.5 26.8 L28.5 30 L26 28.2 L23.5 30 L24.5 26.8 L22 25 L25 25 Z" fill="#FFD600" stroke="#F57F17" strokeWidth="0.5"/>
-      </svg>`,
-  },
-}
-
-interface StoryStepProps {
-  stepKey: string
-  step: { title: string; text: string }
-  weekColors: { main: string; light: string }
-  weekId: number
-  index: number
-}
-
-function StoryStep({ stepKey, step, weekColors, weekId, index }: StoryStepProps) {
-  const config = STEP_CONFIG[stepKey as keyof typeof STEP_CONFIG] || {
-    label: stepKey.toUpperCase(), emoji: '📖',
-    bg: '#F5F5F5', accent: weekColors.main, dark: weekColors.main,
-    illustration: '<svg viewBox="0 0 80 80"><circle cx="40" cy="40" r="38" fill="#E0E0E0"/></svg>'
-  }
-
-  return (
-    <div style={{
-      background: 'white',
-      borderRadius: 20,
-      overflow: 'hidden',
-      marginBottom: 16,
-      boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
-      border: `1px solid ${config.bg}`
-    }}>
-      {/* Header tipo Brain Activation */}
+    <button
+      onClick={() => {
+        const a = audioRef.current; if (!a) return
+        if (playing) { a.pause(); setPlaying(false) }
+        else { a.play().catch(() => {}); setPlaying(true) }
+      }}
+      style={{
+        flex: 1, padding: '10px 10px', borderRadius: 14,
+        background: forChild ? '#FFF3E0' : '#F0F9F4',
+        border: `1.5px solid ${accent}30`,
+        display: 'flex', alignItems: 'center', gap: 8,
+        cursor: 'pointer', textAlign: 'left'
+      }}
+    >
+      <audio ref={audioRef} src={src} preload="metadata" />
       <div style={{
-        background: config.bg,
-        padding: '14px 18px',
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between'
+        width: 34, height: 34, borderRadius: '50%',
+        background: accent, flexShrink: 0,
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        boxShadow: `0 3px 8px ${accent}50`
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          {/* Número */}
-          <div style={{
-            width: 36, height: 36, borderRadius: '50%',
-            background: config.accent,
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: 16, fontWeight: 700, color: 'white',
-            flexShrink: 0, boxShadow: `0 3px 8px ${config.accent}60`
-          }}>
-            {index + 1}
-          </div>
-          <div>
-            <p style={{
-              fontSize: 9, fontWeight: 700, color: config.accent, margin: 0,
-              letterSpacing: '0.1em', textTransform: 'uppercase'
-            }}>
-              {config.label}
-            </p>
-            <p style={{
-              fontSize: 14, fontWeight: 700, color: config.dark, margin: 0,
-              fontFamily: "'Georgia', 'Times New Roman', serif"
-            }}>
-              {step.title}
-            </p>
-          </div>
-        </div>
-        {/* Ilustración SVG */}
-        <div style={{ width: 56, height: 56, flexShrink: 0 }}
-          dangerouslySetInnerHTML={{ __html: config.illustration }} />
+        {playing ? (
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="white">
+            <rect x="6" y="4" width="4" height="16" rx="1"/>
+            <rect x="14" y="4" width="4" height="16" rx="1"/>
+          </svg>
+        ) : (
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="white">
+            <path d="M8 5v14l11-7z"/>
+          </svg>
+        )}
       </div>
-
-      {/* Contenido */}
-      <div style={{ padding: '16px 18px' }}>
-        {/* Texto de la historia */}
-        <div style={{
-          background: config.bg + '60',
-          borderRadius: 12, padding: '12px 14px',
-          borderLeft: `3px solid ${config.accent}`,
-          marginBottom: 12
-        }}>
-          <p style={{
-            fontSize: 13, color: '#374151', lineHeight: 1.8,
-            fontStyle: 'italic', margin: 0,
-            fontFamily: "'Georgia', 'Times New Roman', serif"
-          }}>
-            "{step.text}"
-          </p>
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <p style={{ fontSize: 9, color: accent, margin: '0 0 3px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+          {forChild ? 'Para el niño/a' : 'Para el adulto'}
+        </p>
+        <p style={{ fontSize: 11, fontWeight: 600, color: '#374151', margin: '0 0 4px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+          {label}
+        </p>
+        <div style={{ height: 4, background: '#E5E7EB', borderRadius: 2, overflow: 'hidden' }}>
+          <div style={{ height: '100%', width: `${pct}%`, background: accent, borderRadius: 2, transition: 'width 0.3s' }} />
         </div>
       </div>
-    </div>
+      <span style={{ fontSize: 9, color: '#9CA3AF', flexShrink: 0 }}>{fmt(progress)}</span>
+    </button>
   )
 }
 
-// ── Componente principal de Historia ─────────────────────────────────────────
+// ── Ilustraciones SVG por parte ───────────────────────────────────────────────
+const ILLUSTRATIONS: Record<string, string> = {
+  inicio: `<svg viewBox="0 0 140 180" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <ellipse cx="70" cy="165" rx="50" ry="12" fill="rgba(255,255,255,0.12)"/>
+    <path d="M70 155 C70 155 38 122 42 90 C47 60 70 52 70 52 C70 52 93 60 98 90 C102 122 70 155 70 155Z" fill="#4CAF50"/>
+    <path d="M70 118 C70 118 50 103 53 82" stroke="#2E7D32" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+    <path d="M70 126 C70 126 90 111 87 90" stroke="#2E7D32" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+    <ellipse cx="70" cy="158" rx="11" ry="7" fill="#5D4037"/>
+    <circle cx="62" cy="50" r="4" fill="#A5D6A7" opacity="0.8"/>
+    <circle cx="78" cy="45" r="3" fill="#C8E6C9" opacity="0.7"/>
+    <circle cx="55" cy="58" r="2" fill="#81C784" opacity="0.6"/>
+  </svg>`,
+
+  desequilibrio: `<svg viewBox="0 0 140 180" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="70" cy="75" r="32" fill="#FF8F00"/>
+    <circle cx="60" cy="67" r="6" fill="#BF360C"/>
+    <circle cx="80" cy="67" r="6" fill="#BF360C"/>
+    <path d="M58 82 Q70 77 82 82" stroke="#BF360C" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+    <rect x="55" y="107" width="30" height="35" rx="8" fill="#FF6D00"/>
+    <rect x="28" y="110" width="24" height="12" rx="6" fill="#FF6D00"/>
+    <rect x="88" y="110" width="24" height="12" rx="6" fill="#FF6D00"/>
+    <rect x="55" y="142" width="12" height="22" rx="6" fill="#E64A19"/>
+    <rect x="73" y="142" width="12" height="22" rx="6" fill="#E64A19"/>
+    <path d="M18 55 Q38 38 68 50 Q98 62 118 38" stroke="rgba(255,255,255,0.6)" stroke-width="3" stroke-linecap="round" fill="none"/>
+    <path d="M15 110 Q40 92 70 104 Q100 116 118 96" stroke="rgba(255,255,255,0.4)" stroke-width="2" stroke-linecap="round" fill="none" stroke-dasharray="6 5"/>
+    <ellipse cx="70" cy="170" rx="45" ry="10" fill="rgba(255,255,255,0.08)"/>
+  </svg>`,
+
+  accion: `<svg viewBox="0 0 140 180" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="70" cy="70" r="26" fill="#FFCC02"/>
+    <circle cx="62" cy="63" r="5" fill="#333"/>
+    <circle cx="78" cy="63" r="5" fill="#333"/>
+    <path d="M62 76 Q70 82 78 76" stroke="#333" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+    <rect x="52" y="96" width="36" height="38" rx="8" fill="#1976D2"/>
+    <rect x="26" y="99" width="24" height="13" rx="6.5" fill="#1976D2"/>
+    <rect x="90" y="99" width="24" height="13" rx="6.5" fill="#1976D2"/>
+    <rect x="52" y="134" width="14" height="22" rx="7" fill="#1565C0"/>
+    <rect x="74" y="134" width="14" height="22" rx="7" fill="#1565C0"/>
+    <path d="M86 46 L90 59 L103 54 L92 66 L97 79" stroke="#FFD600" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="32" cy="100" r="18" fill="rgba(255,255,255,0.15)"/>
+    <ellipse cx="32" cy="103" rx="10" ry="7" fill="#795548" opacity="0.8"/>
+    <path d="M24 100 Q28 90 36 92 Q44 94 40 102 Q36 110 28 106Z" fill="#4CAF50" opacity="0.9"/>
+  </svg>`,
+
+  catarsis: `<svg viewBox="0 0 140 180" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="70" cy="68" r="26" fill="#FFCC02"/>
+    <circle cx="62" cy="61" r="5" fill="#333"/>
+    <circle cx="78" cy="61" r="5" fill="#333"/>
+    <path d="M62 74 Q70 80 78 74" stroke="#333" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+    <rect x="52" y="94" width="36" height="34" rx="8" fill="#9C27B0"/>
+    <rect x="26" y="97" width="24" height="12" rx="6" fill="#9C27B0"/>
+    <rect x="90" y="97" width="24" height="12" rx="6" fill="#9C27B0"/>
+    <rect x="52" y="128" width="14" height="22" rx="7" fill="#7B1FA2"/>
+    <rect x="74" y="128" width="14" height="22" rx="7" fill="#7B1FA2"/>
+    <ellipse cx="60" cy="88" rx="4" ry="8" fill="#64B5F6" opacity="0.85"/>
+    <ellipse cx="80" cy="90" rx="4" ry="8" fill="#64B5F6" opacity="0.75"/>
+    <circle cx="40" cy="56" r="5" fill="#64B5F6" opacity="0.6"/>
+    <circle cx="100" cy="50" r="4" fill="#64B5F6" opacity="0.5"/>
+    <circle cx="110" cy="66" r="3" fill="#64B5F6" opacity="0.4"/>
+    <circle cx="30" cy="70" r="3" fill="#64B5F6" opacity="0.4"/>
+    <ellipse cx="70" cy="168" rx="45" ry="10" fill="rgba(255,255,255,0.08)"/>
+  </svg>`,
+
+  ensenanza: `<svg viewBox="0 0 140 180" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="70" cy="70" r="26" fill="#FFCC02"/>
+    <circle cx="62" cy="63" r="5" fill="#333"/>
+    <circle cx="78" cy="63" r="5" fill="#333"/>
+    <path d="M62 76 Q70 82 78 76" stroke="#333" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+    <rect x="52" y="96" width="36" height="34" rx="8" fill="#FF8F00"/>
+    <rect x="26" y="99" width="24" height="12" rx="6" fill="#FF8F00"/>
+    <rect x="90" y="99" width="24" height="12" rx="6" fill="#FF8F00"/>
+    <rect x="52" y="130" width="14" height="22" rx="7" fill="#E65100"/>
+    <rect x="74" y="130" width="14" height="22" rx="7" fill="#E65100"/>
+    <path d="M70 36 L73 46 L84 46 L75 53 L78 63 L70 57 L62 63 L65 53 L56 46 L67 46Z" fill="#FFD600" stroke="#F57F17" stroke-width="1"/>
+    <path d="M100 40 L102 48 L110 48 L104 53 L106 61 L100 57 L94 61 L96 53 L90 48 L98 48Z" fill="#FFD600" stroke="#F57F17" stroke-width="0.8"/>
+    <path d="M40 40 L42 48 L50 48 L44 53 L46 61 L40 57 L34 61 L36 53 L30 48 L38 48Z" fill="#FFD600" stroke="#F57F17" stroke-width="0.8"/>
+    <ellipse cx="70" cy="168" rx="45" ry="10" fill="rgba(255,255,255,0.08)"/>
+  </svg>`,
+}
+
+// ── Configuración de cada parte ───────────────────────────────────────────────
+const STEP_CONFIG = {
+  inicio:        { label: 'Inicio',        color: '#2D6A4F', darkColor: '#1B4332', bg: 'linear-gradient(160deg, #1B4332, #2D6A4F)' },
+  desequilibrio: { label: 'Desequilibrio', color: '#E64A19', darkColor: '#BF360C', bg: 'linear-gradient(160deg, #BF360C, #E64A19)' },
+  accion:        { label: 'Acción',        color: '#1976D2', darkColor: '#0D47A1', bg: 'linear-gradient(160deg, #0D47A1, #1976D2)' },
+  catarsis:      { label: 'Catarsis',      color: '#7B1FA2', darkColor: '#4A148C', bg: 'linear-gradient(160deg, #4A148C, #7B1FA2)' },
+  ensenanza:     { label: 'Enseñanza',     color: '#F57F17', darkColor: '#E65100', bg: 'linear-gradient(160deg, #E65100, #F57F17)' },
+}
+
+const STEP_KEYS = ['inicio', 'desequilibrio', 'accion', 'catarsis', 'ensenanza'] as const
+type StepKey = typeof STEP_KEYS[number]
+
+// Postura asociada a cada parte de la historia (semana 1)
+const POSTURA_POR_PARTE: Record<number, Record<StepKey, { emoji: string; name: string; magic: string; id: string }>> = {
+  1: {
+    inicio:        { emoji: '🏔️', name: 'Montaña',          magic: 'El Cuerpo que No Tiembla', id: 'montana' },
+    desequilibrio: { emoji: '🐢', name: 'Tortuga',           magic: 'La Casa que Siempre Llevas', id: 'tortuga' },
+    accion:        { emoji: '🧘', name: 'Postura del Indio', magic: 'El Trono de Oma', id: 'indio' },
+    catarsis:      { emoji: '🐱', name: 'Gato I y II',       magic: 'La Espalda que Respira', id: 'gato' },
+    ensenanza:     { emoji: '🌲', name: 'Árbol',             magic: 'Las Raíces que Suben', id: 'arbol' },
+  },
+  2: {
+    inicio:        { emoji: '🧒', name: 'Postura del Niño',  magic: 'El Caracol del Fondo del Mar', id: 'postura_nino' },
+    desequilibrio: { emoji: '🦋', name: 'Mariposa',          magic: 'La Raya que Baila en el Agua', id: 'mariposa' },
+    accion:        { emoji: '🐍', name: 'Cobra',             magic: 'La Serpiente que Sale del Mar', id: 'cobra' },
+    catarsis:      { emoji: '🌉', name: 'Puente',            magic: 'La Gran Ola de Kawa', id: 'puente' },
+    ensenanza:     { emoji: '🦋', name: 'Mariposa',          magic: 'La Raya que Baila en el Agua', id: 'mariposa' },
+  },
+  3: {
+    inicio:        { emoji: '⚔️', name: 'Guerrero II',       magic: 'Kawa Abre las Alas', id: 'guerrero2' },
+    desequilibrio: { emoji: '🔺', name: 'Triángulo',         magic: 'El Rayo del Cóndor', id: 'triangulo' },
+    accion:        { emoji: '🦅', name: 'Gaviota',           magic: 'El Vuelo de Inti', id: 'gaviota' },
+    catarsis:      { emoji: '🚢', name: 'Barco',             magic: 'La Nave del Viento', id: 'barco' },
+    ensenanza:     { emoji: '🧸', name: 'Marioneta',         magic: 'Los Hilos que se Sueltan', id: 'marioneta' },
+  },
+  4: {
+    inicio:        { emoji: '🐍', name: 'Cobra Profunda',    magic: 'La Llama que Sube', id: 'cobra_profunda' },
+    desequilibrio: { emoji: '⚔️', name: 'Guerrero I',        magic: 'La Llama Conquistadora', id: 'guerrero1' },
+    accion:        { emoji: '☀️', name: 'Saludo al Sol',     magic: 'La Danza del Volcán', id: 'saludo_sol' },
+    catarsis:      { emoji: '🌸', name: 'Flor de Loto',      magic: 'La Rosa que Nace del Fuego', id: 'flor_loto' },
+    ensenanza:     { emoji: '🌸', name: 'Flor de Loto',      magic: 'La Rosa que Nace del Fuego', id: 'flor_loto' },
+  },
+  5: {
+    inicio:        { emoji: '🌌', name: 'Secuencia Completa', magic: 'El Viaje Completo', id: 'secuencia_completa' },
+    desequilibrio: { emoji: '🫀', name: 'OM de la Ballena',  magic: 'La Vibración del Origen', id: 'om_ballena' },
+    accion:        { emoji: '🌌', name: 'Secuencia Completa', magic: 'El Viaje Completo', id: 'secuencia_completa' },
+    catarsis:      { emoji: '🫀', name: 'OM de la Ballena',  magic: 'La Vibración del Origen', id: 'om_ballena' },
+    ensenanza:     { emoji: '🌌', name: 'Secuencia Completa', magic: 'El Viaje Completo', id: 'secuencia_completa' },
+  },
+}
+
+// ── Componente principal ──────────────────────────────────────────────────────
 interface HistoriaKawaProps {
   week: Week
   weekColors: { main: string; light: string }
@@ -259,173 +225,261 @@ interface HistoriaKawaProps {
 }
 
 export default function HistoriaKawa({ week, weekColors, onComplete, isCompleted }: HistoriaKawaProps) {
-  const s = week.id
+  const [current, setCurrent]     = useState(0)
+  const [direction, setDirection] = useState<'next'|'prev'|null>(null)
+  const [animating, setAnimating] = useState(false)
+  const touchStartX               = useRef<number>(0)
+
+  const steps      = Object.entries(week.story)
+  const total      = steps.length
+  const stepKey    = STEP_KEYS[current] as StepKey
+  const stepConfig = STEP_CONFIG[stepKey] || STEP_CONFIG.inicio
+  const posturas   = POSTURA_POR_PARTE[week.id] || POSTURA_POR_PARTE[1]
+  const postura    = posturas[stepKey] || posturas.inicio
+  const s          = week.id
+
+  const audioMapNarracion: Record<string, string> = {
+    montana: 'montana', indio: 'posturaindio', tortuga: 'posturatortuga',
+    gato: 'gatolYII', arbol: 'posturaarbol',
+  }
+  const audioKey = audioMapNarracion[postura.id] || postura.id
+
+  const goTo = useCallback((idx: number) => {
+    if (animating || idx === current) return
+    setDirection(idx > current ? 'next' : 'prev')
+    setAnimating(true)
+    setTimeout(() => {
+      setCurrent(idx)
+      setAnimating(false)
+      setDirection(null)
+    }, 320)
+  }, [animating, current])
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX
+  }
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    const dx = e.changedTouches[0].clientX - touchStartX.current
+    if (Math.abs(dx) > 50) {
+      if (dx < 0 && current < total - 1) goTo(current + 1)
+      if (dx > 0 && current > 0) goTo(current - 1)
+    }
+  }
+
+  const [stepKey_, stepData] = steps[current]
+
+  // Animación de la tarjeta
+  const cardTransform = animating
+    ? direction === 'next' ? 'translateX(-100%)' : 'translateX(100%)'
+    : 'translateX(0)'
 
   return (
-    <div>
-      {/* ── HEADER TIPO BRAIN ACTIVATION ── */}
-      <div style={{
-        borderRadius: 20,
-        overflow: 'hidden',
-        marginBottom: 16,
-        boxShadow: '0 6px 24px rgba(0,0,0,0.12)'
-      }}>
-        {/* Franja superior con textura */}
-        <div style={{
-          background: `linear-gradient(135deg, ${weekColors.main} 0%, ${weekColors.main}DD 100%)`,
-          padding: '18px 18px 14px',
-          position: 'relative',
-          overflow: 'hidden'
-        }}>
-          {/* Círculos decorativos de fondo */}
-          {[['-20px','-20px',80],['80%','-10px',60],['70%','60%',40]].map(([l,t,sz],i) => (
-            <div key={i} style={{
-              position: 'absolute', left: l as string, top: t as string,
-              width: sz as number, height: sz as number,
-              borderRadius: '50%', background: 'rgba(255,255,255,0.08)',
-              pointerEvents: 'none'
-            }} />
-          ))}
+    <div style={{ borderRadius: 20, overflow: 'hidden', boxShadow: '0 6px 24px rgba(0,0,0,0.14)' }}>
 
-          <div style={{ position: 'relative', zIndex: 1 }}>
-            {/* Badge del guardián */}
+      {/* ── ÁREA DE TARJETA (carrusel) ── */}
+      <div
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
+        style={{ position: 'relative', overflow: 'hidden' }}
+      >
+        {/* Tarjeta actual */}
+        <div style={{
+          transform: cardTransform,
+          transition: animating ? 'transform 0.32s cubic-bezier(.4,0,.2,1)' : 'none',
+          willChange: 'transform'
+        }}>
+          {/* Header con ilustración */}
+          <div style={{
+            background: stepConfig.bg,
+            height: 220,
+            position: 'relative',
+            display: 'flex', alignItems: 'flex-end',
+            padding: '0 20px 18px'
+          }}>
+            {/* Círculos decorativos */}
+            <div style={{ position: 'absolute', top: -20, left: -20, width: 100, height: 100, borderRadius: '50%', background: 'rgba(255,255,255,0.07)', pointerEvents: 'none' }} />
+            <div style={{ position: 'absolute', top: 10, right: -10, width: 70, height: 70, borderRadius: '50%', background: 'rgba(255,255,255,0.06)', pointerEvents: 'none' }} />
+
+            {/* Ilustración SVG */}
             <div style={{
-              display: 'inline-flex', alignItems: 'center', gap: 6,
-              background: 'rgba(255,255,255,0.2)',
-              borderRadius: 20, padding: '4px 12px', marginBottom: 10
-            }}>
-              <span style={{ fontSize: 14 }}>{week.elementEmoji}</span>
-              <span style={{ fontSize: 10, fontWeight: 700, color: 'white', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
-                Guardián {week.id} · {week.element}
-              </span>
+              position: 'absolute', right: 16, top: '50%',
+              transform: 'translateY(-50%)',
+              width: 130, height: 170,
+              opacity: 0.95
+            }}
+              dangerouslySetInnerHTML={{ __html: ILLUSTRATIONS[stepKey_] || ILLUSTRATIONS.inicio }}
+            />
+
+            {/* Badge y número */}
+            <div style={{ position: 'relative', zIndex: 1 }}>
+              <div style={{
+                display: 'inline-flex', alignItems: 'center', gap: 6,
+                background: 'rgba(255,255,255,0.2)',
+                borderRadius: 20, padding: '4px 12px', marginBottom: 8
+              }}>
+                <div style={{
+                  width: 20, height: 20, borderRadius: '50%',
+                  background: 'rgba(255,255,255,0.9)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  fontSize: 11, fontWeight: 700, color: stepConfig.darkColor
+                }}>
+                  {current + 1}
+                </div>
+                <span style={{ fontSize: 10, fontWeight: 700, color: 'white', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+                  {stepConfig.label}
+                </span>
+              </div>
+              <h3 style={{
+                fontSize: 18, fontWeight: 700, color: 'white', margin: 0,
+                fontFamily: "'Georgia','Times New Roman',serif",
+                textShadow: '0 1px 4px rgba(0,0,0,0.3)',
+                maxWidth: 180
+              }}>
+                {stepData.title}
+              </h3>
             </div>
 
-            <h2 style={{
-              fontSize: 20, fontWeight: 700, color: 'white', margin: '0 0 6px',
-              fontFamily: "'Georgia', 'Times New Roman', serif"
+            {/* Dots de progreso (estilo Instagram) */}
+            <div style={{
+              position: 'absolute', top: 14, left: 0, right: 0,
+              display: 'flex', gap: 4, padding: '0 16px'
             }}>
-              📖 La historia de Kawa
-            </h2>
-            <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.8)', margin: 0, lineHeight: 1.5 }}>
-              {week.guardian} {week.guardianSpecies} · {week.teaching}
+              {steps.map((_, i) => (
+                <div key={i} style={{
+                  flex: 1, height: 3, borderRadius: 2,
+                  background: i <= current ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.3)',
+                  transition: 'background 0.3s'
+                }} />
+              ))}
+            </div>
+          </div>
+
+          {/* Texto de la historia */}
+          <div style={{
+            background: 'white', padding: '16px 18px 14px',
+            borderLeft: `4px solid ${stepConfig.color}`
+          }}>
+            <p style={{
+              fontSize: 13, color: '#374151', lineHeight: 1.8,
+              fontStyle: 'italic', margin: 0,
+              fontFamily: "'Georgia','Times New Roman',serif"
+            }}>
+              "{stepData.text}"
             </p>
           </div>
         </div>
+      </div>
 
-        {/* Franja de audio */}
-        <div style={{
-          background: weekColors.light,
-          padding: '12px 18px',
-          borderTop: `2px solid ${weekColors.main}20`
-        }}>
-          <p style={{
-            fontSize: 9, fontWeight: 700, color: weekColors.main, margin: '0 0 8px',
-            letterSpacing: '0.1em', textTransform: 'uppercase'
-          }}>
-            🎧 Audio de la historia
-          </p>
+      {/* ── BARRA INFERIOR FIJA ── */}
+      <div style={{ background: 'white', borderTop: '1px solid #F3F4F6' }}>
+
+        {/* Audios */}
+        <div style={{ padding: '12px 14px 8px', display: 'flex', gap: 8 }}>
           <AudioBtn
-            src={`/audio/semana-${s}/s${s}historiadekawa.m4a`}
-            label="Narración completa — leer mientras el niño escucha"
+            src={`/audio/semana-${s}/s${s}postura${audioKey}historia.m4a`}
+            label="Narración mágica"
+            forChild={true}
+            color={stepConfig.color}
+          />
+          <AudioBtn
+            src={`/audio/semana-${s}/s${s}howto${audioKey}.m4a`}
+            label="Cómo hacer la postura"
             forChild={false}
-            color={weekColors.main}
+            color={stepConfig.color}
           />
         </div>
-      </div>
 
-      {/* ── SECCIÓN: PREPARA EL AMBIENTE ── */}
-      <div style={{
-        background: '#FFF8E1',
-        borderRadius: 16, padding: '14px 16px', marginBottom: 16,
-        border: '1.5px solid #FDE68A',
-        display: 'flex', alignItems: 'flex-start', gap: 12
-      }}>
+        {/* Postura asociada */}
         <div style={{
-          width: 40, height: 40, borderRadius: 12,
-          background: '#F59E0B', flexShrink: 0,
-          display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20
-        }}>🎒</div>
-        <div style={{ flex: 1 }}>
-          <p style={{ fontSize: 10, fontWeight: 700, color: '#92400E', margin: '0 0 4px', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
-            ANTES DE COMENZAR
-          </p>
-          <p style={{ fontSize: 12, fontWeight: 600, color: '#78350F', margin: '0 0 4px' }}>
-            {week.physicalObject.name}
-          </p>
-          <p style={{ fontSize: 11, color: '#92400E', margin: 0, lineHeight: 1.5 }}>
-            {week.physicalObject.description}
-          </p>
-        </div>
-      </div>
-
-      {/* ── PARTES DE LA HISTORIA ── */}
-      <div style={{
-        background: 'rgba(255,255,255,0.5)',
-        borderRadius: 16, padding: '14px 16px', marginBottom: 12,
-        border: '1px solid rgba(0,0,0,0.06)'
-      }}>
-        <p style={{
-          fontSize: 9, fontWeight: 700, color: '#9CA3AF', margin: '0 0 12px',
-          letterSpacing: '0.1em', textTransform: 'uppercase'
+          margin: '0 14px 12px',
+          background: '#F8F7F4', borderRadius: 14,
+          padding: '10px 12px',
+          display: 'flex', alignItems: 'center', gap: 10
         }}>
-          EL VIAJE DE KAWA — {Object.keys(week.story).length} PARTES
-        </p>
-
-        {Object.entries(week.story).map(([key, act], index) => (
-          <StoryStep
-            key={key}
-            stepKey={key}
-            step={act}
-            weekColors={weekColors}
-            weekId={week.id}
-            index={index}
-          />
-        ))}
-      </div>
-
-      {/* ── OBJETO TÁCTIL / ENSEÑANZA ── */}
-      <div style={{
-        background: `linear-gradient(135deg, ${weekColors.main}15, ${weekColors.main}05)`,
-        borderRadius: 16, padding: '14px 16px', marginBottom: 16,
-        border: `1.5px solid ${weekColors.main}30`
-      }}>
-        <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
           <div style={{
             width: 44, height: 44, borderRadius: 12,
-            background: weekColors.main,
+            background: stepConfig.color + '20',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: 22, flexShrink: 0
-          }}>🎁</div>
-          <div>
-            <p style={{ fontSize: 9, fontWeight: 700, color: weekColors.main, margin: '0 0 4px', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
-              EL REGALO DEL GUARDIÁN
+            fontSize: 24, flexShrink: 0
+          }}>
+            {postura.emoji}
+          </div>
+          <div style={{ flex: 1 }}>
+            <p style={{ fontSize: 9, color: '#9CA3AF', margin: '0 0 2px', textTransform: 'uppercase', letterSpacing: '0.06em', fontWeight: 700 }}>
+              Postura de esta parte
             </p>
-            <p style={{ fontSize: 13, fontWeight: 600, color: '#111', margin: '0 0 4px' }}>
-              {week.tactileObject}
-            </p>
-            <p style={{ fontSize: 12, color: '#6B7280', margin: 0, fontStyle: 'italic', lineHeight: 1.5 }}>
-              "{week.teaching}"
-            </p>
+            <p style={{ fontSize: 13, fontWeight: 700, color: '#111', margin: 0 }}>{postura.name}</p>
+            <p style={{ fontSize: 10, color: '#9CA3AF', margin: 0, fontStyle: 'italic' }}>"{postura.magic}"</p>
+          </div>
+          <div style={{
+            background: stepConfig.color, color: 'white',
+            borderRadius: 10, padding: '5px 10px', fontSize: 10, fontWeight: 700, flexShrink: 0
+          }}>
+            Ver →
           </div>
         </div>
-      </div>
 
-      {/* ── BOTÓN COMPLETAR ── */}
-      <button onClick={onComplete} style={{
-        width: '100%', padding: '15px', borderRadius: 16,
-        background: isCompleted
-          ? `linear-gradient(135deg, #E8F5E9, #C8E6C9)`
-          : `linear-gradient(135deg, ${weekColors.main}, ${weekColors.main}CC)`,
-        border: isCompleted ? `2px solid ${weekColors.main}` : 'none',
-        cursor: 'pointer', fontSize: 15, fontWeight: 700,
-        color: isCompleted ? weekColors.main : 'white',
-        letterSpacing: '0.02em',
-        boxSizing: 'border-box',
-        boxShadow: isCompleted ? 'none' : `0 4px 16px ${weekColors.main}50`,
-        transition: 'all 0.3s'
-      }}>
-        {isCompleted ? '⭐ Historia completada — ¡Bien hecho!' : '⭐ Marcar historia como completada'}
-      </button>
+        {/* Navegación */}
+        <div style={{ display: 'flex', gap: 8, padding: '0 14px 14px', alignItems: 'center' }}>
+          <button
+            onClick={() => goTo(current - 1)}
+            disabled={current === 0}
+            style={{
+              width: 40, height: 40, borderRadius: '50%',
+              border: '1.5px solid #E5E7EB', background: 'white',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontSize: 16, cursor: current === 0 ? 'default' : 'pointer',
+              opacity: current === 0 ? 0.3 : 1, flexShrink: 0
+            }}
+          >
+            ←
+          </button>
+
+          {current < total - 1 ? (
+            <button
+              onClick={() => goTo(current + 1)}
+              style={{
+                flex: 1, padding: '12px', borderRadius: 14,
+                background: stepConfig.color,
+                border: 'none', cursor: 'pointer',
+                color: 'white', fontSize: 14, fontWeight: 700,
+                boxShadow: `0 4px 14px ${stepConfig.color}50`
+              }}
+            >
+              Siguiente parte →
+            </button>
+          ) : (
+            <button
+              onClick={onComplete}
+              style={{
+                flex: 1, padding: '12px', borderRadius: 14,
+                background: isCompleted ? '#E8F5E9' : stepConfig.color,
+                border: isCompleted ? `2px solid ${weekColors.main}` : 'none',
+                cursor: 'pointer',
+                color: isCompleted ? weekColors.main : 'white',
+                fontSize: 14, fontWeight: 700,
+                boxShadow: isCompleted ? 'none' : `0 4px 14px ${stepConfig.color}50`
+              }}
+            >
+              {isCompleted ? '⭐ Historia completada' : '⭐ Completar historia'}
+            </button>
+          )}
+
+          <button
+            onClick={() => goTo(current + 1)}
+            disabled={current === total - 1}
+            style={{
+              width: 40, height: 40, borderRadius: '50%',
+              border: '1.5px solid #E5E7EB', background: 'white',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontSize: 16, cursor: current === total - 1 ? 'default' : 'pointer',
+              opacity: current === total - 1 ? 0.3 : 1, flexShrink: 0
+            }}
+          >
+            →
+          </button>
+        </div>
+      </div>
     </div>
   )
 }
