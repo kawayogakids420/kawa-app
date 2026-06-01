@@ -167,7 +167,6 @@ export default function ClaseTab({ week, weekColors, activeProfile }: Props) {
   const [historiaStep, setHistoriaStep]             = useState(0)
   const [showProfileTips, setShowProfileTips]       = useState(false)
   const [highlightedPostura, setHighlightedPostura] = useState<string | null>(null)
-  const [materialesOpen, setMaterialesOpen]         = useState(false)
   const { logSession, activeChildId, userType }     = useAppStore()
   const [logOpen, setLogOpen] = useState(false)
   const [mood, setMood]       = useState<'great'|'good'|'okay'|'hard'>('good')
@@ -178,7 +177,6 @@ export default function ClaseTab({ week, weekColors, activeProfile }: Props) {
   const doneCount   = completedSections.size
   const totalSecs   = SECTIONS.length
   const isInHistoria = activeSection === 'historia'
-  const materiales  = MATERIALES_EXTRA[week.id] || []
 
   const markDone = (sec: Section) => {
     setCompleted(prev => new Set([...prev, sec]))
@@ -274,42 +272,7 @@ export default function ClaseTab({ week, weekColors, activeProfile }: Props) {
         )}
       </div>
 
-      {/* ── CALLOUT DE MATERIALES ── */}
-      <div style={{
-        borderRadius: 14, marginBottom: 12, overflow: 'hidden',
-        border: '1px solid #FDE68A'
-      }}>
-        <button
-          onClick={() => setMaterialesOpen(!materialesOpen)}
-          style={{
-            width: '100%', padding: '11px 14px',
-            background: '#FFFBEB',
-            display: 'flex', alignItems: 'center', gap: 10,
-            cursor: 'pointer', border: 'none', boxSizing: 'border-box'
-          }}
-        >
-          <span style={{ fontSize: 18, flexShrink: 0 }}>📦</span>
-          <p style={{ flex: 1, fontSize: 12, fontWeight: 600, color: '#92400E', margin: 0, textAlign: 'left' }}>
-            Recuerda tener listos los materiales para la clase
-          </p>
-          <span style={{
-            fontSize: 11, color: '#B45309', flexShrink: 0,
-            transform: materialesOpen ? 'rotate(180deg)' : 'none',
-            transition: 'transform 0.2s', display: 'block'
-          }}>▾</span>
-        </button>
 
-        {materialesOpen && (
-          <div style={{ background: '#FFFDE7', padding: '10px 14px 12px', borderTop: '1px solid #FDE68A' }}>
-            {[week.physicalObject.name, week.tactileObject, ...materiales].map((item, i) => (
-              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 5 }}>
-                <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#F59E0B', flexShrink: 0 }} />
-                <p style={{ fontSize: 12, color: '#78350F', margin: 0 }}>{item}</p>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
 
       {/* ══ HISTORIA ══ */}
       {activeSection === 'historia' && (

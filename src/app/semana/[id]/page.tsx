@@ -109,21 +109,53 @@ export default function SemanaPage({ params }: { params: Promise<{ id: string }>
         )}
       </div>
 
-      {/* ── IDENTIDAD DE LA SEMANA ── */}
-      <div className="px-5 -mt-2 mb-4">
-        <div className="grid grid-cols-3 gap-2">
-          {[
-            { label: 'Símbolo',       value: week.symbol },
-            { label: 'Objeto táctil', value: week.tactileObject },
-            { label: 'Color',         value: week.colorName },
-          ].map(({ label, value }) => (
-            <div key={label} className="bg-white rounded-xl p-3 shadow-sm text-center">
-              <p className="text-[10px] text-gray-400 uppercase tracking-wide mb-1">{label}</p>
-              <p className="text-xs font-medium text-gray-800 leading-tight">{value}</p>
+      {/* ── OBJETO TÁCTIL Y COLOR ── */}
+      <div className="px-5 -mt-2 mb-3">
+        <div className="grid grid-cols-2 gap-2">
+          <div className="rounded-2xl p-3 shadow-sm flex items-center gap-3"
+            style={{ backgroundColor: colors.light, border: `1.5px solid ${colors.main}25` }}>
+            <div className="w-9 h-9 rounded-xl flex items-center justify-center text-lg flex-shrink-0"
+              style={{ backgroundColor: colors.main + '20' }}>
+              🖐️
             </div>
-          ))}
+            <div>
+              <p className="text-[9px] uppercase tracking-wide mb-0.5 font-semibold" style={{ color: colors.main }}>Objeto táctil</p>
+              <p className="text-xs font-semibold text-gray-800 leading-tight">{week.tactileObject}</p>
+            </div>
+          </div>
+          <div className="rounded-2xl p-3 shadow-sm flex items-center gap-3"
+            style={{ backgroundColor: colors.light, border: `1.5px solid ${colors.main}25` }}>
+            <div className="w-9 h-9 rounded-xl flex items-center justify-center text-lg flex-shrink-0"
+              style={{ backgroundColor: colors.main + '20' }}>
+              🎨
+            </div>
+            <div>
+              <p className="text-[9px] uppercase tracking-wide mb-0.5 font-semibold" style={{ color: colors.main }}>Color del mundo</p>
+              <p className="text-xs font-semibold text-gray-800 leading-tight">{week.colorName}</p>
+            </div>
+          </div>
         </div>
       </div>
+
+      {/* ── IN-APP MESSAGE: MATERIALES ── */}
+      {tab === 'clase' && (
+        <div className="px-5 mb-3">
+          <button
+            onClick={() => setTab('materiales')}
+            className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-left"
+            style={{ background: `linear-gradient(135deg, ${colors.main}15, ${colors.main}06)`, border: `1px solid ${colors.main}25` }}>
+            <div className="w-8 h-8 rounded-xl flex items-center justify-center text-base flex-shrink-0"
+              style={{ backgroundColor: colors.main }}>
+              <span style={{ fontSize: 14 }}>📦</span>
+            </div>
+            <div className="flex-1">
+              <p className="text-xs font-semibold m-0" style={{ color: colors.main }}>¿Ya preparaste los materiales?</p>
+              <p className="text-[11px] text-gray-500 m-0">Tócalo antes de comenzar la clase</p>
+            </div>
+            <span className="text-xs font-semibold" style={{ color: colors.main }}>Ver →</span>
+          </button>
+        </div>
+      )}
 
       {/* ── TABS ── */}
       <div className="px-5 mb-4">
