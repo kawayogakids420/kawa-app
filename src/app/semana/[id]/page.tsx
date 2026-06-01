@@ -8,6 +8,15 @@ import ClaseTab from './ClaseTab'
 import PadresTab from './PadresTab'
 import MaterialesTab from './MaterialesTab'
 
+// ── Símbolos de los mundos ────────────────────────────────────────────────────
+const WORLD_SYMBOLS: Record<number, string> = {
+  1: '/images/simbolo-tierra.png',
+  2: '/images/simbolo-agua.png',
+  3: '/images/simbolo-aire.png',
+  4: '/images/simbolo-fuego.png',
+  5: '/images/simbolo-infinito.png',
+}
+
 type Tab = 'clase' | 'padres' | 'materiales'
 
 export default function SemanaPage({ params }: { params: Promise<{ id: string }> }) {
@@ -18,8 +27,7 @@ export default function SemanaPage({ params }: { params: Promise<{ id: string }>
   const { completedWeeks, completeWeek, children, activeChildId } = useAppStore()
   const [tab, setTab] = useState<Tab>('clase')
 
-  // Niño activo y su perfil
-  const activeChild = children.find(c => c.id === activeChildId) ?? children[0] ?? null
+  const activeChild   = children.find(c => c.id === activeChildId) ?? children[0] ?? null
   const activeProfile = activeChild?.profile ?? null
 
   if (!week) return (
@@ -28,9 +36,9 @@ export default function SemanaPage({ params }: { params: Promise<{ id: string }>
     </div>
   )
 
-  const colors = WEEK_COLORS[weekId as keyof typeof WEEK_COLORS]
+  const colors      = WEEK_COLORS[weekId as keyof typeof WEEK_COLORS]
   const isCompleted = completedWeeks.includes(weekId)
-  const profile = activeProfile ? PROFILES[activeProfile] : null
+  const profile     = activeProfile ? PROFILES[activeProfile] : null
 
   const tabs: { id: Tab; label: string; icon: string }[] = [
     { id: 'clase',      label: 'La Clase',   icon: '🧘' },
@@ -41,23 +49,52 @@ export default function SemanaPage({ params }: { params: Promise<{ id: string }>
   return (
     <div className="min-h-screen bg-gray-50 pb-24">
 
-      {/* Header */}
-      <div className="px-5 pt-12 pb-6" style={{ backgroundColor: colors.main }}>
-        <button onClick={() => router.back()}
-          className="text-white opacity-70 mb-4 flex items-center gap-1">
+      {/* ── HEADER ── */}
+      <div className="px-5 pt-12 pb-6 relative overflow-hidden" style={{ backgroundColor: colors.main }}>
+
+        {/* Símbolo del mundo de fondo — decorativo */}
+        <div style={{
+          position: 'absolute', right: -20, top: '50%',
+          transform: 'translateY(-50%)',
+          width: 140, height: 140,
+          opacity: 0.12, pointerEvents: 'none'
+        }}>
+          <img
+            src={WORLD_SYMBOLS[weekId]}
+            alt=""
+            style={{ width: '100%', height: '100%', objectFit: 'contain', filter: 'brightness(0) invert(1)' }}
+          />
+        </div>
+
+        <button onClick={() => router.back()} className="text-white opacity-70 mb-4 flex items-center gap-1">
           <span>←</span> <span className="text-sm">Volver</span>
         </button>
+
         <div className="flex items-start justify-between">
-          <div>
+          <div style={{ flex: 1, marginRight: 16 }}>
             <p className="text-sm opacity-70 text-white mb-1">
-              Semana {week.id} · {week.element} {week.elementEmoji}
+              Semana {week.id} · {week.element}
             </p>
             <h1 className="text-2xl font-bold text-white leading-tight">
               {week.guardian} {week.guardianSpecies}
             </h1>
             <p className="text-sm text-white opacity-70 mt-1 max-w-xs">{week.teaching}</p>
           </div>
-          <div className="text-4xl">{week.elementEmoji}</div>
+
+          {/* Símbolo del mundo — visible */}
+          <div style={{
+            width: 64, height: 64, flexShrink: 0,
+            background: 'rgba(255,255,255,0.15)',
+            borderRadius: 18,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            padding: 10
+          }}>
+            <img
+              src={WORLD_SYMBOLS[weekId]}
+              alt={week.element}
+              style={{ width: '100%', height: '100%', objectFit: 'contain', filter: 'brightness(0) invert(1)' }}
+            />
+          </div>
         </div>
 
         {/* Badge de perfil */}
@@ -72,13 +109,13 @@ export default function SemanaPage({ params }: { params: Promise<{ id: string }>
         )}
       </div>
 
-      {/* Identidad de la semana */}
+      {/* ── IDENTIDAD DE LA SEMANA ── */}
       <div className="px-5 -mt-2 mb-4">
         <div className="grid grid-cols-3 gap-2">
           {[
-            { label: 'Símbolo',      value: week.symbol },
+            { label: 'Símbolo',       value: week.symbol },
             { label: 'Objeto táctil', value: week.tactileObject },
-            { label: 'Color',        value: week.colorName },
+            { label: 'Color',         value: week.colorName },
           ].map(({ label, value }) => (
             <div key={label} className="bg-white rounded-xl p-3 shadow-sm text-center">
               <p className="text-[10px] text-gray-400 uppercase tracking-wide mb-1">{label}</p>
@@ -88,7 +125,7 @@ export default function SemanaPage({ params }: { params: Promise<{ id: string }>
         </div>
       </div>
 
-      {/* Tabs */}
+      {/* ── TABS ── */}
       <div className="px-5 mb-4">
         <div className="flex gap-1 bg-white rounded-2xl p-1 shadow-sm">
           {tabs.map(t => (
@@ -104,14 +141,14 @@ export default function SemanaPage({ params }: { params: Promise<{ id: string }>
         </div>
       </div>
 
-      {/* Contenido del tab */}
+      {/* ── CONTENIDO ── */}
       <div className="px-5">
         {tab === 'clase'      && <ClaseTab week={week} weekColors={colors} activeProfile={activeProfile} />}
         {tab === 'padres'     && <PadresTab week={week} weekColors={colors} />}
         {tab === 'materiales' && <MaterialesTab week={week} weekColors={colors} />}
       </div>
 
-      {/* Botón completar */}
+      {/* ── BOTÓN COMPLETAR ── */}
       {!isCompleted && tab === 'clase' && (
         <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 p-4 max-w-[430px] mx-auto">
           <button

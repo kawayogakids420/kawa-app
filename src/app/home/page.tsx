@@ -5,7 +5,16 @@ import { useAppStore } from '@/lib/store'
 import { COURSE_WEEKS, PROFILES, WEEK_COLORS } from '@/lib/data/course'
 import { getWeekProgress } from '@/lib/utils'
 
-// ── Coach screen — solo la primera vez ───────────────────────────────────────
+// ── Símbolos de los mundos ────────────────────────────────────────────────────
+const WORLD_SYMBOLS: Record<number, string> = {
+  1: '/images/simbolo-tierra.png',
+  2: '/images/simbolo-agua.png',
+  3: '/images/simbolo-aire.png',
+  4: '/images/simbolo-fuego.png',
+  5: '/images/simbolo-infinito.png',
+}
+
+// ── Coach screen ──────────────────────────────────────────────────────────────
 function CoachScreen({ onClose }: { onClose: () => void }) {
   const steps = [
     { icon: '🗺️', title: 'El mapa es tu guía', desc: 'Toca cualquier mundo para ir a esa clase. Kawa avanza un mundo por semana.' },
@@ -16,49 +25,23 @@ function CoachScreen({ onClose }: { onClose: () => void }) {
   const isLast = idx === steps.length - 1
 
   return (
-    <div style={{
-      position: 'fixed', inset: 0, zIndex: 50,
-      display: 'flex', alignItems: 'flex-end',
-      background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)'
-    }}>
-      <div style={{
-        background: 'white', width: '100%', maxWidth: 430,
-        margin: '0 auto', borderRadius: '24px 24px 0 0', padding: '24px 24px 40px'
-      }}>
+    <div style={{ position: 'fixed', inset: 0, zIndex: 50, display: 'flex', alignItems: 'flex-end', background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)' }}>
+      <div style={{ background: 'white', width: '100%', maxWidth: 430, margin: '0 auto', borderRadius: '24px 24px 0 0', padding: '24px 24px 40px' }}>
         <div style={{ display: 'flex', justifyContent: 'center', gap: 6, marginBottom: 24 }}>
           {steps.map((_, i) => (
-            <div key={i} style={{
-              height: 6, borderRadius: 3, transition: 'all 0.3s',
-              width: i === idx ? 24 : 8,
-              backgroundColor: i === idx ? '#2D6A4F' : '#E5E7EB'
-            }} />
+            <div key={i} style={{ height: 6, borderRadius: 3, transition: 'all 0.3s', width: i === idx ? 24 : 8, backgroundColor: i === idx ? '#2D6A4F' : '#E5E7EB' }} />
           ))}
         </div>
         <div style={{ textAlign: 'center', marginBottom: 32 }}>
           <div style={{ fontSize: 52, marginBottom: 16 }}>{steps[idx].icon}</div>
-          <h3 style={{ fontSize: 20, fontWeight: 500, color: '#111', marginBottom: 8, fontFamily: "'Livvic','Georgia',serif" }}>
-            {steps[idx].title}
-          </h3>
-          <p style={{ fontSize: 14, color: '#6B7280', lineHeight: 1.6, maxWidth: 260, margin: '0 auto' }}>
-            {steps[idx].desc}
-          </p>
+          <h3 style={{ fontSize: 20, fontWeight: 500, color: '#111', marginBottom: 8, fontFamily: "'Livvic','Georgia',serif" }}>{steps[idx].title}</h3>
+          <p style={{ fontSize: 14, color: '#6B7280', lineHeight: 1.6, maxWidth: 260, margin: '0 auto' }}>{steps[idx].desc}</p>
         </div>
         <div style={{ display: 'flex', gap: 12 }}>
           {!isLast && (
-            <button onClick={onClose} style={{
-              flex: 1, padding: '12px', borderRadius: 16,
-              border: '1px solid #E5E7EB', background: 'white',
-              color: '#6B7280', fontSize: 14, cursor: 'pointer'
-            }}>
-              Saltar
-            </button>
+            <button onClick={onClose} style={{ flex: 1, padding: '12px', borderRadius: 16, border: '1px solid #E5E7EB', background: 'white', color: '#6B7280', fontSize: 14, cursor: 'pointer' }}>Saltar</button>
           )}
-          <button onClick={() => isLast ? onClose() : setIdx(idx + 1)} style={{
-            flex: isLast ? 1 : 2, padding: '12px', borderRadius: 16,
-            border: 'none', background: '#2D6A4F', color: 'white',
-            fontSize: 14, fontWeight: 500, cursor: 'pointer',
-            fontFamily: "'Livvic',system-ui,sans-serif"
-          }}>
+          <button onClick={() => isLast ? onClose() : setIdx(idx + 1)} style={{ flex: isLast ? 1 : 2, padding: '12px', borderRadius: 16, border: 'none', background: '#2D6A4F', color: 'white', fontSize: 14, fontWeight: 500, cursor: 'pointer', fontFamily: "'Livvic',system-ui,sans-serif" }}>
             {isLast ? 'Comenzar el viaje 🌱' : 'Siguiente →'}
           </button>
         </div>
@@ -67,7 +50,7 @@ function CoachScreen({ onClose }: { onClose: () => void }) {
   )
 }
 
-// ── Mensajes del coach de Kawa ────────────────────────────────────────────────
+// ── Mensajes del coach ────────────────────────────────────────────────────────
 const COACH_MESSAGES: Record<number, string> = {
   1: 'Kawa acaba de llegar a la Tierra. Esta semana aprenderás a sentir tu cuerpo y encontrar tu raíz.',
   2: 'El Mundo del Agua te espera. Esta semana aprenderás a fluir con el movimiento y las emociones.',
@@ -79,41 +62,29 @@ const COACH_MESSAGES: Record<number, string> = {
 // ── Página principal ──────────────────────────────────────────────────────────
 export default function HomePage() {
   const router = useRouter()
-  const {
-    children, activeChildId, currentWeek,
-    completedWeeks, sessionLogs, setActiveChild
-  } = useAppStore()
+  const { children, activeChildId, currentWeek, completedWeeks, sessionLogs, setActiveChild } = useAppStore()
 
-  const activeChild    = children.find(c => c.id === activeChildId) ?? children[0] ?? null
-  const profile        = activeChild?.profile ? PROFILES[activeChild.profile] : null
-  const progress       = getWeekProgress(completedWeeks)
+  const activeChild     = children.find(c => c.id === activeChildId) ?? children[0] ?? null
+  const profile         = activeChild?.profile ? PROFILES[activeChild.profile] : null
+  const progress        = getWeekProgress(completedWeeks)
   const currentWeekData = COURSE_WEEKS.find(w => w.id === currentWeek)
-  const currentColors  = WEEK_COLORS[currentWeek as keyof typeof WEEK_COLORS]
+  const currentColors   = WEEK_COLORS[currentWeek as keyof typeof WEEK_COLORS]
 
-  // Coach screen primera vez
   const [showCoach, setShowCoach] = useState(false)
   useEffect(() => {
     const seen = localStorage.getItem('kawa-coach-seen')
     if (!seen) setShowCoach(true)
   }, [])
-  const closeCoach = () => {
-    localStorage.setItem('kawa-coach-seen', '1')
-    setShowCoach(false)
-  }
+  const closeCoach = () => { localStorage.setItem('kawa-coach-seen', '1'); setShowCoach(false) }
 
-  // ¿Practicó hoy?
   const practicedToday = (() => {
     if (!sessionLogs.length) return false
     const last = new Date(sessionLogs[sessionLogs.length - 1].date)
     return last.toDateString() === new Date().toDateString()
   })()
 
-  // Última sesión — para mostrar progreso
-  const lastSessionWeek = sessionLogs.length
-    ? sessionLogs[sessionLogs.length - 1].weekId
-    : null
+  const lastSessionWeek = sessionLogs.length ? sessionLogs[sessionLogs.length - 1].weekId : null
 
-  // Racha
   const streak = (() => {
     if (!sessionLogs.length) return 0
     let count = 0
@@ -133,74 +104,43 @@ export default function HomePage() {
       {showCoach && <CoachScreen onClose={closeCoach} />}
 
       {/* ── HEADER ── */}
-      <div style={{
-        padding: '48px 20px 24px', position: 'relative', overflow: 'hidden',
-        background: 'linear-gradient(160deg, #1B4332 0%, #2D6A4F 55%, #1A237E 100%)'
-      }}>
-        {/* Estrellitas */}
-        {[[15,20],[30,60],[70,15],[85,40],[92,70],[8,80],[50,10],[60,75],[40,50],
-          [75,85],[20,35],[95,25],[55,55],[10,90],[80,15]].map(([x,y],i) => (
-          <div key={i} style={{
-            position: 'absolute', borderRadius: '50%', background: 'white',
-            width: i%3===0?2:1, height: i%3===0?2:1,
-            left: `${x}%`, top: `${y}%`, opacity: 0.3+(i%4)*0.1,
-            pointerEvents: 'none'
-          }} />
+      <div style={{ padding: '48px 20px 24px', position: 'relative', overflow: 'hidden', background: 'linear-gradient(160deg, #1B4332 0%, #2D6A4F 55%, #1A237E 100%)' }}>
+        {[[15,20],[30,60],[70,15],[85,40],[92,70],[8,80],[50,10],[60,75],[40,50],[75,85],[20,35],[95,25],[55,55],[10,90],[80,15]].map(([x,y],i) => (
+          <div key={i} style={{ position: 'absolute', borderRadius: '50%', background: 'white', width: i%3===0?2:1, height: i%3===0?2:1, left: `${x}%`, top: `${y}%`, opacity: 0.3+(i%4)*0.1, pointerEvents: 'none' }} />
         ))}
-
         <div style={{ position: 'relative', zIndex: 1 }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 }}>
             <div>
               <p style={{ color: 'rgba(187,247,208,0.8)', fontSize: 13, margin: 0 }}>Hola,</p>
-              <h1 style={{
-                color: 'white', fontSize: 22, fontWeight: 500, margin: 0,
-                fontFamily: "'Livvic','Georgia',serif"
-              }}>
-                {activeChild?.name || 'Guardián'}{' '}
-                {activeChild?.gender === 'female' ? '👧' : '👦'}
+              <h1 style={{ color: 'white', fontSize: 22, fontWeight: 500, margin: 0, fontFamily: "'Livvic','Georgia',serif" }}>
+                {activeChild?.name || 'Guardián'}{' '}{activeChild?.gender === 'female' ? '👧' : '👦'}
               </h1>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
               {children.length > 1 && (
                 <div style={{ display: 'flex', gap: 4 }}>
                   {children.map(child => (
-                    <button key={child.id} onClick={() => setActiveChild(child.id)} style={{
-                      width: 32, height: 32, borderRadius: '50%',
-                      border: `2px solid ${child.id === activeChildId ? 'white' : 'transparent'}`,
-                      background: child.id === activeChildId ? 'rgba(255,255,255,0.25)' : 'rgba(255,255,255,0.1)',
-                      fontSize: 14, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center'
-                    }}>
+                    <button key={child.id} onClick={() => setActiveChild(child.id)} style={{ width: 32, height: 32, borderRadius: '50%', border: `2px solid ${child.id === activeChildId ? 'white' : 'transparent'}`, background: child.id === activeChildId ? 'rgba(255,255,255,0.25)' : 'rgba(255,255,255,0.1)', fontSize: 14, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                       {child.gender === 'female' ? '👧' : '👦'}
                     </button>
                   ))}
                 </div>
               )}
               {profile && (
-                <button onClick={() => router.push('/perfil')} style={{
-                  display: 'flex', alignItems: 'center', gap: 8, padding: '6px 12px',
-                  borderRadius: 12, background: 'rgba(255,255,255,0.15)',
-                  border: 'none', cursor: 'pointer'
-                }}>
+                <button onClick={() => router.push('/perfil')} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '6px 12px', borderRadius: 12, background: 'rgba(255,255,255,0.15)', border: 'none', cursor: 'pointer' }}>
                   <span style={{ fontSize: 16 }}>{profile.icon}</span>
                   <span style={{ fontSize: 12, color: 'white', fontWeight: 500 }}>{profile.name}</span>
                 </button>
               )}
             </div>
           </div>
-
-          {/* Barra progreso */}
           <div style={{ marginTop: 16 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
               <span style={{ fontSize: 12, color: 'rgba(187,247,208,0.8)' }}>Progreso del viaje</span>
-              <span style={{ fontSize: 12, color: 'rgba(187,247,208,0.8)' }}>
-                {completedWeeks.length}/5 mundos · {progress}%
-              </span>
+              <span style={{ fontSize: 12, color: 'rgba(187,247,208,0.8)' }}>{completedWeeks.length}/5 mundos · {progress}%</span>
             </div>
             <div style={{ height: 8, borderRadius: 4, overflow: 'hidden', background: 'rgba(255,255,255,0.15)' }}>
-              <div style={{
-                height: '100%', borderRadius: 4, transition: 'width 0.7s',
-                width: `${progress}%`, background: 'rgba(255,255,255,0.9)'
-              }} />
+              <div style={{ height: '100%', borderRadius: 4, transition: 'width 0.7s', width: `${progress}%`, background: 'rgba(255,255,255,0.9)' }} />
             </div>
           </div>
         </div>
@@ -215,84 +155,90 @@ export default function HomePage() {
             { label: 'Sesiones', value: sessionLogs.length },
             { label: 'Racha',    value: streak + (streak === 1 ? ' día' : ' días') },
           ].map(({ label, value }) => (
-            <div key={label} style={{
-              background: 'white', borderRadius: 16, padding: '10px 8px',
-              textAlign: 'center', border: '0.5px solid #E5E7EB'
-            }}>
+            <div key={label} style={{ background: 'white', borderRadius: 16, padding: '10px 8px', textAlign: 'center', border: '0.5px solid #E5E7EB' }}>
               <p style={{ fontSize: 17, fontWeight: 500, color: '#111', margin: 0 }}>{value}</p>
               <p style={{ fontSize: 11, color: '#9CA3AF', margin: 0 }}>{label}</p>
             </div>
           ))}
         </div>
 
-        {/* ── MAPA COMPACTO CON 5 MUNDOS ── */}
-        <div style={{
-          borderRadius: 20, overflow: 'hidden', marginBottom: 14,
-          background: 'linear-gradient(135deg, #1B4332 0%, #2D6A4F 60%, #1A237E 100%)',
-          padding: '16px 16px 0'
-        }}>
-          {/* Título del mapa */}
-          <p style={{ color: 'rgba(187,247,208,0.8)', fontSize: 11, margin: '0 0 12px' }}>
-            El mapa de los 5 mundos
-          </p>
+        {/* ── MAPA COMPACTO ── */}
+        <div style={{ borderRadius: 20, overflow: 'hidden', marginBottom: 14, background: 'linear-gradient(135deg, #1B4332 0%, #2D6A4F 60%, #1A237E 100%)', padding: '16px 16px 0' }}>
+          <p style={{ color: 'rgba(187,247,208,0.8)', fontSize: 11, margin: '0 0 12px' }}>El mapa de los 5 mundos</p>
 
-          {/* Dots de los 5 mundos */}
+          {/* Dots con símbolos */}
           <div style={{ display: 'flex', alignItems: 'center', marginBottom: 8 }}>
             {COURSE_WEEKS.map((week, i) => {
               const isCompleted = completedWeeks.includes(week.id)
               const isCurrent   = week.id === currentWeek
               const isLocked    = week.id > currentWeek && !isCompleted
-              const colors      = WEEK_COLORS[week.id as keyof typeof WEEK_COLORS]
               return (
                 <div key={week.id} style={{ display: 'flex', alignItems: 'center', flex: 1 }}>
-                  {/* Conector izquierdo */}
                   {i > 0 && (
-                    <div style={{
-                      flex: 1, height: 2,
-                      background: completedWeeks.includes(week.id - 1) || isCompleted
-                        ? 'rgba(255,255,255,0.8)' : 'rgba(255,255,255,0.25)'
-                    }} />
+                    <div style={{ flex: 1, height: 2, background: completedWeeks.includes(week.id - 1) || isCompleted ? 'rgba(255,255,255,0.8)' : 'rgba(255,255,255,0.25)' }} />
                   )}
-                  {/* Dot */}
                   <button
                     onClick={() => !isLocked && router.push(`/semana/${week.id}`)}
                     disabled={isLocked}
                     style={{
-                      width: isCurrent ? 44 : 36,
-                      height: isCurrent ? 44 : 36,
+                      width: isCurrent ? 52 : 42,
+                      height: isCurrent ? 52 : 42,
                       borderRadius: '50%',
-                      border: isCurrent ? '3px solid white' : '2px solid rgba(255,255,255,0.5)',
+                      border: isCurrent ? '3px solid white' : '2px solid rgba(255,255,255,0.4)',
                       background: isCompleted
-                        ? 'rgba(255,255,255,0.9)'
+                        ? 'rgba(255,255,255,0.95)'
                         : isCurrent
-                        ? 'rgba(255,255,255,0.25)'
-                        : 'rgba(255,255,255,0.1)',
+                        ? 'rgba(255,255,255,0.2)'
+                        : 'rgba(255,255,255,0.08)',
                       cursor: isLocked ? 'default' : 'pointer',
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      fontSize: isCurrent ? 18 : 14,
                       flexShrink: 0,
-                      boxShadow: isCurrent ? '0 0 0 4px rgba(255,255,255,0.2)' : 'none',
-                      transition: 'all 0.2s'
+                      boxShadow: isCurrent ? '0 0 0 5px rgba(255,255,255,0.15)' : 'none',
+                      transition: 'all 0.2s',
+                      padding: 0, overflow: 'hidden',
+                      opacity: isLocked ? 0.4 : 1,
                     }}>
-                    {isCompleted ? '✓' : isLocked ? '🔒' : week.elementEmoji}
+                    {isLocked ? (
+                      <span style={{ fontSize: 16 }}>🔒</span>
+                    ) : isCompleted ? (
+                      /* Símbolo con check verde superpuesto */
+                      <div style={{ position: 'relative', width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <img
+                          src={WORLD_SYMBOLS[week.id]}
+                          alt={week.element}
+                          style={{ width: '70%', height: '70%', objectFit: 'contain', opacity: 0.6 }}
+                        />
+                        <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <span style={{ fontSize: 16, fontWeight: 700, color: '#2D6A4F' }}>✓</span>
+                        </div>
+                      </div>
+                    ) : (
+                      <img
+                        src={WORLD_SYMBOLS[week.id]}
+                        alt={week.element}
+                        style={{
+                          width: isCurrent ? '72%' : '65%',
+                          height: isCurrent ? '72%' : '65%',
+                          objectFit: 'contain',
+                          filter: 'brightness(0) invert(1)',
+                          opacity: isCurrent ? 0.95 : 0.7
+                        }}
+                      />
+                    )}
                   </button>
                 </div>
               )
             })}
           </div>
 
-          {/* Nombres de los mundos */}
+          {/* Nombres */}
           <div style={{ display: 'flex', marginBottom: 12 }}>
             {COURSE_WEEKS.map(week => {
-              const isCurrent = week.id === currentWeek
+              const isCurrent   = week.id === currentWeek
               const isCompleted = completedWeeks.includes(week.id)
               return (
                 <div key={week.id} style={{ flex: 1, textAlign: 'center' }}>
-                  <p style={{
-                    fontSize: 9, margin: 0,
-                    color: isCurrent ? 'white' : isCompleted ? 'rgba(255,255,255,0.7)' : 'rgba(255,255,255,0.35)',
-                    fontWeight: isCurrent ? 500 : 400
-                  }}>
+                  <p style={{ fontSize: 9, margin: 0, color: isCurrent ? 'white' : isCompleted ? 'rgba(255,255,255,0.7)' : 'rgba(255,255,255,0.35)', fontWeight: isCurrent ? 600 : 400 }}>
                     {week.element}
                   </p>
                 </div>
@@ -301,38 +247,32 @@ export default function HomePage() {
           </div>
 
           {/* Info semana actual */}
-          <div style={{
-            background: 'rgba(0,0,0,0.3)', padding: '10px 12px',
-            margin: '0 -16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between'
-          }}>
-            <div>
-              <p style={{ fontSize: 10, color: 'rgba(255,255,255,0.6)', margin: 0 }}>Esta semana</p>
-              <p style={{ fontSize: 13, fontWeight: 500, color: 'white', margin: 0, fontFamily: "'Livvic','Georgia',serif" }}>
-                Mundo de la {currentWeekData?.element}
-              </p>
+          <div style={{ background: 'rgba(0,0,0,0.3)', padding: '10px 12px', margin: '0 -16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <img
+                src={WORLD_SYMBOLS[currentWeek]}
+                alt={currentWeekData?.element}
+                style={{ width: 28, height: 28, objectFit: 'contain', filter: 'brightness(0) invert(1)', opacity: 0.9 }}
+              />
+              <div>
+                <p style={{ fontSize: 10, color: 'rgba(255,255,255,0.6)', margin: 0 }}>Esta semana</p>
+                <p style={{ fontSize: 13, fontWeight: 600, color: 'white', margin: 0, fontFamily: "'Livvic','Georgia',serif" }}>
+                  Mundo de la {currentWeekData?.element}
+                </p>
+              </div>
             </div>
             <div style={{ display: 'flex', gap: 6 }}>
-              <span style={{ background: 'rgba(255,255,255,0.2)', color: 'white', fontSize: 10, padding: '3px 8px', borderRadius: 20 }}>
-                ⏱ 45 min
-              </span>
-              <span style={{ background: 'rgba(255,255,255,0.2)', color: 'white', fontSize: 10, padding: '3px 8px', borderRadius: 20 }}>
-                {currentWeekData?.posturas.length} posturas
-              </span>
+              <span style={{ background: 'rgba(255,255,255,0.2)', color: 'white', fontSize: 10, padding: '3px 8px', borderRadius: 20 }}>⏱ 45 min</span>
+              <span style={{ background: 'rgba(255,255,255,0.2)', color: 'white', fontSize: 10, padding: '3px 8px', borderRadius: 20 }}>{currentWeekData?.posturas.length} posturas</span>
             </div>
           </div>
         </div>
 
-        {/* ── MENSAJE DEL COACH DE KAWA ── */}
-        <div style={{
-          background: '#FFFDE7', borderRadius: 16, padding: '12px 14px',
-          marginBottom: 14, display: 'flex', gap: 10, alignItems: 'flex-start',
-          border: '0.5px solid #FEF08A'
-        }}>
+        {/* ── COACH DE KAWA ── */}
+        <div style={{ background: '#FFFDE7', borderRadius: 16, padding: '12px 14px', marginBottom: 14, display: 'flex', gap: 10, alignItems: 'flex-start', border: '0.5px solid #FEF08A' }}>
           <span style={{ fontSize: 24, flexShrink: 0 }}>🌱</span>
           <div>
-            <p style={{ fontSize: 11, fontWeight: 500, color: '#854D0E', margin: '0 0 2px' }}>
-              Kawa dice:
-            </p>
+            <p style={{ fontSize: 11, fontWeight: 600, color: '#854D0E', margin: '0 0 2px' }}>Kawa dice:</p>
             <p style={{ fontSize: 12, color: '#713F12', margin: 0, lineHeight: 1.5 }}>
               {practicedToday
                 ? `¡Increíble, ${activeChild?.name || ''}! Ya practicaste hoy. Vuelve mañana para continuar el viaje.`
@@ -343,89 +283,42 @@ export default function HomePage() {
 
         {/* ── CTA PRINCIPAL ── */}
         {practicedToday ? (
-          <div style={{
-            borderRadius: 20, padding: '14px 16px', marginBottom: 14,
-            background: currentColors.light,
-            border: `1.5px solid ${currentColors.main}30`,
-            display: 'flex', alignItems: 'center', gap: 12
-          }}>
-            <div style={{
-              width: 44, height: 44, borderRadius: 12, flexShrink: 0,
-              background: currentColors.main,
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: 20, color: 'white', fontWeight: 500
-            }}>✓</div>
+          <div style={{ borderRadius: 20, padding: '14px 16px', marginBottom: 14, background: currentColors.light, border: `1.5px solid ${currentColors.main}30`, display: 'flex', alignItems: 'center', gap: 12 }}>
+            <div style={{ width: 44, height: 44, borderRadius: 12, flexShrink: 0, background: currentColors.main, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20, color: 'white' }}>✓</div>
             <div style={{ flex: 1 }}>
-              <p style={{ fontSize: 13, fontWeight: 500, color: currentColors.main, margin: 0 }}>
-                ¡Hoy ya practicaste! 🌟
-              </p>
-              <p style={{ fontSize: 11, color: '#6B7280', margin: 0 }}>
-                Vuelve mañana para continuar
-              </p>
+              <p style={{ fontSize: 13, fontWeight: 600, color: currentColors.main, margin: 0 }}>¡Hoy ya practicaste! 🌟</p>
+              <p style={{ fontSize: 11, color: '#6B7280', margin: 0 }}>Vuelve mañana para continuar</p>
             </div>
-            <button onClick={() => router.push(`/semana/${currentWeek}`)} style={{
-              background: currentColors.main, color: 'white',
-              border: 'none', borderRadius: 12, padding: '8px 12px',
-              fontSize: 12, fontWeight: 500, cursor: 'pointer', flexShrink: 0
-            }}>
+            <button onClick={() => router.push(`/semana/${currentWeek}`)} style={{ background: currentColors.main, color: 'white', border: 'none', borderRadius: 12, padding: '8px 12px', fontSize: 12, fontWeight: 500, cursor: 'pointer', flexShrink: 0 }}>
               Ver clase
             </button>
           </div>
         ) : (
-          <button
-            onClick={() => router.push(`/semana/${currentWeek}`)}
-            style={{
-              width: '100%', borderRadius: 20, padding: '16px',
-              background: `linear-gradient(135deg, ${currentColors.main} 0%, ${currentColors.main}CC 100%)`,
-              border: 'none', cursor: 'pointer', marginBottom: 14,
-              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-              boxSizing: 'border-box'
-            }}>
-            <div style={{ textAlign: 'left' }}>
-              <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.7)', margin: '0 0 2px' }}>
-                Tu práctica de hoy
-              </p>
-              <p style={{ fontSize: 17, fontWeight: 500, color: 'white', margin: 0, fontFamily: "'Livvic','Georgia',serif" }}>
-                Mundo de la {currentWeekData?.element}
-              </p>
+          <button onClick={() => router.push(`/semana/${currentWeek}`)} style={{ width: '100%', borderRadius: 20, padding: '16px', background: `linear-gradient(135deg, ${currentColors.main} 0%, ${currentColors.main}CC 100%)`, border: 'none', cursor: 'pointer', marginBottom: 14, display: 'flex', alignItems: 'center', justifyContent: 'space-between', boxSizing: 'border-box' }}>
+            <div style={{ textAlign: 'left', display: 'flex', alignItems: 'center', gap: 12 }}>
+              <img src={WORLD_SYMBOLS[currentWeek]} alt="" style={{ width: 36, height: 36, objectFit: 'contain', filter: 'brightness(0) invert(1)', opacity: 0.9, flexShrink: 0 }} />
+              <div>
+                <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.7)', margin: '0 0 2px' }}>Tu práctica de hoy</p>
+                <p style={{ fontSize: 17, fontWeight: 600, color: 'white', margin: 0, fontFamily: "'Livvic','Georgia',serif" }}>Mundo de la {currentWeekData?.element}</p>
+              </div>
             </div>
-            <div style={{
-              background: 'rgba(255,255,255,0.25)', borderRadius: 12,
-              padding: '8px 14px', color: 'white', fontSize: 13, fontWeight: 500
-            }}>
+            <div style={{ background: 'rgba(255,255,255,0.25)', borderRadius: 12, padding: '8px 14px', color: 'white', fontSize: 13, fontWeight: 500, flexShrink: 0 }}>
               Ir a la clase →
             </div>
           </button>
         )}
 
-        {/* ── PROGRESO DE ÚLTIMA SESIÓN (si existe) ── */}
+        {/* ── ÚLTIMA SESIÓN ── */}
         {lastSessionWeek && !practicedToday && (
-          <div style={{
-            background: 'white', borderRadius: 16, padding: '12px 14px',
-            marginBottom: 14, border: '0.5px solid #E5E7EB'
-          }}>
-            <p style={{ fontSize: 12, fontWeight: 500, color: '#111', margin: '0 0 8px' }}>
-              Última sesión registrada
-            </p>
+          <div style={{ background: 'white', borderRadius: 16, padding: '12px 14px', marginBottom: 14, border: '0.5px solid #E5E7EB' }}>
+            <p style={{ fontSize: 12, fontWeight: 600, color: '#111', margin: '0 0 8px' }}>Última sesión registrada</p>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <span style={{ fontSize: 20 }}>
-                {sessionLogs[sessionLogs.length-1].mood === 'great' ? '🌟'
-                  : sessionLogs[sessionLogs.length-1].mood === 'good' ? '😊'
-                  : sessionLogs[sessionLogs.length-1].mood === 'okay' ? '😐' : '😔'}
-              </span>
+              <span style={{ fontSize: 20 }}>{sessionLogs[sessionLogs.length-1].mood === 'great' ? '🌟' : sessionLogs[sessionLogs.length-1].mood === 'good' ? '😊' : sessionLogs[sessionLogs.length-1].mood === 'okay' ? '😐' : '😔'}</span>
               <div style={{ flex: 1 }}>
-                <p style={{ fontSize: 12, color: '#374151', margin: 0 }}>
-                  Semana {lastSessionWeek} — {COURSE_WEEKS.find(w => w.id === lastSessionWeek)?.element}
-                </p>
-                <p style={{ fontSize: 11, color: '#9CA3AF', margin: 0 }}>
-                  {new Date(sessionLogs[sessionLogs.length-1].date)
-                    .toLocaleDateString('es-ES', { day: 'numeric', month: 'long' })}
-                </p>
+                <p style={{ fontSize: 12, color: '#374151', margin: 0 }}>Semana {lastSessionWeek} — {COURSE_WEEKS.find(w => w.id === lastSessionWeek)?.element}</p>
+                <p style={{ fontSize: 11, color: '#9CA3AF', margin: 0 }}>{new Date(sessionLogs[sessionLogs.length-1].date).toLocaleDateString('es-ES', { day: 'numeric', month: 'long' })}</p>
               </div>
-              <button onClick={() => router.push('/progreso')} style={{
-                background: '#F3F4F6', border: 'none', borderRadius: 10,
-                padding: '6px 10px', fontSize: 11, color: '#6B7280', cursor: 'pointer'
-              }}>
+              <button onClick={() => router.push('/progreso')} style={{ background: '#F3F4F6', border: 'none', borderRadius: 10, padding: '6px 10px', fontSize: 11, color: '#6B7280', cursor: 'pointer' }}>
                 Ver historial
               </button>
             </div>
@@ -435,11 +328,7 @@ export default function HomePage() {
       </div>
 
       {/* ── NAV ── */}
-      <nav style={{
-        position: 'fixed', bottom: 0, left: 0, right: 0,
-        background: 'white', borderTop: '0.5px solid #E5E7EB',
-        display: 'flex', maxWidth: 430, margin: '0 auto'
-      }}>
+      <nav style={{ position: 'fixed', bottom: 0, left: 0, right: 0, background: 'white', borderTop: '0.5px solid #E5E7EB', display: 'flex', maxWidth: 430, margin: '0 auto' }}>
         {[
           { href: '/home',                  icon: '🗺️', label: 'Inicio' },
           { href: `/semana/${currentWeek}`, icon: '🧘', label: 'Clase' },
@@ -447,10 +336,7 @@ export default function HomePage() {
           { href: '/materiales',            icon: '📦', label: 'Kit' },
           { href: '/perfil',                icon: '👤', label: 'Perfil' },
         ].map(({ href, icon, label }) => (
-          <button key={href} onClick={() => router.push(href)} style={{
-            flex: 1, padding: '12px 0', display: 'flex', flexDirection: 'column',
-            alignItems: 'center', gap: 2, background: 'none', border: 'none', cursor: 'pointer'
-          }}>
+          <button key={href} onClick={() => router.push(href)} style={{ flex: 1, padding: '12px 0', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2, background: 'none', border: 'none', cursor: 'pointer' }}>
             <span style={{ fontSize: 20 }}>{icon}</span>
             <span style={{ fontSize: 10, color: '#9CA3AF' }}>{label}</span>
           </button>
