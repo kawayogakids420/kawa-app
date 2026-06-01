@@ -91,40 +91,62 @@ function PosturaImage({ weekId, posturaId, gender, color }: {
   }, [weekId, posturaId, generoPath])
 
   if (!imgSrc) {
-    // Fallback: círculo con emoji
+    // Fallback: círculo con emoji centrado
     return (
       <div style={{
-        position: 'absolute', right: 16, bottom: 16,
-        width: 110, height: 110, borderRadius: '50%',
-        background: 'rgba(255,255,255,0.15)',
+        position: 'absolute', inset: 0,
         display: 'flex', alignItems: 'center', justifyContent: 'center',
-        fontSize: 56, backdropFilter: 'blur(4px)'
+        pointerEvents: 'none'
       }}>
-        {POSTURA_POR_PARTE[weekId]?.[posturaId as StepKey]?.emoji || '🧘'}
+        <div style={{
+          width: 100, height: 100, borderRadius: '50%',
+          background: 'rgba(255,255,255,0.12)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          fontSize: 52
+        }}>
+          {POSTURA_POR_PARTE[weekId]?.[posturaId as StepKey]?.emoji || '🧘'}
+        </div>
       </div>
     )
   }
 
   return (
     <div style={{
-      position: 'absolute', right: 0, bottom: 0,
-      width: 160, height: 200,
-      overflow: 'hidden'
+      position: 'absolute', inset: 0,
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      overflow: 'hidden', pointerEvents: 'none'
     }}>
-      {/* Gradiente para integrar la imagen */}
-      <div style={{
-        position: 'absolute', inset: 0, zIndex: 1,
-        background: 'linear-gradient(to right, rgba(0,0,0,0.4) 0%, transparent 40%), linear-gradient(to top, rgba(0,0,0,0.3) 0%, transparent 40%)'
-      }} />
+      {/* Imagen centrada */}
       <img
         src={imgSrc}
         alt="postura de yoga"
         style={{
-          width: '100%', height: '100%',
-          objectFit: 'cover', objectPosition: 'top center',
-          opacity: 0.9
+          height: '105%',
+          width: 'auto',
+          objectFit: 'contain',
+          objectPosition: 'center bottom',
+          opacity: 0.55,
+          filter: 'brightness(1.1) contrast(0.9)',
         }}
       />
+      {/* Degradado superior — difumina hacia el color del guardián */}
+      <div style={{
+        position: 'absolute', top: 0, left: 0, right: 0, height: '45%',
+        background: 'linear-gradient(to bottom, rgba(0,0,0,0.45) 0%, transparent 100%)',
+        pointerEvents: 'none'
+      }} />
+      {/* Degradado inferior — integra con el texto */}
+      <div style={{
+        position: 'absolute', bottom: 0, left: 0, right: 0, height: '40%',
+        background: 'linear-gradient(to top, rgba(0,0,0,0.5) 0%, transparent 100%)',
+        pointerEvents: 'none'
+      }} />
+      {/* Degradado lateral izquierdo — espacio para el texto */}
+      <div style={{
+        position: 'absolute', top: 0, bottom: 0, left: 0, width: '40%',
+        background: 'linear-gradient(to right, rgba(0,0,0,0.35) 0%, transparent 100%)',
+        pointerEvents: 'none'
+      }} />
     </div>
   )
 }
