@@ -203,77 +203,71 @@ export default function ClaseTab({ week, weekColors, activeProfile }: Props) {
   return (
     <div>
 
-      {/* ── BARRA DE PROGRESO ── */}
+      {/* ── BARRA DE PROGRESO — siempre muestra las 5 partes del carrusel ── */}
       <div style={{ background: 'white', borderRadius: 16, padding: '14px 16px', marginBottom: 12, border: '0.5px solid #E5E7EB' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
-          <p style={{ fontSize: 13, fontWeight: 700, color: '#111', margin: 0 }}>
-            {isInHistoria ? 'Historia de Kawa' : 'Progreso de esta sesión'}
-          </p>
-          <p style={{ fontSize: 13, fontWeight: 700, color: isInHistoria ? STEP_COLORS[historiaStep] : weekColors.main, margin: 0 }}>
-            {isInHistoria ? `${historiaStep + 1}/5` : `${doneCount}/${totalSecs}`}
+
+        {/* Header con sección actual */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            <p style={{ fontSize: 13, fontWeight: 700, color: '#111', margin: 0 }}>
+              La clase de Kawa
+            </p>
+            {!isInHistoria && (
+              <span style={{
+                fontSize: 10, fontWeight: 600, padding: '2px 8px', borderRadius: 20,
+                background: weekColors.light, color: weekColors.main
+              }}>
+                {activeSection === 'posturas' ? '🧘 Posturas'
+                  : activeSection === 'respiracion' ? '🌬️ Respiración'
+                  : '☁️ Relajación'}
+              </span>
+            )}
+          </div>
+          <p style={{ fontSize: 12, fontWeight: 700, color: STEP_COLORS[historiaStep], margin: 0 }}>
+            {historiaStep + 1}/5
           </p>
         </div>
 
-        {/* Barra */}
-        <div style={{ height: 6, background: '#F3F4F6', borderRadius: 3, overflow: 'hidden', marginBottom: 12 }}>
+        {/* Barra de progreso — avanza con el carrusel */}
+        <div style={{ height: 5, background: '#F3F4F6', borderRadius: 3, overflow: 'hidden', marginBottom: 12 }}>
           <div style={{
             height: '100%', borderRadius: 3, transition: 'width 0.4s, background 0.4s',
-            width: isInHistoria
-              ? `${((historiaStep + 1) / 5) * 100}%`
-              : `${(doneCount / totalSecs) * 100}%`,
-            background: isInHistoria ? STEP_COLORS[historiaStep] : weekColors.main
+            width: `${((historiaStep + 1) / 5) * 100}%`,
+            background: STEP_COLORS[historiaStep]
           }} />
         </div>
 
-        {/* Tabs — se sincronizan con el carrusel */}
-        {isInHistoria ? (
-          <div style={{ display: 'flex', gap: 4 }}>
-            {STEP_LABELS.map((label, i) => {
-              const done   = i < historiaStep
-              const active = i === historiaStep
-              return (
-                <button key={i} onClick={() => setHistoriaStep(i)} style={{
+        {/* Las 5 partes del carrusel — siempre visibles */}
+        <div style={{ display: 'flex', gap: 4 }}>
+          {STEP_LABELS.map((label, i) => {
+            const done   = i < historiaStep
+            const active = i === historiaStep && isInHistoria
+            return (
+              <button key={i}
+                onClick={() => { setActiveSection('historia'); setHistoriaStep(i) }}
+                style={{
                   flex: 1, padding: '7px 2px', borderRadius: 10, border: 'none',
                   cursor: 'pointer', display: 'flex', flexDirection: 'column',
                   alignItems: 'center', gap: 3, transition: 'all 0.25s',
-                  background: done ? STEP_COLORS[i] : active ? STEP_COLORS[i] + '18' : '#F8F7F4'
+                  background: done
+                    ? STEP_COLORS[i]
+                    : active
+                    ? STEP_COLORS[i] + '20'
+                    : '#F8F7F4'
                 }}>
-                  <span style={{ fontSize: 15 }}>{done ? '⭐' : STEP_ICONS[i]}</span>
-                  <span style={{
-                    fontSize: 8, fontWeight: 700, letterSpacing: '0.01em',
-                    color: done ? 'white' : active ? STEP_COLORS[i] : '#9CA3AF'
-                  }}>
-                    {label}
-                  </span>
-                </button>
-              )
-            })}
-          </div>
-        ) : (
-          <div style={{ display: 'flex', gap: 6 }}>
-            {SECTIONS.map(sec => {
-              const done   = completedSections.has(sec)
-              const active = activeSection === sec
-              const icons:  Record<Section, string> = { historia: '📖', posturas: '🧘', respiracion: '🌬️', relajacion: '☁️' }
-              const labels: Record<Section, string> = { historia: 'Historia', posturas: 'Posturas', respiracion: 'Respir.', relajacion: 'Relaj.' }
-              return (
-                <button key={sec} onClick={() => setActiveSection(sec)} style={{
-                  flex: 1, padding: '7px 4px', borderRadius: 10, border: 'none',
-                  cursor: 'pointer', display: 'flex', flexDirection: 'column',
-                  alignItems: 'center', gap: 3, transition: 'all 0.25s',
-                  background: done ? weekColors.main : active ? weekColors.light : '#F8F7F4'
+                <span style={{ fontSize: 15 }}>{done ? '⭐' : STEP_ICONS[i]}</span>
+                <span style={{
+                  fontSize: 8, fontWeight: 700, letterSpacing: '0.01em',
+                  color: done ? 'white' : active ? STEP_COLORS[i] : '#9CA3AF'
                 }}>
-                  <span style={{ fontSize: 16 }}>{done ? '⭐' : icons[sec]}</span>
-                  <span style={{ fontSize: 9, fontWeight: 600, color: done ? 'white' : active ? weekColors.main : '#9CA3AF' }}>
-                    {labels[sec]}
-                  </span>
-                </button>
-              )
-            })}
-          </div>
-        )}
+                  {label}
+                </span>
+              </button>
+            )
+          })}
+        </div>
 
-        {doneCount === totalSecs && !isInHistoria && (
+        {doneCount === totalSecs && (
           <div style={{ marginTop: 10, background: weekColors.light, borderRadius: 10, padding: '8px 12px', textAlign: 'center' }}>
             <p style={{ fontSize: 13, fontWeight: 700, color: weekColors.main, margin: 0 }}>🌟 ¡Sesión completa! Ya puedes registrarla</p>
           </div>
