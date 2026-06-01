@@ -181,48 +181,33 @@ export default function HomePage() {
                     onClick={() => !isLocked && router.push(`/semana/${week.id}`)}
                     disabled={isLocked}
                     style={{
-                      width: isCurrent ? 52 : 42,
-                      height: isCurrent ? 52 : 42,
+                      width: isCurrent ? 54 : 44,
+                      height: isCurrent ? 54 : 44,
                       borderRadius: '50%',
-                      border: isCurrent ? '3px solid white' : '2px solid rgba(255,255,255,0.4)',
-                      background: isCompleted
-                        ? 'rgba(255,255,255,0.95)'
-                        : isCurrent
-                        ? 'rgba(255,255,255,0.2)'
-                        : 'rgba(255,255,255,0.08)',
+                      border: isCurrent ? '3px solid white' : '2px solid rgba(255,255,255,0.5)',
+                      background: 'rgba(255,255,255,0.92)',
                       cursor: isLocked ? 'default' : 'pointer',
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
                       flexShrink: 0,
-                      boxShadow: isCurrent ? '0 0 0 5px rgba(255,255,255,0.15)' : 'none',
+                      boxShadow: isCurrent ? '0 0 0 5px rgba(255,255,255,0.2)' : 'none',
                       transition: 'all 0.2s',
                       padding: 0, overflow: 'hidden',
-                      opacity: isLocked ? 0.4 : 1,
+                      opacity: isLocked ? 0.35 : 1,
                     }}>
                     {isLocked ? (
                       <span style={{ fontSize: 16 }}>🔒</span>
                     ) : isCompleted ? (
-                      /* Símbolo con check verde superpuesto */
                       <div style={{ position: 'relative', width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        <img
-                          src={WORLD_SYMBOLS[week.id]}
-                          alt={week.element}
-                          style={{ width: '70%', height: '70%', objectFit: 'contain', opacity: 0.6 }}
-                        />
+                        <img src={WORLD_SYMBOLS[week.id]} alt={week.element} style={{ width: '68%', height: '68%', objectFit: 'contain', opacity: 0.5 }} />
                         <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                          <span style={{ fontSize: 16, fontWeight: 700, color: '#2D6A4F' }}>✓</span>
+                          <span style={{ fontSize: 18, fontWeight: 700, color: '#2D6A4F' }}>✓</span>
                         </div>
                       </div>
                     ) : (
                       <img
                         src={WORLD_SYMBOLS[week.id]}
                         alt={week.element}
-                        style={{
-                          width: isCurrent ? '72%' : '65%',
-                          height: isCurrent ? '72%' : '65%',
-                          objectFit: 'contain',
-                          filter: 'brightness(0) invert(1)',
-                          opacity: isCurrent ? 0.95 : 0.7
-                        }}
+                        style={{ width: isCurrent ? '74%' : '66%', height: isCurrent ? '74%' : '66%', objectFit: 'contain' }}
                       />
                     )}
                   </button>
@@ -252,7 +237,7 @@ export default function HomePage() {
               <img
                 src={WORLD_SYMBOLS[currentWeek]}
                 alt={currentWeekData?.element}
-                style={{ width: 28, height: 28, objectFit: 'contain', filter: 'brightness(0) invert(1)', opacity: 0.9 }}
+                style={{ width: 28, height: 28, objectFit: 'contain', opacity: 0.95 }}
               />
               <div>
                 <p style={{ fontSize: 10, color: 'rgba(255,255,255,0.6)', margin: 0 }}>Esta semana</p>
@@ -296,7 +281,7 @@ export default function HomePage() {
         ) : (
           <button onClick={() => router.push(`/semana/${currentWeek}`)} style={{ width: '100%', borderRadius: 20, padding: '16px', background: `linear-gradient(135deg, ${currentColors.main} 0%, ${currentColors.main}CC 100%)`, border: 'none', cursor: 'pointer', marginBottom: 14, display: 'flex', alignItems: 'center', justifyContent: 'space-between', boxSizing: 'border-box' }}>
             <div style={{ textAlign: 'left', display: 'flex', alignItems: 'center', gap: 12 }}>
-              <img src={WORLD_SYMBOLS[currentWeek]} alt="" style={{ width: 36, height: 36, objectFit: 'contain', filter: 'brightness(0) invert(1)', opacity: 0.9, flexShrink: 0 }} />
+              <img src={WORLD_SYMBOLS[currentWeek]} alt="" style={{ width: 36, height: 36, objectFit: 'contain', opacity: 0.95, flexShrink: 0 }} />
               <div>
                 <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.7)', margin: '0 0 2px' }}>Tu práctica de hoy</p>
                 <p style={{ fontSize: 17, fontWeight: 600, color: 'white', margin: 0, fontFamily: "'Livvic','Georgia',serif" }}>Mundo de la {currentWeekData?.element}</p>

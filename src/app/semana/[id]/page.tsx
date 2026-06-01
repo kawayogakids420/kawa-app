@@ -62,7 +62,7 @@ export default function SemanaPage({ params }: { params: Promise<{ id: string }>
           <img
             src={WORLD_SYMBOLS[weekId]}
             alt=""
-            style={{ width: '100%', height: '100%', objectFit: 'contain', filter: 'brightness(0) invert(1)' }}
+            style={{ width: '100%', height: '100%', objectFit: 'contain' }}
           />
         </div>
 
@@ -92,7 +92,7 @@ export default function SemanaPage({ params }: { params: Promise<{ id: string }>
             <img
               src={WORLD_SYMBOLS[weekId]}
               alt={week.element}
-              style={{ width: '100%', height: '100%', objectFit: 'contain', filter: 'brightness(0) invert(1)' }}
+              style={{ width: '100%', height: '100%', objectFit: 'contain' }}
             />
           </div>
         </div>
