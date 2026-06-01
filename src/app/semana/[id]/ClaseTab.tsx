@@ -16,12 +16,9 @@ interface Props {
 type Section = 'historia' | 'posturas' | 'respiracion' | 'relajacion'
 const SECTIONS: Section[] = ['historia', 'posturas', 'respiracion', 'relajacion']
 
-const SECTION_META: Record<Section, { label: string; icon: string }> = {
-  historia:    { label: 'Historia',    icon: '📖' },
-  posturas:    { label: 'Posturas',    icon: '🧘' },
-  respiracion: { label: 'Respiración', icon: '🌬️' },
-  relajacion:  { label: 'Relajación',  icon: '☁️' },
-}
+const STEP_LABELS = ['Inicio', 'Deseq.', 'Acción', 'Catarsis', 'Enseñ.']
+const STEP_ICONS  = ['🌱', '🌀', '⚡', '💧', '✨']
+const STEP_COLORS = ['#2D6A4F', '#E64A19', '#1976D2', '#7B1FA2', '#F57F17']
 
 // ── Reproductor de audio ──────────────────────────────────────────────────────
 function AudioBtn({ src, label, forChild = false, color = '#2D6A4F' }: {
@@ -81,11 +78,12 @@ function AudioBtn({ src, label, forChild = false, color = '#2D6A4F' }: {
 }
 
 // ── Tarjeta de postura ────────────────────────────────────────────────────────
-function PostureCard({ posture, weekColors, weekId, activeProfile, profile, showProfileTips }: {
+function PostureCard({ posture, weekColors, weekId, activeProfile, profile, showProfileTips, highlighted }: {
   posture: any; weekColors: { main: string; light: string }; weekId: number
   activeProfile: SensoryProfile | null; profile: any; showProfileTips: boolean
+  highlighted?: boolean
 }) {
-  const [open, setOpen] = useState(false)
+  const [open, setOpen] = useState(highlighted ?? false)
   const audioMap: Record<string, string> = {
     montana: 'montana', indio: 'posturaindio', tortuga: 'posturatortuga',
     gato: 'gatolYII', arbol: 'posturaarbol',
@@ -94,21 +92,29 @@ function PostureCard({ posture, weekColors, weekId, activeProfile, profile, show
   const s = weekId
 
   return (
-    <div style={{ background: 'white', borderRadius: 16, overflow: 'hidden', marginBottom: 10, border: '1.5px solid #F0EDE8', boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}>
-      <button onClick={() => setOpen(!open)} style={{ width: '100%', padding: '12px 14px', display: 'flex', alignItems: 'center', gap: 12, background: open ? weekColors.light : 'white', border: 'none', cursor: 'pointer', textAlign: 'left', borderBottom: open ? `1.5px solid ${weekColors.main}30` : 'none' }}>
+    <div id={`postura-${posture.id}`} style={{
+      background: 'white', borderRadius: 16, overflow: 'hidden', marginBottom: 10,
+      border: highlighted ? `2px solid ${weekColors.main}` : '1.5px solid #F0EDE8',
+      boxShadow: highlighted ? `0 4px 16px ${weekColors.main}30` : '0 2px 8px rgba(0,0,0,0.06)'
+    }}>
+      <button onClick={() => setOpen(!open)} style={{
+        width: '100%', padding: '12px 14px', display: 'flex', alignItems: 'center', gap: 12,
+        background: open ? weekColors.light : 'white', border: 'none', cursor: 'pointer', textAlign: 'left',
+        borderBottom: open ? `1.5px solid ${weekColors.main}30` : 'none'
+      }}>
         <div style={{ width: 44, height: 44, borderRadius: 12, background: open ? weekColors.main : '#F3F4F6', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 24, flexShrink: 0, transition: 'all 0.2s' }}>
           {posture.emoji}
         </div>
         <div style={{ flex: 1 }}>
-          <p style={{ fontSize: 14, fontWeight: 500, color: '#111', margin: 0 }}>{posture.name}</p>
-          <p style={{ fontSize: 11, color: '#9CA3AF', margin: 0 }}>"{posture.magicName}"</p>
+          <p style={{ fontSize: 14, fontWeight: 700, color: '#111', margin: 0 }}>{posture.name}</p>
+          <p style={{ fontSize: 11, color: '#9CA3AF', margin: 0, fontStyle: 'italic' }}>"{posture.magicName}"</p>
         </div>
         <div style={{ width: 28, height: 28, borderRadius: '50%', background: weekColors.main + '20', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, color: weekColors.main, flexShrink: 0, transition: 'transform 0.2s', transform: open ? 'rotate(180deg)' : 'none' }}>↓</div>
       </button>
 
       {open && (
         <div style={{ padding: '14px' }}>
-          <p style={{ fontSize: 10, fontWeight: 500, color: '#9CA3AF', margin: '0 0 8px', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Audio de la postura</p>
+          <p style={{ fontSize: 9, fontWeight: 700, color: '#9CA3AF', margin: '0 0 8px', textTransform: 'uppercase', letterSpacing: '0.06em' }}>🎧 Audio de la postura</p>
           <AudioBtn src={`/audio/semana-${s}/s${s}postura${audioKey}historia.m4a`} label="Narración mágica — para el niño/a" forChild={true} color={weekColors.main} />
           <AudioBtn src={`/audio/semana-${s}/s${s}howto${audioKey}.m4a`} label="Cómo hacer la postura — para el adulto" forChild={false} color={weekColors.main} />
           <div style={{ height: 1, background: '#F3F4F6', margin: '10px 0' }} />
@@ -126,7 +132,7 @@ function PostureCard({ posture, weekColors, weekId, activeProfile, profile, show
               <div style={{ background: weekColors.light, borderRadius: 10, padding: '10px 12px', marginBottom: 8 }}>
                 <p style={{ fontSize: 9, color: '#9CA3AF', margin: '0 0 4px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Cómo hacerla</p>
                 <p style={{ fontSize: 12, color: '#374151', lineHeight: 1.6, margin: 0 }}>{posture.howTo}</p>
-                <p style={{ fontSize: 11, fontWeight: 500, color: weekColors.main, margin: '6px 0 0' }}>⏱️ {posture.duration}</p>
+                <p style={{ fontSize: 11, fontWeight: 600, color: weekColors.main, margin: '6px 0 0' }}>⏱️ {posture.duration}</p>
               </div>
               <div style={{ background: '#F8F7F4', borderRadius: 10, padding: '10px 12px' }}>
                 <p style={{ fontSize: 9, color: '#9CA3AF', margin: '0 0 6px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Beneficios sensoriales</p>
@@ -150,7 +156,9 @@ export default function ClaseTab({ week, weekColors, activeProfile }: Props) {
   const router = useRouter()
   const [activeSection, setActiveSection]     = useState<Section>('historia')
   const [completedSections, setCompleted]     = useState<Set<Section>>(new Set())
+  const [historiaStep, setHistoriaStep]       = useState(0)
   const [showProfileTips, setShowProfileTips] = useState(false)
+  const [highlightedPostura, setHighlightedPostura] = useState<string | null>(null)
   const { logSession, activeChildId, userType } = useAppStore()
   const [logOpen, setLogOpen] = useState(false)
   const [mood, setMood]       = useState<'great'|'good'|'okay'|'hard'>('good')
@@ -160,7 +168,6 @@ export default function ClaseTab({ week, weekColors, activeProfile }: Props) {
   const s           = week.id
   const doneCount   = completedSections.size
   const totalSecs   = SECTIONS.length
-  const progressPct = Math.round((doneCount / totalSecs) * 100)
 
   const markDone = (sec: Section) => {
     setCompleted(prev => new Set([...prev, sec]))
@@ -168,40 +175,107 @@ export default function ClaseTab({ week, weekColors, activeProfile }: Props) {
     if (idx < SECTIONS.length - 1) setActiveSection(SECTIONS[idx + 1])
   }
 
+  // Escuchar evento "Ver postura" desde HistoriaKawa
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const { posturaId } = (e as CustomEvent).detail
+      setHighlightedPostura(posturaId)
+      setActiveSection('posturas')
+      setTimeout(() => {
+        const el = document.getElementById(`postura-${posturaId}`)
+        el?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      }, 300)
+    }
+    window.addEventListener('kawa-ver-postura', handler)
+    return () => window.removeEventListener('kawa-ver-postura', handler)
+  }, [])
+
+  // La barra de progreso muestra las 5 partes cuando estamos en Historia
+  // y las 4 secciones cuando estamos en otras secciones
+  const isInHistoria = activeSection === 'historia'
+
   return (
     <div>
       {/* ── BARRA DE PROGRESO ── */}
       <div style={{ background: 'white', borderRadius: 16, padding: '14px 16px', marginBottom: 12, border: '0.5px solid #E5E7EB' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
-          <p style={{ fontSize: 13, fontWeight: 500, color: '#111', margin: 0 }}>Progreso de esta sesión</p>
-          <p style={{ fontSize: 13, fontWeight: 500, color: weekColors.main, margin: 0 }}>{doneCount}/{totalSecs}</p>
+          <p style={{ fontSize: 13, fontWeight: 700, color: '#111', margin: 0 }}>
+            {isInHistoria ? 'Historia de Kawa' : 'Progreso de esta sesión'}
+          </p>
+          <p style={{ fontSize: 13, fontWeight: 700, color: weekColors.main, margin: 0 }}>
+            {isInHistoria ? `${historiaStep + 1}/5` : `${doneCount}/${totalSecs}`}
+          </p>
         </div>
-        <div style={{ height: 8, background: '#F3F4F6', borderRadius: 4, overflow: 'hidden', marginBottom: 10 }}>
-          <div style={{ height: '100%', borderRadius: 4, transition: 'width 0.5s', width: `${progressPct}%`, background: weekColors.main }} />
+
+        {/* Barra de progreso */}
+        <div style={{ height: 6, background: '#F3F4F6', borderRadius: 3, overflow: 'hidden', marginBottom: 12 }}>
+          <div style={{
+            height: '100%', borderRadius: 3, transition: 'width 0.4s',
+            width: isInHistoria
+              ? `${((historiaStep + 1) / 5) * 100}%`
+              : `${(doneCount / totalSecs) * 100}%`,
+            background: isInHistoria ? STEP_COLORS[historiaStep] : weekColors.main
+          }} />
         </div>
-        <div style={{ display: 'flex', gap: 6 }}>
-          {SECTIONS.map(sec => {
-            const done   = completedSections.has(sec)
-            const active = activeSection === sec
-            const meta   = SECTION_META[sec]
-            return (
-              <button key={sec} onClick={() => setActiveSection(sec)} style={{
-                flex: 1, padding: '6px 4px', borderRadius: 10, border: 'none',
-                cursor: 'pointer', display: 'flex', flexDirection: 'column',
-                alignItems: 'center', gap: 3, transition: 'all 0.2s',
-                background: done ? weekColors.main : active ? weekColors.light : '#F8F7F4'
-              }}>
-                <span style={{ fontSize: 16 }}>{done ? '⭐' : meta.icon}</span>
-                <span style={{ fontSize: 9, fontWeight: 500, color: done ? 'white' : active ? weekColors.main : '#9CA3AF' }}>
-                  {meta.label}
-                </span>
-              </button>
-            )
-          })}
-        </div>
-        {doneCount === totalSecs && (
+
+        {/* Tabs */}
+        {isInHistoria ? (
+          // Tabs de las 5 partes de la historia
+          <div style={{ display: 'flex', gap: 4 }}>
+            {STEP_LABELS.map((label, i) => {
+              const done   = i < historiaStep
+              const active = i === historiaStep
+              return (
+                <button key={i} onClick={() => setHistoriaStep(i)} style={{
+                  flex: 1, padding: '6px 2px', borderRadius: 10, border: 'none',
+                  cursor: 'pointer', display: 'flex', flexDirection: 'column',
+                  alignItems: 'center', gap: 3, transition: 'all 0.2s',
+                  background: done
+                    ? STEP_COLORS[i]
+                    : active
+                    ? STEP_COLORS[i] + '20'
+                    : '#F8F7F4'
+                }}>
+                  <span style={{ fontSize: 14 }}>{done ? '⭐' : STEP_ICONS[i]}</span>
+                  <span style={{
+                    fontSize: 8, fontWeight: 700,
+                    color: done ? 'white' : active ? STEP_COLORS[i] : '#9CA3AF',
+                    letterSpacing: '0.01em'
+                  }}>
+                    {label}
+                  </span>
+                </button>
+              )
+            })}
+          </div>
+        ) : (
+          // Tabs de las 4 secciones
+          <div style={{ display: 'flex', gap: 6 }}>
+            {SECTIONS.map(sec => {
+              const done   = completedSections.has(sec)
+              const active = activeSection === sec
+              const icons: Record<Section, string> = { historia: '📖', posturas: '🧘', respiracion: '🌬️', relajacion: '☁️' }
+              const labels: Record<Section, string> = { historia: 'Historia', posturas: 'Posturas', respiracion: 'Respir.', relajacion: 'Relaj.' }
+              return (
+                <button key={sec} onClick={() => setActiveSection(sec)} style={{
+                  flex: 1, padding: '6px 4px', borderRadius: 10, border: 'none',
+                  cursor: 'pointer', display: 'flex', flexDirection: 'column',
+                  alignItems: 'center', gap: 3, transition: 'all 0.2s',
+                  background: done ? weekColors.main : active ? weekColors.light : '#F8F7F4'
+                }}>
+                  <span style={{ fontSize: 16 }}>{done ? '⭐' : icons[sec]}</span>
+                  <span style={{ fontSize: 9, fontWeight: 600, color: done ? 'white' : active ? weekColors.main : '#9CA3AF' }}>
+                    {labels[sec]}
+                  </span>
+                </button>
+              )
+            })}
+          </div>
+        )}
+
+        {doneCount === totalSecs && !isInHistoria && (
           <div style={{ marginTop: 10, background: weekColors.light, borderRadius: 10, padding: '8px 12px', textAlign: 'center' }}>
-            <p style={{ fontSize: 13, fontWeight: 500, color: weekColors.main, margin: 0 }}>🌟 ¡Sesión completa! Ya puedes registrarla</p>
+            <p style={{ fontSize: 13, fontWeight: 700, color: weekColors.main, margin: 0 }}>🌟 ¡Sesión completa! Ya puedes registrarla</p>
           </div>
         )}
       </div>
@@ -214,11 +288,11 @@ export default function ClaseTab({ week, weekColors, activeProfile }: Props) {
       }}>
         <span style={{ fontSize: 22 }}>🎒</span>
         <div style={{ flex: 1, textAlign: 'left' }}>
-          <p style={{ fontSize: 13, fontWeight: 500, color: '#92400E', margin: 0 }}>Prepara los materiales</p>
+          <p style={{ fontSize: 13, fontWeight: 700, color: '#92400E', margin: 0 }}>Prepara los materiales</p>
           <p style={{ fontSize: 11, color: '#B45309', margin: 0 }}>{week.physicalObject.name} · Colchoneta · {week.tactileObject}</p>
         </div>
-        <div style={{ background: '#F59E0B', color: 'white', borderRadius: 10, padding: '6px 12px', fontSize: 12, fontWeight: 500, flexShrink: 0 }}>
-          Ver materiales →
+        <div style={{ background: '#F59E0B', color: 'white', borderRadius: 10, padding: '6px 12px', fontSize: 12, fontWeight: 700, flexShrink: 0 }}>
+          Ver →
         </div>
       </button>
 
@@ -229,6 +303,8 @@ export default function ClaseTab({ week, weekColors, activeProfile }: Props) {
           weekColors={weekColors}
           onComplete={() => markDone('historia')}
           isCompleted={completedSections.has('historia')}
+          currentStep={historiaStep}
+          onStepChange={setHistoriaStep}
         />
       )}
 
@@ -239,25 +315,34 @@ export default function ClaseTab({ week, weekColors, activeProfile }: Props) {
             <div style={{ width: 36, height: 36, borderRadius: 10, background: 'rgba(255,255,255,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20 }}>🧘</div>
             <div style={{ flex: 1 }}>
               <p style={{ fontSize: 10, color: 'rgba(255,255,255,0.7)', margin: 0, textTransform: 'uppercase', letterSpacing: '0.08em' }}>{week.posturas.length} posturas de Kawa</p>
-              <p style={{ fontSize: 15, fontWeight: 500, color: 'white', margin: 0 }}>Las posturas de Kawa</p>
+              <p style={{ fontSize: 15, fontWeight: 700, color: 'white', margin: 0 }}>Las posturas de Kawa</p>
             </div>
             {profile && (
-              <button onClick={() => setShowProfileTips(!showProfileTips)} style={{ background: 'rgba(255,255,255,0.2)', border: 'none', borderRadius: 10, padding: '6px 10px', color: 'white', fontSize: 11, cursor: 'pointer' }}>
+              <button onClick={() => setShowProfileTips(!showProfileTips)} style={{ background: 'rgba(255,255,255,0.2)', border: 'none', borderRadius: 10, padding: '6px 10px', color: 'white', fontSize: 11, fontWeight: 600, cursor: 'pointer' }}>
                 {showProfileTips ? 'General' : `${profile.icon} ${profile.name}`}
               </button>
             )}
           </div>
 
           {week.posturas.map(posture => (
-            <PostureCard key={posture.id} posture={posture} weekColors={weekColors} weekId={week.id} activeProfile={activeProfile} profile={profile} showProfileTips={showProfileTips} />
+            <PostureCard
+              key={posture.id}
+              posture={posture}
+              weekColors={weekColors}
+              weekId={week.id}
+              activeProfile={activeProfile}
+              profile={profile}
+              showProfileTips={showProfileTips}
+              highlighted={highlightedPostura === posture.id}
+            />
           ))}
 
           <div style={{ background: 'white', borderRadius: 14, padding: '14px', marginBottom: 10, border: '1.5px solid #F0EDE8' }}>
-            <p style={{ fontSize: 12, fontWeight: 500, color: '#111', margin: '0 0 10px' }}>Adaptaciones por perfil</p>
+            <p style={{ fontSize: 11, fontWeight: 700, color: '#111', margin: '0 0 10px' }}>Adaptaciones por perfil</p>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
               {Object.values(week.profileAdaptations).map((pa: any) => (
                 <div key={pa.name} style={{ borderRadius: 10, padding: '10px', background: pa.bgColor }}>
-                  <p style={{ fontSize: 11, fontWeight: 500, color: pa.color, margin: '0 0 6px' }}>{pa.icon} {pa.name}</p>
+                  <p style={{ fontSize: 11, fontWeight: 700, color: pa.color, margin: '0 0 5px' }}>{pa.icon} {pa.name}</p>
                   {pa.tips.slice(0, 2).map((tip: string, i: number) => (
                     <p key={i} style={{ fontSize: 10, color: pa.color, margin: '0 0 2px' }}>• {tip}</p>
                   ))}
@@ -266,7 +351,7 @@ export default function ClaseTab({ week, weekColors, activeProfile }: Props) {
             </div>
           </div>
 
-          <button onClick={() => markDone('posturas')} style={{ width: '100%', padding: '14px', borderRadius: 14, background: completedSections.has('posturas') ? '#E8F5E9' : weekColors.main, border: 'none', cursor: 'pointer', color: completedSections.has('posturas') ? weekColors.main : 'white', fontSize: 14, fontWeight: 500, boxSizing: 'border-box' }}>
+          <button onClick={() => markDone('posturas')} style={{ width: '100%', padding: '14px', borderRadius: 14, background: completedSections.has('posturas') ? '#E8F5E9' : weekColors.main, border: 'none', cursor: 'pointer', color: completedSections.has('posturas') ? weekColors.main : 'white', fontSize: 14, fontWeight: 700, boxSizing: 'border-box' }}>
             {completedSections.has('posturas') ? '⭐ Posturas completadas' : '⭐ Marcar posturas como completadas'}
           </button>
         </div>
@@ -279,7 +364,7 @@ export default function ClaseTab({ week, weekColors, activeProfile }: Props) {
             <div style={{ width: 36, height: 36, borderRadius: 10, background: 'rgba(255,255,255,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20 }}>🌬️</div>
             <div>
               <p style={{ fontSize: 10, color: 'rgba(255,255,255,0.7)', margin: 0, textTransform: 'uppercase', letterSpacing: '0.08em' }}>Técnica de respiración</p>
-              <p style={{ fontSize: 15, fontWeight: 500, color: 'white', margin: 0 }}>{week.breathing.name}</p>
+              <p style={{ fontSize: 15, fontWeight: 700, color: 'white', margin: 0 }}>{week.breathing.name}</p>
             </div>
           </div>
           <div style={{ background: 'white', borderRadius: 14, padding: '12px 14px', marginBottom: 10, border: '1.5px solid #F0EDE8' }}>
@@ -295,16 +380,12 @@ export default function ClaseTab({ week, weekColors, activeProfile }: Props) {
             <p style={{ fontSize: 13, color: '#374151', lineHeight: 1.6, margin: 0 }}>{week.breathing.howTo}</p>
           </div>
           <div style={{ background: 'white', borderRadius: 14, padding: '12px 14px', marginBottom: 10, border: '1.5px solid #F0EDE8' }}>
-            <div style={{ marginBottom: 8 }}>
-              <p style={{ fontSize: 9, color: '#9CA3AF', margin: '0 0 3px', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Beneficio</p>
-              <p style={{ fontSize: 12, color: '#374151', margin: 0 }}>{week.breathing.benefit}</p>
-            </div>
-            <div style={{ borderTop: '1px solid #F3F4F6', paddingTop: 8 }}>
-              <p style={{ fontSize: 9, color: '#9CA3AF', margin: '0 0 3px', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Cuándo usarla</p>
-              <p style={{ fontSize: 12, color: '#374151', margin: 0 }}>{week.breathing.whenToUse}</p>
-            </div>
+            <p style={{ fontSize: 9, color: '#9CA3AF', margin: '0 0 3px', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Beneficio</p>
+            <p style={{ fontSize: 12, color: '#374151', margin: '0 0 8px' }}>{week.breathing.benefit}</p>
+            <p style={{ fontSize: 9, color: '#9CA3AF', margin: '0 0 3px', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Cuándo usarla</p>
+            <p style={{ fontSize: 12, color: '#374151', margin: 0 }}>{week.breathing.whenToUse}</p>
           </div>
-          <button onClick={() => markDone('respiracion')} style={{ width: '100%', padding: '14px', borderRadius: 14, background: completedSections.has('respiracion') ? '#E8F5E9' : weekColors.main, border: 'none', cursor: 'pointer', color: completedSections.has('respiracion') ? weekColors.main : 'white', fontSize: 14, fontWeight: 500, boxSizing: 'border-box' }}>
+          <button onClick={() => markDone('respiracion')} style={{ width: '100%', padding: '14px', borderRadius: 14, background: completedSections.has('respiracion') ? '#E8F5E9' : weekColors.main, border: 'none', cursor: 'pointer', color: completedSections.has('respiracion') ? weekColors.main : 'white', fontSize: 14, fontWeight: 700, boxSizing: 'border-box' }}>
             {completedSections.has('respiracion') ? '⭐ Respiración completada' : '⭐ Marcar respiración como completada'}
           </button>
         </div>
@@ -317,19 +398,19 @@ export default function ClaseTab({ week, weekColors, activeProfile }: Props) {
             <div style={{ width: 36, height: 36, borderRadius: 10, background: 'rgba(255,255,255,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20 }}>☁️</div>
             <div>
               <p style={{ fontSize: 10, color: 'rgba(255,255,255,0.7)', margin: 0, textTransform: 'uppercase', letterSpacing: '0.08em' }}>Cierre de sesión</p>
-              <p style={{ fontSize: 15, fontWeight: 500, color: 'white', margin: 0 }}>Relajación guiada de Kawa</p>
+              <p style={{ fontSize: 15, fontWeight: 700, color: 'white', margin: 0 }}>Relajación guiada de Kawa</p>
             </div>
           </div>
           <div style={{ background: 'white', borderRadius: 14, padding: '12px 14px', marginBottom: 10, border: '1.5px solid #F0EDE8' }}>
             <AudioBtn src={`/audio/semana-${s}/s${s}relajacion.m4a`} label="Relajación guiada — reproducir mientras el niño está acostado" forChild={true} color={weekColors.main} />
           </div>
           <div style={{ background: '#E8EAF6', borderRadius: 14, padding: '14px', marginBottom: 10, border: '1.5px solid #C5CAE9' }}>
-            <p style={{ fontSize: 10, color: '#5C6BC0', margin: '0 0 10px', textTransform: 'uppercase', letterSpacing: '0.06em', fontWeight: 500 }}>Leer en voz baja mientras el niño está acostado</p>
+            <p style={{ fontSize: 9, fontWeight: 700, color: '#5C6BC0', margin: '0 0 10px', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Leer en voz baja mientras el niño está acostado</p>
             {week.relaxationScript.split('\n\n').map((paragraph, i) => (
               <p key={i} style={{ fontSize: 13, color: '#283593', fontStyle: 'italic', lineHeight: 1.7, margin: '0 0 10px', fontFamily: "'Georgia',serif" }}>{paragraph}</p>
             ))}
           </div>
-          <button onClick={() => markDone('relajacion')} style={{ width: '100%', padding: '14px', borderRadius: 14, background: completedSections.has('relajacion') ? '#E8F5E9' : weekColors.main, border: 'none', cursor: 'pointer', color: completedSections.has('relajacion') ? weekColors.main : 'white', fontSize: 14, fontWeight: 500, boxSizing: 'border-box' }}>
+          <button onClick={() => markDone('relajacion')} style={{ width: '100%', padding: '14px', borderRadius: 14, background: completedSections.has('relajacion') ? '#E8F5E9' : weekColors.main, border: 'none', cursor: 'pointer', color: completedSections.has('relajacion') ? weekColors.main : 'white', fontSize: 14, fontWeight: 700, boxSizing: 'border-box' }}>
             {completedSections.has('relajacion') ? '⭐ Relajación completada' : '⭐ Marcar relajación como completada'}
           </button>
         </div>
@@ -343,18 +424,19 @@ export default function ClaseTab({ week, weekColors, activeProfile }: Props) {
       )}
 
       {/* ── REGISTRAR SESIÓN ── */}
-      <button onClick={() => setLogOpen(true)} style={{ width: '100%', padding: '14px', borderRadius: 14, background: 'white', marginTop: 12, border: `2px solid ${weekColors.main}`, color: weekColors.main, fontSize: 14, fontWeight: 500, cursor: 'pointer', boxSizing: 'border-box' }}>
+      <button onClick={() => setLogOpen(true)} style={{ width: '100%', padding: '14px', borderRadius: 14, background: 'white', marginTop: 12, border: `2px solid ${weekColors.main}`, color: weekColors.main, fontSize: 14, fontWeight: 700, cursor: 'pointer', boxSizing: 'border-box' }}>
         📝 Registrar esta sesión {doneCount === totalSecs ? '🌟' : `(${doneCount}/${totalSecs} completadas)`}
       </button>
 
+      {/* Modal registro */}
       {logOpen && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 50, display: 'flex', alignItems: 'flex-end' }}>
           <div style={{ background: 'white', width: '100%', maxWidth: 430, margin: '0 auto', borderRadius: '24px 24px 0 0', padding: 24 }}>
-            <h3 style={{ fontSize: 18, fontWeight: 500, color: '#111', margin: '0 0 16px' }}>¿Cómo fue la sesión?</h3>
+            <h3 style={{ fontSize: 18, fontWeight: 700, color: '#111', margin: '0 0 16px' }}>¿Cómo fue la sesión?</h3>
             {doneCount > 0 && (
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16, padding: '10px 12px', borderRadius: 12, background: weekColors.light }}>
                 <span style={{ fontSize: 22 }}>{'⭐'.repeat(doneCount)}</span>
-                <p style={{ fontSize: 13, fontWeight: 500, color: weekColors.main, margin: 0 }}>
+                <p style={{ fontSize: 13, fontWeight: 700, color: weekColors.main, margin: 0 }}>
                   {doneCount} estrella{doneCount > 1 ? 's' : ''} ganada{doneCount > 1 ? 's' : ''} hoy
                 </p>
               </div>
@@ -373,7 +455,7 @@ export default function ClaseTab({ week, weekColors, activeProfile }: Props) {
               <button onClick={() => {
                 logSession({ weekId: week.id, childId: activeChildId ?? '', completed: doneCount === totalSecs, mood, notes, posturesCompleted: week.posturas.map(p => p.id) })
                 setLogOpen(false); setNotes('')
-              }} style={{ flex: 1, padding: 12, borderRadius: 12, border: 'none', background: weekColors.main, color: 'white', fontSize: 14, fontWeight: 500, cursor: 'pointer' }}>
+              }} style={{ flex: 1, padding: 12, borderRadius: 12, border: 'none', background: weekColors.main, color: 'white', fontSize: 14, fontWeight: 700, cursor: 'pointer' }}>
                 Guardar sesión
               </button>
             </div>
