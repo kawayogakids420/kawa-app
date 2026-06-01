@@ -20,6 +20,15 @@ const STEP_LABELS = ['Inicio', 'Deseq.', 'Acción', 'Catarsis', 'Enseñ.']
 const STEP_ICONS  = ['🌱', '🌀', '⚡', '💧', '✨']
 const STEP_COLORS = ['#2D6A4F', '#E64A19', '#1976D2', '#7B1FA2', '#F57F17']
 
+// Materiales por semana
+const MATERIALES_EXTRA: Record<number, string[]> = {
+  1: ['Piedra suave y fría', 'Colchoneta o manta', 'Música suave de bosque (opcional)'],
+  2: ['Tela azul suave', 'Bol pequeño con agua', 'Colchoneta'],
+  3: ['Pluma de ave o papel liviano', 'Espacio amplio para abrir brazos', 'Colchoneta'],
+  4: ['Piedra naranja o cálida', 'Colchoneta', 'Luz cálida si es posible'],
+  5: ['Los 4 objetos del curso', 'Tela oscura con estrellas', 'Colchoneta'],
+}
+
 // ── Reproductor de audio ──────────────────────────────────────────────────────
 function AudioBtn({ src, label, forChild = false, color = '#2D6A4F' }: {
   src: string; label: string; forChild?: boolean; color?: string
@@ -111,7 +120,6 @@ function PostureCard({ posture, weekColors, weekId, activeProfile, profile, show
         </div>
         <div style={{ width: 28, height: 28, borderRadius: '50%', background: weekColors.main + '20', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, color: weekColors.main, flexShrink: 0, transition: 'transform 0.2s', transform: open ? 'rotate(180deg)' : 'none' }}>↓</div>
       </button>
-
       {open && (
         <div style={{ padding: '14px' }}>
           <p style={{ fontSize: 9, fontWeight: 700, color: '#9CA3AF', margin: '0 0 8px', textTransform: 'uppercase', letterSpacing: '0.06em' }}>🎧 Audio de la postura</p>
@@ -154,12 +162,13 @@ function PostureCard({ posture, weekColors, weekId, activeProfile, profile, show
 // ── Componente principal ──────────────────────────────────────────────────────
 export default function ClaseTab({ week, weekColors, activeProfile }: Props) {
   const router = useRouter()
-  const [activeSection, setActiveSection]     = useState<Section>('historia')
-  const [completedSections, setCompleted]     = useState<Set<Section>>(new Set())
-  const [historiaStep, setHistoriaStep]       = useState(0)
-  const [showProfileTips, setShowProfileTips] = useState(false)
+  const [activeSection, setActiveSection]           = useState<Section>('historia')
+  const [completedSections, setCompleted]           = useState<Set<Section>>(new Set())
+  const [historiaStep, setHistoriaStep]             = useState(0)
+  const [showProfileTips, setShowProfileTips]       = useState(false)
   const [highlightedPostura, setHighlightedPostura] = useState<string | null>(null)
-  const { logSession, activeChildId, userType } = useAppStore()
+  const [materialesOpen, setMaterialesOpen]         = useState(false)
+  const { logSession, activeChildId, userType }     = useAppStore()
   const [logOpen, setLogOpen] = useState(false)
   const [mood, setMood]       = useState<'great'|'good'|'okay'|'hard'>('good')
   const [notes, setNotes]     = useState('')
@@ -168,6 +177,8 @@ export default function ClaseTab({ week, weekColors, activeProfile }: Props) {
   const s           = week.id
   const doneCount   = completedSections.size
   const totalSecs   = SECTIONS.length
+  const isInHistoria = activeSection === 'historia'
+  const materiales  = MATERIALES_EXTRA[week.id] || []
 
   const markDone = (sec: Section) => {
     setCompleted(prev => new Set([...prev, sec]))
@@ -175,7 +186,6 @@ export default function ClaseTab({ week, weekColors, activeProfile }: Props) {
     if (idx < SECTIONS.length - 1) setActiveSection(SECTIONS[idx + 1])
   }
 
-  // Escuchar evento "Ver postura" desde HistoriaKawa
   useEffect(() => {
     const handler = (e: Event) => {
       const { posturaId } = (e as CustomEvent).detail
@@ -190,27 +200,24 @@ export default function ClaseTab({ week, weekColors, activeProfile }: Props) {
     return () => window.removeEventListener('kawa-ver-postura', handler)
   }, [])
 
-  // La barra de progreso muestra las 5 partes cuando estamos en Historia
-  // y las 4 secciones cuando estamos en otras secciones
-  const isInHistoria = activeSection === 'historia'
-
   return (
     <div>
+
       {/* ── BARRA DE PROGRESO ── */}
       <div style={{ background: 'white', borderRadius: 16, padding: '14px 16px', marginBottom: 12, border: '0.5px solid #E5E7EB' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
           <p style={{ fontSize: 13, fontWeight: 700, color: '#111', margin: 0 }}>
             {isInHistoria ? 'Historia de Kawa' : 'Progreso de esta sesión'}
           </p>
-          <p style={{ fontSize: 13, fontWeight: 700, color: weekColors.main, margin: 0 }}>
+          <p style={{ fontSize: 13, fontWeight: 700, color: isInHistoria ? STEP_COLORS[historiaStep] : weekColors.main, margin: 0 }}>
             {isInHistoria ? `${historiaStep + 1}/5` : `${doneCount}/${totalSecs}`}
           </p>
         </div>
 
-        {/* Barra de progreso */}
+        {/* Barra */}
         <div style={{ height: 6, background: '#F3F4F6', borderRadius: 3, overflow: 'hidden', marginBottom: 12 }}>
           <div style={{
-            height: '100%', borderRadius: 3, transition: 'width 0.4s',
+            height: '100%', borderRadius: 3, transition: 'width 0.4s, background 0.4s',
             width: isInHistoria
               ? `${((historiaStep + 1) / 5) * 100}%`
               : `${(doneCount / totalSecs) * 100}%`,
@@ -218,29 +225,23 @@ export default function ClaseTab({ week, weekColors, activeProfile }: Props) {
           }} />
         </div>
 
-        {/* Tabs */}
+        {/* Tabs — se sincronizan con el carrusel */}
         {isInHistoria ? (
-          // Tabs de las 5 partes de la historia
           <div style={{ display: 'flex', gap: 4 }}>
             {STEP_LABELS.map((label, i) => {
               const done   = i < historiaStep
               const active = i === historiaStep
               return (
                 <button key={i} onClick={() => setHistoriaStep(i)} style={{
-                  flex: 1, padding: '6px 2px', borderRadius: 10, border: 'none',
+                  flex: 1, padding: '7px 2px', borderRadius: 10, border: 'none',
                   cursor: 'pointer', display: 'flex', flexDirection: 'column',
-                  alignItems: 'center', gap: 3, transition: 'all 0.2s',
-                  background: done
-                    ? STEP_COLORS[i]
-                    : active
-                    ? STEP_COLORS[i] + '20'
-                    : '#F8F7F4'
+                  alignItems: 'center', gap: 3, transition: 'all 0.25s',
+                  background: done ? STEP_COLORS[i] : active ? STEP_COLORS[i] + '18' : '#F8F7F4'
                 }}>
-                  <span style={{ fontSize: 14 }}>{done ? '⭐' : STEP_ICONS[i]}</span>
+                  <span style={{ fontSize: 15 }}>{done ? '⭐' : STEP_ICONS[i]}</span>
                   <span style={{
-                    fontSize: 8, fontWeight: 700,
-                    color: done ? 'white' : active ? STEP_COLORS[i] : '#9CA3AF',
-                    letterSpacing: '0.01em'
+                    fontSize: 8, fontWeight: 700, letterSpacing: '0.01em',
+                    color: done ? 'white' : active ? STEP_COLORS[i] : '#9CA3AF'
                   }}>
                     {label}
                   </span>
@@ -249,18 +250,17 @@ export default function ClaseTab({ week, weekColors, activeProfile }: Props) {
             })}
           </div>
         ) : (
-          // Tabs de las 4 secciones
           <div style={{ display: 'flex', gap: 6 }}>
             {SECTIONS.map(sec => {
               const done   = completedSections.has(sec)
               const active = activeSection === sec
-              const icons: Record<Section, string> = { historia: '📖', posturas: '🧘', respiracion: '🌬️', relajacion: '☁️' }
+              const icons:  Record<Section, string> = { historia: '📖', posturas: '🧘', respiracion: '🌬️', relajacion: '☁️' }
               const labels: Record<Section, string> = { historia: 'Historia', posturas: 'Posturas', respiracion: 'Respir.', relajacion: 'Relaj.' }
               return (
                 <button key={sec} onClick={() => setActiveSection(sec)} style={{
-                  flex: 1, padding: '6px 4px', borderRadius: 10, border: 'none',
+                  flex: 1, padding: '7px 4px', borderRadius: 10, border: 'none',
                   cursor: 'pointer', display: 'flex', flexDirection: 'column',
-                  alignItems: 'center', gap: 3, transition: 'all 0.2s',
+                  alignItems: 'center', gap: 3, transition: 'all 0.25s',
                   background: done ? weekColors.main : active ? weekColors.light : '#F8F7F4'
                 }}>
                   <span style={{ fontSize: 16 }}>{done ? '⭐' : icons[sec]}</span>
@@ -280,23 +280,44 @@ export default function ClaseTab({ week, weekColors, activeProfile }: Props) {
         )}
       </div>
 
-      {/* ── BOTÓN MATERIALES ── */}
-      <button onClick={() => router.push('/materiales')} style={{
-        width: '100%', padding: '12px 16px', borderRadius: 14, marginBottom: 12,
-        background: '#FFF8E1', border: '1.5px solid #FDE68A',
-        display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer', boxSizing: 'border-box'
+      {/* ── CALLOUT DE MATERIALES ── */}
+      <div style={{
+        borderRadius: 14, marginBottom: 12, overflow: 'hidden',
+        border: '1px solid #FDE68A'
       }}>
-        <span style={{ fontSize: 22 }}>🎒</span>
-        <div style={{ flex: 1, textAlign: 'left' }}>
-          <p style={{ fontSize: 13, fontWeight: 700, color: '#92400E', margin: 0 }}>Prepara los materiales</p>
-          <p style={{ fontSize: 11, color: '#B45309', margin: 0 }}>{week.physicalObject.name} · Colchoneta · {week.tactileObject}</p>
-        </div>
-        <div style={{ background: '#F59E0B', color: 'white', borderRadius: 10, padding: '6px 12px', fontSize: 12, fontWeight: 700, flexShrink: 0 }}>
-          Ver →
-        </div>
-      </button>
+        <button
+          onClick={() => setMaterialesOpen(!materialesOpen)}
+          style={{
+            width: '100%', padding: '11px 14px',
+            background: '#FFFBEB',
+            display: 'flex', alignItems: 'center', gap: 10,
+            cursor: 'pointer', border: 'none', boxSizing: 'border-box'
+          }}
+        >
+          <span style={{ fontSize: 18, flexShrink: 0 }}>📦</span>
+          <p style={{ flex: 1, fontSize: 12, fontWeight: 600, color: '#92400E', margin: 0, textAlign: 'left' }}>
+            Recuerda tener listos los materiales para la clase
+          </p>
+          <span style={{
+            fontSize: 11, color: '#B45309', flexShrink: 0,
+            transform: materialesOpen ? 'rotate(180deg)' : 'none',
+            transition: 'transform 0.2s', display: 'block'
+          }}>▾</span>
+        </button>
 
-      {/* ══ HISTORIA — carrusel ══ */}
+        {materialesOpen && (
+          <div style={{ background: '#FFFDE7', padding: '10px 14px 12px', borderTop: '1px solid #FDE68A' }}>
+            {[week.physicalObject.name, week.tactileObject, ...materiales].map((item, i) => (
+              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 5 }}>
+                <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#F59E0B', flexShrink: 0 }} />
+                <p style={{ fontSize: 12, color: '#78350F', margin: 0 }}>{item}</p>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* ══ HISTORIA ══ */}
       {activeSection === 'historia' && (
         <HistoriaKawa
           week={week}
@@ -323,20 +344,9 @@ export default function ClaseTab({ week, weekColors, activeProfile }: Props) {
               </button>
             )}
           </div>
-
           {week.posturas.map(posture => (
-            <PostureCard
-              key={posture.id}
-              posture={posture}
-              weekColors={weekColors}
-              weekId={week.id}
-              activeProfile={activeProfile}
-              profile={profile}
-              showProfileTips={showProfileTips}
-              highlighted={highlightedPostura === posture.id}
-            />
+            <PostureCard key={posture.id} posture={posture} weekColors={weekColors} weekId={week.id} activeProfile={activeProfile} profile={profile} showProfileTips={showProfileTips} highlighted={highlightedPostura === posture.id} />
           ))}
-
           <div style={{ background: 'white', borderRadius: 14, padding: '14px', marginBottom: 10, border: '1.5px solid #F0EDE8' }}>
             <p style={{ fontSize: 11, fontWeight: 700, color: '#111', margin: '0 0 10px' }}>Adaptaciones por perfil</p>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
@@ -350,7 +360,6 @@ export default function ClaseTab({ week, weekColors, activeProfile }: Props) {
               ))}
             </div>
           </div>
-
           <button onClick={() => markDone('posturas')} style={{ width: '100%', padding: '14px', borderRadius: 14, background: completedSections.has('posturas') ? '#E8F5E9' : weekColors.main, border: 'none', cursor: 'pointer', color: completedSections.has('posturas') ? weekColors.main : 'white', fontSize: 14, fontWeight: 700, boxSizing: 'border-box' }}>
             {completedSections.has('posturas') ? '⭐ Posturas completadas' : '⭐ Marcar posturas como completadas'}
           </button>
