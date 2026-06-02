@@ -27,7 +27,6 @@ function getPreview(text: string, n=18): { preview:string; rest:string; hasMore:
   return { preview:words.slice(0,n).join(' ')+'...', rest:words.slice(n).join(' '), hasMore:true }
 }
 
-function firstWords(text:string, n:number) { return text.split(' ').slice(0,n).join(' ') }
 
 // ── Posturas ──────────────────────────────────────────────────────────────────
 const POSTURA_POR_PARTE: Record<number, Record<StepKey,{emoji:string;name:string;magic:string;id:string;howTo:string;duration:string;benefits:string[]}>> = {
@@ -349,9 +348,7 @@ export default function HistoriaKawa({ week, weekColors, onComplete, isCompleted
                 <h3 style={{ fontSize:17, fontWeight:700, color:'white', margin:'0 0 4px', fontFamily:"'Georgia','Times New Roman',serif", textShadow:'0 2px 6px rgba(0,0,0,0.4)', maxWidth:'62%' }}>
                   {stepData.title}
                 </h3>
-                <p style={{ fontSize:11, color:'rgba(255,255,255,0.82)', margin:0, fontStyle:'italic', lineHeight:1.45, maxWidth:'64%', textShadow:'0 1px 4px rgba(0,0,0,0.5)' }}>
-                  "{firstWords(stepData.text,12)}..."
-                </p>
+
               </div>
             </div>
 
@@ -385,8 +382,8 @@ export default function HistoriaKawa({ week, weekColors, onComplete, isCompleted
               <div style={{ marginBottom:12 }}>
                 <AudioBtn
                   src={`/audio/semana-${s}/s${s}postura${audioKey}historia.m4a`}
-                  label={`Narración — ${stepData.title}`}
-                  sublabel="▶ Historia de Kawa"
+                  label={`Historia — ${stepData.title}`}
+                  sublabel="📖 Kawa te cuenta"
                   color={AUDIO_COLORS.historia.color}
                   bg={AUDIO_COLORS.historia.bg}
                   size="large"
@@ -404,12 +401,12 @@ export default function HistoriaKawa({ week, weekColors, onComplete, isCompleted
               </div>
 
               {/* Audios postura — compactos con colores diferenciados */}
-              <div style={{ display:'flex', gap:7, alignItems:'stretch' }}>
+              <div style={{ display:'flex', gap:7, marginBottom:8 }}>
                 {/* Narración mágica — naranja */}
                 <AudioBtn
                   src={`/audio/semana-${s}/s${s}postura${audioKey}historia.m4a`}
-                  label="Narración mágica"
-                  sublabel="👦 Para el niño/a"
+                  label="Postura en cuento"
+                  sublabel="✨ El niño/a escucha"
                   color={AUDIO_COLORS.magica.color}
                   bg={AUDIO_COLORS.magica.bg}
                   icon="✨"
@@ -417,25 +414,33 @@ export default function HistoriaKawa({ week, weekColors, onComplete, isCompleted
                 {/* Instrucciones adulto — verde */}
                 <AudioBtn
                   src={`/audio/semana-${s}/s${s}howto${audioKey}.m4a`}
-                  label="Cómo hacer la postura"
-                  sublabel="👩 Para el adulto"
+                  label="Guía del adulto"
+                  sublabel="🧘 Cómo acompañar"
                   color={AUDIO_COLORS.adulto.color}
                   bg={AUDIO_COLORS.adulto.bg}
                   icon="🧘"
                 />
-                {/* Ver postura */}
-                <button onClick={() => setShowPostura(true)} style={{
-                  flexShrink:0, width:48,
-                  background:'rgba(255,255,255,0.92)',
-                  border:`1.5px solid ${config.color}30`,
-                  borderRadius:12,
-                  display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center',
-                  cursor:'pointer', gap:2, padding:'6px 4px'
-                }}>
-                  <span style={{ fontSize:20 }}>{postura.emoji}</span>
-                  <span style={{ fontSize:8, color:config.color, fontWeight:700 }}>Ver</span>
-                </button>
               </div>
+              {/* Ver postura — ancho completo */}
+              <button onClick={() => setShowPostura(true)} style={{
+                width:'100%', padding:'10px 14px',
+                background:'rgba(255,255,255,0.92)',
+                border:`1.5px solid ${config.color}35`,
+                borderRadius:12, cursor:'pointer',
+                display:'flex', alignItems:'center', justifyContent:'space-between',
+                boxSizing:'border-box'
+              }}>
+                <div style={{ display:'flex', alignItems:'center', gap:10 }}>
+                  <div style={{ width:36, height:36, borderRadius:10, background:`${config.color}15`, display:'flex', alignItems:'center', justifyContent:'center', fontSize:22, flexShrink:0 }}>
+                    {postura.emoji}
+                  </div>
+                  <div style={{ textAlign:'left' }}>
+                    <p style={{ fontSize:9, color:config.color, margin:0, fontWeight:700, textTransform:'uppercase', letterSpacing:'0.05em' }}>Ver postura completa</p>
+                    <p style={{ fontSize:12, color:'#1F2937', margin:0, fontWeight:600 }}>{postura.name} — instrucciones y beneficios</p>
+                  </div>
+                </div>
+                <span style={{ fontSize:18, color:config.color, flexShrink:0 }}>→</span>
+              </button>
             </div>
 
           </div>
