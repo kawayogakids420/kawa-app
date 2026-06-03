@@ -5,20 +5,20 @@ import { useAppStore } from '@/lib/store'
 
 // ── Configuración por parte ───────────────────────────────────────────────────
 const STEP_CONFIG = {
-  inicio:        { label:'Inicio',        color:'#2D6A4F', dark:'#1B4332', bg:'linear-gradient(160deg,#1B4332,#2D6A4F)' },
-  desequilibrio: { label:'Desequilibrio', color:'#E64A19', dark:'#BF360C', bg:'linear-gradient(160deg,#BF360C,#E64A19)' },
-  accion:        { label:'Acción',        color:'#1976D2', dark:'#0D47A1', bg:'linear-gradient(160deg,#0D47A1,#1976D2)' },
-  catarsis:      { label:'Catarsis',      color:'#7B1FA2', dark:'#4A148C', bg:'linear-gradient(160deg,#4A148C,#7B1FA2)' },
-  ensenanza:     { label:'Enseñanza',     color:'#F57F17', dark:'#E65100', bg:'linear-gradient(160deg,#E65100,#F57F17)' },
+  inicio:        { label:'Inicio',        color:'#A87840', dark:'#6A4A10', text:'#3A2808', bg:'linear-gradient(145deg,#D4E8A0 0%,#C8D890 40%,#E8D4A0 100%)' },
+  desequilibrio: { label:'Desequilibrio', color:'#C06030', dark:'#8A3818', text:'#4A1808', bg:'linear-gradient(145deg,#F8C8A0 0%,#F0B090 40%,#F8A8B0 100%)' },
+  accion:        { label:'Acción',        color:'#4070B0', dark:'#1A4080', text:'#0A2050', bg:'linear-gradient(145deg,#A8C8F8 0%,#98B8F0 40%,#B8A8F8 100%)' },
+  catarsis:      { label:'Catarsis',      color:'#8858A8', dark:'#5A2878', text:'#380850', bg:'linear-gradient(145deg,#E0B8F8 0%,#D0A0F0 40%,#B8B0F8 100%)' },
+  ensenanza:     { label:'Enseñanza',     color:'#C06840', dark:'#883818', text:'#501808', bg:'linear-gradient(145deg,#F8E090 0%,#F0C880 40%,#F8B898 100%)' },
 }
 const STEP_KEYS = ['inicio','desequilibrio','accion','catarsis','ensenanza'] as const
 type StepKey = typeof STEP_KEYS[number]
 
 // Colores diferenciados para cada tipo de audio
 const AUDIO_COLORS = {
-  historia: { color:'#1A237E', bg:'#E8EAF6', label:'Índigo — narración historia' },
-  magica:   { color:'#E65100', bg:'#FFF3E0', label:'Naranja — para el niño/a' },
-  adulto:   { color:'#2D6A4F', bg:'#E8F5E9', label:'Verde — para el adulto' },
+  historia: { color:'#9050A0', bg:'linear-gradient(135deg,#F8E8FF,#F0D8FF)', solid:'#F4E0FF' },
+  magica:   { color:'#C07020', bg:'linear-gradient(135deg,#FFF8D0,#FFF0A8)', solid:'#FFF8D0' },
+  adulto:   { color:'#C06858', bg:'linear-gradient(135deg,#FFF0F4,#FFE4EC)', solid:'#FFF0F4' },
 }
 
 function getPreview(text: string, n=18): { preview:string; rest:string; hasMore:boolean } {
@@ -332,15 +332,15 @@ export default function HistoriaKawa({ week, weekColors, onComplete, isCompleted
               <div style={{ position:'absolute', top:30, right:14, zIndex:3, background:'rgba(255,255,255,0.18)', backdropFilter:'blur(6px)', borderRadius:12, padding:'5px 10px', display:'flex', alignItems:'center', gap:6 }}>
                 <span style={{ fontSize:18 }}>{postura.emoji}</span>
                 <div>
-                  <p style={{ fontSize:8, color:'rgba(255,255,255,0.65)', margin:0, textTransform:'uppercase', letterSpacing:'0.05em' }}>Postura</p>
-                  <p style={{ fontSize:10, color:'white', fontWeight:700, margin:0 }}>{postura.name}</p>
+                  <p style={{ fontSize:8, color:config.text, opacity:0.65, margin:0, textTransform:'uppercase', letterSpacing:'0.05em' }}>Postura</p>
+                  <p style={{ fontSize:10, color:config.text, fontWeight:700, margin:0 }}>{postura.name}</p>
                 </div>
               </div>
 
               {/* Número + título + preview */}
               <div style={{ position:'relative', zIndex:2 }}>
                 <div style={{ display:'inline-flex', alignItems:'center', gap:6, background:'rgba(255,255,255,0.2)', borderRadius:20, padding:'3px 12px', marginBottom:6 }}>
-                  <div style={{ width:18, height:18, borderRadius:'50%', background:'rgba(255,255,255,0.9)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:10, fontWeight:700, color:config.dark }}>
+                  <div style={{ width:18, height:18, borderRadius:'50%', background:'rgba(255,255,255,0.9)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:10, fontWeight:700, color:config.text }}>
                     {current+1}
                   </div>
                   <span style={{ fontSize:10, fontWeight:700, color:'white', letterSpacing:'0.08em', textTransform:'uppercase' }}>{config.label}</span>
@@ -353,13 +353,13 @@ export default function HistoriaKawa({ week, weekColors, onComplete, isCompleted
             </div>
 
             {/* ZONA 2: TEXTO COLAPSABLE */}
-            <div style={{ background:'white', borderLeft:`4px solid ${config.color}` }}>
+            <div style={{ background:'white', borderLeft:`3px solid ${config.color}80` }}>
               <button onClick={() => setExpanded(e=>!e)} style={{ width:'100%', padding:'12px 16px', background:'none', border:'none', cursor:'pointer', textAlign:'left', display:'flex', alignItems:'flex-start', gap:10 }}>
                 <div style={{ flex:1 }}>
                   <p style={{ fontSize:13, color:'#374151', lineHeight:1.75, fontStyle:'italic', margin:0, fontFamily:"'Georgia','Times New Roman',serif" }}>
                     "{preview}
                     {hasMore && textExpanded && <span> {rest}"</span>}
-                    {hasMore && !textExpanded && <span style={{ color:config.color, fontStyle:'normal', fontWeight:600, fontSize:12 }}> leer más</span>}
+                    {hasMore && !textExpanded && <span style={{ color:config.color, fontStyle:'normal', fontWeight:600, fontSize:12, opacity:0.85 }}> leer más</span>}
                     {!hasMore && '"'}
                     {hasMore && textExpanded && ''}
                   </p>
@@ -373,7 +373,7 @@ export default function HistoriaKawa({ week, weekColors, onComplete, isCompleted
             </div>
 
             {/* ZONA 3: AUDIOS UNIFICADOS */}
-            <div style={{ background:`${config.color}10`, borderTop:`1.5px solid ${config.color}28`, padding:'12px 14px' }}>
+            <div style={{ background:'#FFF8EE', borderTop:'1px solid rgba(220,180,130,0.25)', padding:'12px 14px' }}>
 
               {/* Play historia — protagonista, color índigo */}
               <p style={{ fontSize:9, fontWeight:700, color:config.color, margin:'0 0 7px', textTransform:'uppercase', letterSpacing:'0.08em' }}>
@@ -385,7 +385,7 @@ export default function HistoriaKawa({ week, weekColors, onComplete, isCompleted
                   label={`Historia — ${stepData.title}`}
                   sublabel="📖 Kawa te cuenta"
                   color={AUDIO_COLORS.historia.color}
-                  bg={AUDIO_COLORS.historia.bg}
+                  bg={AUDIO_COLORS.historia.solid}
                   size="large"
                   icon="📖"
                 />
@@ -408,7 +408,7 @@ export default function HistoriaKawa({ week, weekColors, onComplete, isCompleted
                   label="Postura en cuento"
                   sublabel="✨ El niño/a escucha"
                   color={AUDIO_COLORS.magica.color}
-                  bg={AUDIO_COLORS.magica.bg}
+                  bg={AUDIO_COLORS.magica.solid}
                   icon="✨"
                 />
                 {/* Instrucciones adulto — verde */}
@@ -417,7 +417,7 @@ export default function HistoriaKawa({ week, weekColors, onComplete, isCompleted
                   label="Guía del adulto"
                   sublabel="🧘 Cómo acompañar"
                   color={AUDIO_COLORS.adulto.color}
-                  bg={AUDIO_COLORS.adulto.bg}
+                  bg={AUDIO_COLORS.adulto.solid}
                   icon="🧘"
                 />
               </div>
