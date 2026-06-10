@@ -5,7 +5,7 @@ import { PROFILES } from '@/lib/data/course'
 import { useAppStore } from '@/lib/store'
 import ProtocoloTO from './ProtocoloTO'
 import HistoriaKawa from './HistoriaKawa'
-import { useRouter } from 'next/navigation'
+import CelebracionScreen from './CelebracionScreen'
 
 interface Props {
   week: Week
@@ -16,8 +16,6 @@ interface Props {
 type Section = 'historia' | 'posturas' | 'respiracion' | 'relajacion'
 const SECTIONS: Section[] = ['historia', 'posturas', 'respiracion', 'relajacion']
 
-
-// Materiales por semana
 const MATERIALES_EXTRA: Record<number, string[]> = {
   1: ['Piedra suave y fría', 'Colchoneta o manta', 'Música suave de bosque (opcional)'],
   2: ['Tela azul suave', 'Bol pequeño con agua', 'Colchoneta'],
@@ -42,15 +40,11 @@ function AudioBtn({ src, label, forChild = false, color = '#2D6A4F' }: {
     const d  = () => setDuration(a.duration)
     const e  = () => { setPlaying(false); setProgress(0) }
     const er = () => setError(true)
-    a.addEventListener('timeupdate', t)
-    a.addEventListener('loadedmetadata', d)
-    a.addEventListener('ended', e)
-    a.addEventListener('error', er)
+    a.addEventListener('timeupdate', t); a.addEventListener('loadedmetadata', d)
+    a.addEventListener('ended', e);      a.addEventListener('error', er)
     return () => {
-      a.removeEventListener('timeupdate', t)
-      a.removeEventListener('loadedmetadata', d)
-      a.removeEventListener('ended', e)
-      a.removeEventListener('error', er)
+      a.removeEventListener('timeupdate', t); a.removeEventListener('loadedmetadata', d)
+      a.removeEventListener('ended', e);      a.removeEventListener('error', er)
     }
   }, [])
 
@@ -158,26 +152,34 @@ function PostureCard({ posture, weekColors, weekId, activeProfile, profile, show
 
 // ── Componente principal ──────────────────────────────────────────────────────
 export default function ClaseTab({ week, weekColors, activeProfile }: Props) {
-  const router = useRouter()
   const [activeSection, setActiveSection]           = useState<Section>('historia')
   const [completedSections, setCompleted]           = useState<Set<Section>>(new Set())
   const [historiaStep, setHistoriaStep]             = useState(0)
   const [showProfileTips, setShowProfileTips]       = useState(false)
   const [highlightedPostura, setHighlightedPostura] = useState<string | null>(null)
-  const { logSession, activeChildId, userType }     = useAppStore()
-  const [logOpen, setLogOpen] = useState(false)
+  const [showCelebracion, setShowCelebracion]       = useState(false)
+  const [logOpen, setLogOpen]                       = useState(false)
   const [mood, setMood]       = useState<'great'|'good'|'okay'|'hard'>('good')
   const [notes, setNotes]     = useState('')
 
+  const { logSession, activeChildId, userType, children } = useAppStore()
+  const activeChild = children.find(c => c.id === activeChildId) ?? children[0] ?? null
+  const childName   = activeChild?.name || 'Guardián'
   const profile     = activeProfile ? PROFILES[activeProfile] : null
   const s           = week.id
   const doneCount   = completedSections.size
   const totalSecs   = SECTIONS.length
 
   const markDone = (sec: Section) => {
-    setCompleted(prev => new Set([...prev, sec]))
+    const newSet = new Set([...completedSections, sec])
+    setCompleted(newSet)
     const idx = SECTIONS.indexOf(sec)
-    if (idx < SECTIONS.length - 1) setActiveSection(SECTIONS[idx + 1])
+    if (idx < SECTIONS.length - 1) {
+      setActiveSection(SECTIONS[idx + 1])
+    } else if (newSet.size === totalSecs) {
+      // Última sección completada → mostrar celebración
+      setShowCelebracion(true)
+    }
   }
 
   useEffect(() => {
@@ -194,17 +196,31 @@ export default function ClaseTab({ week, weekColors, activeProfile }: Props) {
     return () => window.removeEventListener('kawa-ver-postura', handler)
   }, [])
 
+  // ── PANTALLA DE CELEBRACIÓN ───────────────────────────────────────────────
+  if (showCelebracion) {
+    return (
+      <CelebracionScreen
+        week={week}
+        childName={childName}
+        starsEarned={doneCount}
+        totalSections={totalSecs}
+        onContinue={() => {
+          setShowCelebracion(false)
+          setLogOpen(true)
+        }}
+      />
+    )
+  }
+
   return (
     <div>
 
-      {/* Mensaje sesión completa — solo cuando corresponde */}
+      {/* Mensaje sesión completa */}
       {doneCount === totalSecs && (
         <div style={{ background: weekColors.light, borderRadius: 14, padding: '10px 14px', marginBottom: 12, textAlign: 'center', border: `1px solid ${weekColors.main}30` }}>
-          <p style={{ fontSize: 13, fontWeight: 700, color: weekColors.main, margin: 0 }}>🌟 ¡Sesión completa! Ya puedes registrarla</p>
+          <p style={{ fontSize: 13, fontWeight: 700, color: weekColors.main, margin: 0 }}>🌟 ¡Sesión completa!</p>
         </div>
       )}
-
-
 
       {/* ══ HISTORIA ══ */}
       {activeSection === 'historia' && (
@@ -314,16 +330,16 @@ export default function ClaseTab({ week, weekColors, activeProfile }: Props) {
         </div>
       )}
 
-      {/* ── PROTOCOLO TO ── */}
+      {/* Protocolo TO */}
       {userType === 'profesional' && (
         <div style={{ marginTop: 12 }}>
           <ProtocoloTO week={week} weekColors={weekColors} />
         </div>
       )}
 
-      {/* ── REGISTRAR SESIÓN ── */}
+      {/* Registrar sesión */}
       <button onClick={() => setLogOpen(true)} style={{ width: '100%', padding: '14px', borderRadius: 14, background: 'white', marginTop: 12, border: `2px solid ${weekColors.main}`, color: weekColors.main, fontSize: 14, fontWeight: 700, cursor: 'pointer', boxSizing: 'border-box' }}>
-        📝 Registrar esta sesión {doneCount === totalSecs ? '🌟' : `(${doneCount}/${totalSecs} completadas)`}
+        📝 Registrar sesión {doneCount === totalSecs ? '🌟' : `(${doneCount}/${totalSecs})`}
       </button>
 
       {/* Modal registro */}
