@@ -5,133 +5,138 @@ import { PROFILES } from '@/lib/data/course'
 
 export default function PerfilPage() {
   const router = useRouter()
-  const { children, activeChildId, setActiveChild, reset, userType, setUserType } = useAppStore()
+  const {
+    children, activeChildId, setActiveChild,
+    reset, userType, setUserType, currentWeek
+  } = useAppStore()
+
   const activeChild = children.find(c => c.id === activeChildId) ?? children[0] ?? null
-  const profile = activeChild?.profile ? PROFILES[activeChild.profile] : null
+  const profile     = activeChild?.profile ? PROFILES[activeChild.profile] : null
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-24">
-      <div className="bg-[#2D6A4F] px-5 pt-12 pb-6">
-        <button onClick={() => router.back()} className="text-green-200 text-sm mb-4">← Volver</button>
-        <h1 className="text-2xl font-bold text-white">Perfiles</h1>
-        <p className="text-green-200 text-sm">Todos los niños registrados</p>
+    <div style={{ minHeight:'100vh', background:'#FFFAF6', paddingBottom:96 }}>
+
+      {/* Header */}
+      <div style={{ background:'linear-gradient(160deg,#1B4332 0%,#2D6A4F 55%,#1A237E 100%)', padding:'48px 20px 22px', position:'relative', overflow:'hidden' }}>
+        {[[15,20],[70,15],[85,40],[50,10],[40,50]].map(([x,y],i) => (
+          <div key={i} style={{ position:'absolute', borderRadius:'50%', background:'white', width:i%3===0?2:1, height:i%3===0?2:1, left:`${x}%`, top:`${y}%`, opacity:0.3+(i%4)*0.1, pointerEvents:'none' }} />
+        ))}
+        <div style={{ position:'relative', zIndex:1 }}>
+          <button onClick={() => router.push('/home')} style={{ background:'none', border:'none', cursor:'pointer', color:'rgba(187,247,208,0.8)', fontSize:13, marginBottom:14, padding:0, display:'flex', alignItems:'center', gap:6 }}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+            Inicio
+          </button>
+          <h1 style={{ color:'white', fontSize:22, fontWeight:600, margin:'0 0 4px', fontFamily:"'Georgia',serif" }}>
+            Perfil
+          </h1>
+          <p style={{ color:'rgba(187,247,208,0.75)', fontSize:13, margin:0 }}>
+            Configuración de Kawa
+          </p>
+        </div>
       </div>
 
-      <div className="px-5 mt-5 space-y-4">
+      <div style={{ padding:'14px 18px 0', display:'flex', flexDirection:'column', gap:12 }}>
 
-        {/* ── SELECTOR DE ROL ── */}
-        <div className="bg-white rounded-2xl p-5 shadow-sm">
-          <p className="font-semibold text-gray-900 mb-1">¿Cómo usas Kawa?</p>
-          <p className="text-xs text-gray-400 mb-4">
-            Esto determina el contenido que ves en cada clase.
-          </p>
-          <div className="grid grid-cols-2 gap-3">
+        {/* Tipo de usuario */}
+        <div style={{ background:'white', borderRadius:18, padding:'14px 16px', border:'0.5px solid #F0E8E0' }}>
+          <p style={{ fontSize:13, fontWeight:600, color:'#2D1808', margin:'0 0 12px' }}>¿Cómo usas la app?</p>
+          <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:10 }}>
+            {/* Familia */}
             <button
               onClick={() => setUserType('familia')}
-              className="flex flex-col items-center gap-2 py-4 px-3 rounded-2xl border-2 transition-all"
               style={{
-                borderColor: userType === 'familia' ? '#2D6A4F' : '#E5E7EB',
-                backgroundColor: userType === 'familia' ? '#E8F5E9' : 'white',
+                display:'flex', flexDirection:'column', alignItems:'center', gap:8,
+                padding:'14px 10px', borderRadius:16,
+                border:`2px solid ${userType==='familia' ? '#C4735A' : '#F0E8E0'}`,
+                background: userType==='familia' ? '#FFF8F4' : 'white',
+                cursor:'pointer'
               }}>
-              <span className="text-3xl">👨‍👩‍👧</span>
-              <span className="text-xs font-semibold text-center leading-tight"
-                style={{ color: userType === 'familia' ? '#2D6A4F' : '#6B7280' }}>
+              <span style={{ fontSize:28 }}>👨‍👩‍👧</span>
+              <span style={{ fontSize:11, fontWeight:600, color: userType==='familia' ? '#C4735A' : '#9CA3AF', textAlign:'center', lineHeight:1.3 }}>
                 Familia o cuidador/a
               </span>
-              {userType === 'familia' && (
-                <span className="text-[10px] px-2 py-0.5 rounded-full font-medium"
-                  style={{ backgroundColor: '#2D6A4F', color: 'white' }}>
-                  Activo
-                </span>
+              {userType==='familia' && (
+                <span style={{ fontSize:9, padding:'2px 8px', borderRadius:20, background:'#C4735A', color:'white', fontWeight:600 }}>Activo</span>
               )}
             </button>
-
+            {/* Profesional */}
             <button
               onClick={() => setUserType('profesional')}
-              className="flex flex-col items-center gap-2 py-4 px-3 rounded-2xl border-2 transition-all"
               style={{
-                borderColor: userType === 'profesional' ? '#1D9E75' : '#E5E7EB',
-                backgroundColor: userType === 'profesional' ? '#E1F5EE' : 'white',
+                display:'flex', flexDirection:'column', alignItems:'center', gap:8,
+                padding:'14px 10px', borderRadius:16,
+                border:`2px solid ${userType==='profesional' ? '#2D6A4F' : '#F0E8E0'}`,
+                background: userType==='profesional' ? '#F0F9F4' : 'white',
+                cursor:'pointer'
               }}>
-              <span className="text-3xl">🩺</span>
-              <span className="text-xs font-semibold text-center leading-tight"
-                style={{ color: userType === 'profesional' ? '#085041' : '#6B7280' }}>
-                Profesional de salud o educación
+              <span style={{ fontSize:28 }}>🩺</span>
+              <span style={{ fontSize:11, fontWeight:600, color: userType==='profesional' ? '#2D6A4F' : '#9CA3AF', textAlign:'center', lineHeight:1.3 }}>
+                Profesional de salud
               </span>
-              {userType === 'profesional' && (
-                <span className="text-[10px] px-2 py-0.5 rounded-full font-medium"
-                  style={{ backgroundColor: '#1D9E75', color: 'white' }}>
-                  Activo
-                </span>
+              {userType==='profesional' && (
+                <span style={{ fontSize:9, padding:'2px 8px', borderRadius:20, background:'#2D6A4F', color:'white', fontWeight:600 }}>Activo</span>
               )}
             </button>
           </div>
-          {userType === 'profesional' && (
-            <p className="text-xs text-center mt-3" style={{ color: '#085041' }}>
-              ✓ Verás el protocolo clínico TO en cada guardián
-            </p>
-          )}
-          {userType === 'familia' && (
-            <p className="text-xs text-center mt-3" style={{ color: '#2D6A4F' }}>
-              ✓ Verás actividades y guías para practicar en casa
-            </p>
-          )}
+          <p style={{ fontSize:11, color: userType==='profesional' ? '#2D6A4F' : '#C4735A', textAlign:'center', margin:'10px 0 0' }}>
+            {userType==='profesional'
+              ? '✓ Verás el protocolo clínico TO en cada guardián'
+              : '✓ Verás actividades y guías para practicar en casa'}
+          </p>
         </div>
 
-        {/* ── LISTA DE NIÑOS ── */}
+        {/* Lista de niños */}
         {children.map(child => {
-          const p = child.profile ? PROFILES[child.profile] : null
+          const p        = child.profile ? PROFILES[child.profile] : null
           const isActive = child.id === activeChildId
           return (
             <button key={child.id}
               onClick={() => setActiveChild(child.id)}
-              className="w-full bg-white rounded-2xl p-4 shadow-sm flex items-center gap-4 text-left border-2 transition-all"
-              style={{ borderColor: isActive ? (p?.color ?? '#2D6A4F') : 'transparent' }}>
-              <div className="text-4xl">{child.gender === 'female' ? '👧' : '👦'}</div>
-              <div className="flex-1">
-                <div className="flex items-center gap-2">
-                  <p className="font-bold text-gray-900 text-lg">{child.name}</p>
-                  {isActive && (
-                    <span className="text-xs px-2 py-0.5 rounded-full bg-green-100 text-green-700 font-medium">
-                      Activo
-                    </span>
-                  )}
+              style={{
+                width:'100%', background:'white', borderRadius:18,
+                padding:'14px 16px', display:'flex', alignItems:'center', gap:14,
+                textAlign:'left', border:`2px solid ${isActive ? (p?.color ?? '#C4735A') : '#F0E8E0'}`,
+                cursor:'pointer', boxSizing:'border-box'
+              }}>
+              <span style={{ fontSize:38 }}>{child.gender==='female' ? '👧' : '👦'}</span>
+              <div style={{ flex:1 }}>
+                <div style={{ display:'flex', alignItems:'center', gap:8, marginBottom:2 }}>
+                  <p style={{ fontSize:16, fontWeight:600, color:'#2D1808', margin:0 }}>{child.name}</p>
+                  {isActive && <span style={{ fontSize:10, padding:'2px 8px', borderRadius:20, background:'#FFF0E8', color:'#C4735A', fontWeight:600 }}>Activo</span>}
                 </div>
-                <p className="text-gray-400 text-sm">{child.age} años · {child.gender === 'female' ? 'Niña' : 'Niño'}</p>
+                <p style={{ fontSize:12, color:'#C4A090', margin:0 }}>{child.age} años · {child.gender==='female'?'Niña':'Niño'}</p>
                 {p && (
-                  <span className="inline-block text-xs px-2 py-0.5 rounded-full mt-1 font-medium"
-                    style={{ background: p.bg, color: p.color }}>
+                  <span style={{ fontSize:11, padding:'2px 8px', borderRadius:20, background:p.bg, color:p.color, fontWeight:500, display:'inline-block', marginTop:4 }}>
                     {p.icon} {p.name}
                   </span>
                 )}
               </div>
-              {isActive && <span className="text-2xl">✓</span>}
+              {isActive && <span style={{ fontSize:20, color:'#C4735A' }}>✓</span>}
             </button>
           )
         })}
 
-        {/* ── MAPA SENSORIAL ── */}
+        {/* Mapa sensorial */}
         {activeChild?.profilePcts && profile && (
-          <div className="bg-white rounded-2xl p-5 shadow-sm">
-            <p className="font-semibold text-gray-900 mb-4">
+          <div style={{ background:'white', borderRadius:18, padding:'14px 16px', border:'0.5px solid #F0E8E0' }}>
+            <p style={{ fontSize:13, fontWeight:600, color:'#2D1808', margin:'0 0 12px' }}>
               Mapa sensorial de {activeChild.name}
             </p>
-            <div className="space-y-3">
+            <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
               {(['sensible','buscador','bajo_registro','motor'] as const).map(pk => {
-                const p = PROFILES[pk]
+                const p   = PROFILES[pk]
                 const pct = activeChild.profilePcts![pk]
                 return (
                   <div key={pk}>
-                    <div className="flex items-center justify-between mb-1">
-                      <div className="flex items-center gap-2">
-                        <span>{p.icon}</span>
-                        <span className="text-sm font-medium text-gray-800">{p.name}</span>
+                    <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:5 }}>
+                      <div style={{ display:'flex', alignItems:'center', gap:6 }}>
+                        <span style={{ fontSize:14 }}>{p.icon}</span>
+                        <span style={{ fontSize:12, fontWeight:500, color:'#2D1808' }}>{p.name}</span>
                       </div>
-                      <span className="text-xs font-bold text-gray-500">{pct}%</span>
+                      <span style={{ fontSize:11, fontWeight:600, color:'#C4A090' }}>{pct}%</span>
                     </div>
-                    <div className="h-2.5 bg-gray-100 rounded-full overflow-hidden">
-                      <div className="h-full rounded-full"
-                        style={{ width: `${pct}%`, backgroundColor: p.color }} />
+                    <div style={{ height:8, background:'#F5F0E8', borderRadius:4, overflow:'hidden' }}>
+                      <div style={{ height:'100%', borderRadius:4, width:`${pct}%`, background:p.color, transition:'width 0.5s' }} />
                     </div>
                   </div>
                 )
@@ -140,66 +145,67 @@ export default function PerfilPage() {
           </div>
         )}
 
-        {/* ── PERFIL PREDOMINANTE ── */}
+        {/* Perfil predominante */}
         {profile && (
-          <div className="rounded-2xl p-5 shadow-sm" style={{ backgroundColor: profile.bg }}>
-            <h3 className="font-semibold mb-2" style={{ color: profile.color }}>
+          <div style={{ borderRadius:18, padding:'14px 16px', background:profile.bg, border:`1.5px solid ${profile.color}30` }}>
+            <p style={{ fontSize:13, fontWeight:600, color:profile.color, margin:'0 0 6px' }}>
               {profile.icon} Perfil predominante: {profile.name}
-            </h3>
-            <p className="text-sm" style={{ color: profile.color }}>{profile.description}</p>
+            </p>
+            <p style={{ fontSize:12, color:profile.color, margin:0, lineHeight:1.6 }}>{profile.description}</p>
           </div>
         )}
 
-        {/* ── LOS 4 PERFILES ── */}
-        <div className="bg-white rounded-2xl p-5 shadow-sm">
-          <p className="font-semibold text-gray-900 mb-3">Los 4 perfiles sensoriales</p>
-          <div className="space-y-3">
+        {/* Los 4 perfiles */}
+        <div style={{ background:'white', borderRadius:18, padding:'14px 16px', border:'0.5px solid #F0E8E0' }}>
+          <p style={{ fontSize:13, fontWeight:600, color:'#2D1808', margin:'0 0 12px' }}>Los 4 perfiles sensoriales</p>
+          <div style={{ display:'flex', flexDirection:'column', gap:8 }}>
             {Object.values(PROFILES).map(p => (
-              <div key={p.name} className="p-3 rounded-xl border-2"
-                style={{
-                  backgroundColor: p.bg,
-                  borderColor: activeChild?.profile && PROFILES[activeChild.profile].name === p.name
-                    ? p.color : 'transparent'
-                }}>
-                <p className="text-sm font-medium" style={{ color: p.color }}>{p.icon} {p.name}</p>
-                <p className="text-xs mt-0.5" style={{ color: p.color }}>{p.description}</p>
+              <div key={p.name} style={{
+                padding:'10px 12px', borderRadius:12,
+                background:p.bg,
+                border:`2px solid ${activeChild?.profile && PROFILES[activeChild.profile].name===p.name ? p.color : 'transparent'}`
+              }}>
+                <p style={{ fontSize:12, fontWeight:500, color:p.color, margin:'0 0 2px' }}>{p.icon} {p.name}</p>
+                <p style={{ fontSize:11, color:p.color, margin:0, opacity:0.8 }}>{p.description}</p>
               </div>
             ))}
           </div>
         </div>
 
-        {/* ── INFO DEL CURSO ── */}
-        <div className="bg-white rounded-2xl p-5 shadow-sm">
-          <p className="font-semibold text-gray-900 mb-3">Sobre Kawa Yoga Kids</p>
-          <div className="space-y-2 text-sm text-gray-600">
-            <p>📚 Basado en Integración Sensorial de Jean Ayres</p>
-            <p>🧸 Diseñado para niños con autismo, ADHD, Síndrome de Down y neurodiversidad</p>
-            <p>👨‍👩‍👧 Para familias y profesionales (TOs, educadores, terapeutas)</p>
-            <p>📱 Funciona sin conexión después de la primera carga</p>
+        {/* Info del curso */}
+        <div style={{ background:'white', borderRadius:18, padding:'14px 16px', border:'0.5px solid #F0E8E0' }}>
+          <p style={{ fontSize:13, fontWeight:600, color:'#2D1808', margin:'0 0 10px' }}>Sobre Kawa Yoga Kids</p>
+          <div style={{ display:'flex', flexDirection:'column', gap:6 }}>
+            {[
+              '📚 Basado en Integración Sensorial de Jean Ayres',
+              '🧸 Diseñado para niños con autismo, ADHD, Síndrome de Down y neurodiversidad',
+              '👨‍👩‍👧 Para familias y profesionales (TOs, educadores, terapeutas)',
+              '📱 Funciona sin conexión después de la primera carga',
+            ].map((item, i) => (
+              <p key={i} style={{ fontSize:12, color:'#4A3020', margin:0, lineHeight:1.5 }}>{item}</p>
+            ))}
           </div>
         </div>
 
-        {/* ── RESETEAR ── */}
+        {/* Resetear */}
         <button
           onClick={() => { if (confirm('¿Resetear todo el progreso?')) reset() }}
-          className="w-full py-3 rounded-2xl text-red-500 border border-red-200 text-sm">
+          style={{ width:'100%', padding:'12px', borderRadius:14, color:'#E24B4A', background:'white', border:'1px solid #FECACA', fontSize:13, cursor:'pointer', boxSizing:'border-box' }}>
           Resetear progreso
         </button>
 
       </div>
 
-      <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 flex max-w-[430px] mx-auto">
+      {/* NAV 3 ITEMS */}
+      <nav style={{ position:'fixed', bottom:0, left:0, right:0, background:'white', borderTop:'0.5px solid #F0E8E0', display:'flex', maxWidth:430, margin:'0 auto', zIndex:40 }}>
         {[
-          { href: '/home',     icon: '🗺️', label: 'Inicio' },
-          { href: '/semana/1', icon: '🧘', label: 'Clase' },
-          { href: '/progreso', icon: '📈', label: 'Progreso' },
-          { href: '/materiales',icon: '📦', label: 'Kit' },
-          { href: '/perfil',   icon: '👤', label: 'Perfil' },
+          { href:'/home',                  icon:'🗺️', label:'Inicio'    },
+          { href:`/semana/${currentWeek}`, icon:'🧘', label:'Practica'  },
+          { href:'/progreso',              icon:'📖', label:'Mi diario' },
         ].map(({ href, icon, label }) => (
-          <button key={href} onClick={() => router.push(href)}
-            className="flex-1 py-3 flex flex-col items-center gap-0.5">
-            <span className="text-xl">{icon}</span>
-            <span className="text-[10px] text-gray-500">{label}</span>
+          <button key={href} onClick={() => router.push(href)} style={{ flex:1, padding:'12px 0', display:'flex', flexDirection:'column', alignItems:'center', gap:3, background:'none', border:'none', cursor:'pointer' }}>
+            <span style={{ fontSize:20 }}>{icon}</span>
+            <span style={{ fontSize:10, fontWeight:500, color:'#C4A090' }}>{label}</span>
           </button>
         ))}
       </nav>
