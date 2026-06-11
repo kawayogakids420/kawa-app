@@ -337,12 +337,7 @@ export default function ClaseTab({ week, weekColors, activeProfile }: Props) {
         </div>
       )}
 
-      {/* Registrar sesión */}
-      <button onClick={() => setLogOpen(true)} style={{ width: '100%', padding: '14px', borderRadius: 14, background: 'white', marginTop: 12, border: `2px solid ${weekColors.main}`, color: weekColors.main, fontSize: 14, fontWeight: 700, cursor: 'pointer', boxSizing: 'border-box' }}>
-        📝 Registrar sesión {doneCount === totalSecs ? '🌟' : `(${doneCount}/${totalSecs})`}
-      </button>
-
-      {/* Modal registro */}
+      {/* Modal registro — solo se abre desde la celebración */}
       {logOpen && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 50, display: 'flex', alignItems: 'flex-end' }}>
           <div style={{ background: 'white', width: '100%', maxWidth: 430, margin: '0 auto', borderRadius: '24px 24px 0 0', padding: 24 }}>
