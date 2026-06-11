@@ -108,16 +108,10 @@ function MembresiaContent() {
               <p style={{ fontSize:10, color:'rgba(120,50,10,0.7)', margin:0, textTransform:'uppercase', letterSpacing:'0.06em', fontWeight:600 }}>Plan Familia</p>
               <p style={{ fontSize:14, fontWeight:600, color:'#5A2808', margin:0 }}>Para practicar en casa</p>
             </div>
-            <div style={{ textAlign:'right' }}>
-              <p style={{ fontSize:24, fontWeight:700, color:'#5A2808', margin:0, lineHeight:1 }}>$7.99</p>
-              <p style={{ fontSize:10, color:'rgba(90,40,8,0.7)', margin:0 }}>/mes</p>
-            </div>
+
           </div>
           <div style={{ padding:'12px 16px' }}>
-            <div style={{ display:'flex', alignItems:'center', gap:6, marginBottom:10, padding:'6px 10px', background:'#FFF8F0', borderRadius:10 }}>
-              <span style={{ fontSize:14 }}>💛</span>
-              <p style={{ fontSize:11, color:'#C4735A', fontWeight:600, margin:0 }}>o $59.99/año — ahorra un 37%</p>
-            </div>
+
             {FAMILIA_FEATURES.map((f, i) => (
               <div key={i} style={{ display:'flex', alignItems:'center', gap:8, marginBottom:7 }}>
                 <div style={{ width:18, height:18, borderRadius:'50%', background:'#FFF0E8', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
@@ -140,16 +134,10 @@ function MembresiaContent() {
               <p style={{ fontSize:10, color:'rgba(180,220,255,0.8)', margin:0, textTransform:'uppercase', letterSpacing:'0.06em', fontWeight:600 }}>Plan Profesional</p>
               <p style={{ fontSize:14, fontWeight:600, color:'white', margin:0 }}>Para clínicos y educadores</p>
             </div>
-            <div style={{ textAlign:'right' }}>
-              <p style={{ fontSize:24, fontWeight:700, color:'white', margin:0, lineHeight:1 }}>$19.99</p>
-              <p style={{ fontSize:10, color:'rgba(255,255,255,0.7)', margin:0 }}>/mes</p>
-            </div>
+
           </div>
           <div style={{ padding:'12px 16px' }}>
-            <div style={{ display:'flex', alignItems:'center', gap:6, marginBottom:10, padding:'6px 10px', background:'#EFF6FF', borderRadius:10 }}>
-              <span style={{ fontSize:14 }}>💙</span>
-              <p style={{ fontSize:11, color:'#1A6DB5', fontWeight:600, margin:0 }}>o $149.99/año — ahorra un 37%</p>
-            </div>
+
             {PRO_FEATURES.map((f, i) => (
               <div key={i} style={{ display:'flex', alignItems:'center', gap:8, marginBottom:7 }}>
                 <div style={{ width:18, height:18, borderRadius:'50%', background:'#EFF6FF', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
@@ -165,22 +153,7 @@ function MembresiaContent() {
           </div>
         </div>
 
-        {/* Comparación */}
-        <div style={{ background:'white', borderRadius:18, padding:'14px 16px', border:'0.5px solid #F0E8E0' }}>
-          <p style={{ fontSize:12, fontWeight:600, color:'#2D1808', margin:'0 0 10px', textAlign:'center' }}>¿Por qué vale la pena?</p>
-          <div style={{ display:'flex', flexDirection:'column', gap:8 }}>
-            {[
-              { icon:'🧘', text:'Una sesión de yoga infantil presencial cuesta $15–30. Con Kawa tienes acceso ilimitado por $8.' },
-              { icon:'🩺', text:'Un TO cobra $60–120/hora. Kawa profesional a $20/mes es menos que 20 minutos de consulta.' },
-              { icon:'👨‍👩‍👧', text:'El 78% de familias con niños neurodivergentes reportan mejora en regulación con práctica constante de yoga sensorial.' },
-            ].map((item, i) => (
-              <div key={i} style={{ display:'flex', gap:10, alignItems:'flex-start' }}>
-                <span style={{ fontSize:18, flexShrink:0 }}>{item.icon}</span>
-                <p style={{ fontSize:11, color:'#4A3020', margin:0, lineHeight:1.6 }}>{item.text}</p>
-              </div>
-            ))}
-          </div>
-        </div>
+
 
         {/* Volver al home si viene de fuera */}
         {!fromWeek1 && (
