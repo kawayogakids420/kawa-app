@@ -16,6 +16,14 @@ const WORLD_SYMBOLS: Record<number, string> = {
   5: '/images/simbolo-infinito.png',
 }
 
+const CTA_GRADIENTS: Record<number, string> = {
+  1: 'linear-gradient(135deg,#F4B880,#E89860)',
+  2: 'linear-gradient(135deg,#80B0F4,#6090E8)',
+  3: 'linear-gradient(135deg,#80C8F4,#60B0E8)',
+  4: 'linear-gradient(135deg,#F4A070,#E87850)',
+  5: 'linear-gradient(135deg,#C880F4,#A860E8)',
+}
+
 const WARM_GRADIENTS: Record<number, string> = {
   1: 'linear-gradient(150deg,#FFE9A0 0%,#FFCDB8 50%,#F5B8C8 100%)',
   2: 'linear-gradient(150deg,#B8E4FF 0%,#C8D4FF 50%,#E0C8FF 100%)',

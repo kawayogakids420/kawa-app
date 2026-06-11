@@ -77,7 +77,10 @@ function MembresiaContent() {
         </div>
       </div>
 
-      <div style={{ padding:'20px 16px 0', display:'flex', flexDirection:'column', gap:12 }}>
+      {/* Transición suave del header al contenido */}
+      <div style={{ height:24, background:'linear-gradient(to bottom,#1A237E08,transparent)', marginTop:-1 }} />
+
+      <div style={{ padding:'4px 16px 0', display:'flex', flexDirection:'column', gap:12 }}>
 
         {/* Preview mundos bloqueados */}
         <div style={{ background:'white', borderRadius:18, padding:'14px 16px', border:'0.5px solid #F0E8E0' }}>
