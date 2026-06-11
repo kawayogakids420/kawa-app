@@ -181,7 +181,7 @@ export default function SemanaPage({ params }: { params: Promise<{ id: string }>
         <div style={{ position:'fixed', bottom:0, left:0, right:0, background:'#fff', borderTop:'1px solid #F5EEE8', padding:16, maxWidth:430, margin:'0 auto' }}>
           <button
             onClick={() => { completeWeek(weekId); router.push('/home') }}
-            style={{ width:'100%', padding:'14px', borderRadius:16, background:`linear-gradient(135deg,${colors.main},${colors.main}CC)`, border:'none', cursor:'pointer', color:'#fff', fontSize:15, fontWeight:600, boxShadow:`0 4px 16px ${colors.main}40` }}>
+            style={{ width:'100%', padding:'14px', borderRadius:16, background: CTA_GRADIENTS[weekId] || 'linear-gradient(135deg,#F4B880,#E89860)', border:'none', cursor:'pointer', color:'#fff', fontSize:15, fontWeight:600, boxShadow:'0 4px 16px rgba(220,160,100,0.35)' }}>
             Completar la semana ✓
           </button>
         </div>

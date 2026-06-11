@@ -106,8 +106,8 @@ export default function HomePage() {
           <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:4 }}>
             <div>
               <p style={{ color:'rgba(187,247,208,0.8)', fontSize:13, margin:0 }}>Hola,</p>
-              <h1 style={{ color:'white', fontSize:22, fontWeight:500, margin:0, fontFamily:"'Georgia',serif" }}>
-                {activeChild?.name || 'Guardián'}{' '}{activeChild?.gender==='female'?'👧':'👦'}
+              <h1 style={{ color:'white', fontSize:22, fontWeight:500, margin:0, fontFamily:"'Georgia',serif", textTransform:'capitalize' }}>
+                {(activeChild?.name || 'Guardián').toLowerCase()}{' '}{activeChild?.gender==='female'?'👧':'👦'}
               </h1>
             </div>
             <div style={{ display:'flex', alignItems:'center', gap:8 }}>
@@ -121,9 +121,9 @@ export default function HomePage() {
                 </div>
               )}
               {profile && (
-                <button onClick={() => router.push('/perfil')} style={{ display:'flex', alignItems:'center', gap:6, padding:'6px 12px', borderRadius:12, background:'rgba(255,255,255,0.15)', border:'none', cursor:'pointer' }}>
-                  <span style={{ fontSize:15 }}>{profile.icon}</span>
-                  <span style={{ fontSize:12, color:'white', fontWeight:500 }}>{profile.name}</span>
+                <button onClick={() => router.push('/perfil')} style={{ display:'flex', alignItems:'center', gap:5, padding:'5px 11px', borderRadius:20, background:'rgba(255,255,255,0.18)', border:'1px solid rgba(255,255,255,0.25)', cursor:'pointer' }}>
+                  <span style={{ fontSize:13 }}>{profile.icon}</span>
+                  <span style={{ fontSize:11, color:'rgba(255,255,255,0.9)', fontWeight:500 }}>{profile.name}</span>
                 </button>
               )}
             </div>
