@@ -182,9 +182,8 @@ export default function HomePage() {
                       <div style={{ flex:1, height:2, background:completedWeeks.includes(week.id-1)||isCompleted?'rgba(255,255,255,0.75)':'rgba(255,255,255,0.2)' }} />
                     )}
                     <button
-                      onClick={() => !isLocked && router.push(`/semana/${week.id}`)}
-                      disabled={isLocked}
-                      style={{ width:size, height:size, borderRadius:'50%', border:isCurrent?'2.5px solid white':'1.5px solid rgba(255,255,255,0.45)', background:'rgba(255,255,255,0.93)', cursor:isLocked?'default':'pointer', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0, padding:0, overflow:'hidden', opacity, boxShadow:isCurrent?'0 0 0 5px rgba(255,255,255,0.18)':'none', transition:'all 0.2s' }}>
+                      onClick={() => isLocked ? router.push('/membresia') : router.push(`/semana/${week.id}`)}
+                      style={{ width:size, height:size, borderRadius:'50%', border:isCurrent?'2.5px solid white':'1.5px solid rgba(255,255,255,0.45)', background:'rgba(255,255,255,0.93)', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0, padding:0, overflow:'hidden', opacity, boxShadow:isCurrent?'0 0 0 5px rgba(255,255,255,0.18)':'none', transition:'all 0.2s' }}>
                       {isLocked ? (
                         <span style={{ fontSize:10 }}>🔒</span>
                       ) : isCompleted ? (

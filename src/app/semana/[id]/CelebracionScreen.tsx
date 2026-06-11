@@ -163,17 +163,29 @@ export default function CelebracionScreen({ week, childName, starsEarned, totalS
 
         {/* Botones */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10, width: '100%' }}>
-          <button
-            onClick={() => router.push('/home')}
-            style={{
-              width: '100%', padding: '14px', borderRadius: 16,
-              background: ctaGrad, border: 'none', cursor: 'pointer',
-              color: 'white', fontSize: 15, fontWeight: 600,
-              boxShadow: '0 4px 20px rgba(0,0,0,0.15)',
-            }}>
-            Volver al inicio 🗺️
-          </button>
-
+          {week.id === 1 ? (
+            <button
+              onClick={() => router.push('/membresia?from=semana1')}
+              style={{
+                width: '100%', padding: '14px', borderRadius: 16,
+                background: ctaGrad, border: 'none', cursor: 'pointer',
+                color: 'white', fontSize: 15, fontWeight: 600,
+                boxShadow: '0 4px 20px rgba(0,0,0,0.15)',
+              }}>
+              ¿Continuamos con el Agua? 💧
+            </button>
+          ) : (
+            <button
+              onClick={() => router.push('/home')}
+              style={{
+                width: '100%', padding: '14px', borderRadius: 16,
+                background: ctaGrad, border: 'none', cursor: 'pointer',
+                color: 'white', fontSize: 15, fontWeight: 600,
+                boxShadow: '0 4px 20px rgba(0,0,0,0.15)',
+              }}>
+              Volver al inicio 🗺️
+            </button>
+          )}
           <button
             onClick={onContinue}
             style={{
