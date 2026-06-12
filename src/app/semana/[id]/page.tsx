@@ -181,19 +181,10 @@ export default function SemanaPage({ params }: { params: Promise<{ id: string }>
 
       {/* ── CONTENIDO — solo la clase, sin tabs ── */}
       <div style={{ padding:'12px 16px 0' }}>
-        <ClaseTab week={week} weekColors={colors} activeProfile={activeProfile} />
+        <ClaseTab week={week} weekColors={colors} activeProfile={activeProfile} weekId={weekId} />
       </div>
 
-      {/* Botón completar */}
-      {!isCompleted && (
-        <div style={{ position:'fixed', bottom:0, left:0, right:0, background:'#fff', borderTop:'1px solid #F5EEE8', padding:16, maxWidth:430, margin:'0 auto' }}>
-          <button
-            onClick={() => { completeWeek(weekId); router.push('/home') }}
-            style={{ width:'100%', padding:'14px', borderRadius:16, background: CTA_GRADIENTS[weekId] || 'linear-gradient(135deg,#F4B880,#E89860)', border:'none', cursor:'pointer', color:'#fff', fontSize:15, fontWeight:600, boxShadow:'0 4px 16px rgba(220,160,100,0.35)' }}>
-            Completar la semana ✓
-          </button>
-        </div>
-      )}
+      {/* Botón completar — solo si la semana ya fue completada (viene de celebración) */}
 
       {isCompleted && (
         <div style={{ position:'fixed', bottom:0, left:0, right:0, background:'#fff', borderTop:'1px solid #F5EEE8', padding:16, maxWidth:430, margin:'0 auto' }}>

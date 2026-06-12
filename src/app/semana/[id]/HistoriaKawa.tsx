@@ -333,7 +333,7 @@ export default function HistoriaKawa({ week, weekColors, onComplete, isCompleted
           }}>
 
             {/* Header con KAWA CENTRAL — protagonista */}
-            <div style={{ background:config.bg, height:200, position:'relative', overflow:'hidden', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', padding:'0 18px' }}>
+            <div style={{ background:config.bg, height:220, position:'relative', overflow:'hidden', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', padding:'0 18px' }}>
 
               {/* Círculo decorativo fondo */}
               <div style={{ position:'absolute', top:-20, left:-20, width:80, height:80, borderRadius:'50%', background:'rgba(255,255,255,0.1)', pointerEvents:'none' }} />
@@ -357,7 +357,7 @@ export default function HistoriaKawa({ week, weekColors, onComplete, isCompleted
               {/* KAWA — central y protagonista */}
               <div style={{ display:'flex', flexDirection:'column', alignItems:'center', position:'relative', zIndex:2 }}>
                 <div style={{
-                  width:90, height:90, borderRadius:'50%',
+                  width:110, height:110, borderRadius:'50%',
                   background:'rgba(255,255,255,0.92)',
                   border:'2.5px solid rgba(255,255,255,0.98)',
                   overflow:'hidden',
@@ -368,7 +368,7 @@ export default function HistoriaKawa({ week, weekColors, onComplete, isCompleted
                   <img
                     src="/images/kawa-personaje.png"
                     alt="Kawa"
-                    style={{ width:'90%', height:'90%', objectFit:'contain' }}
+                    style={{ width:'94%', height:'94%', objectFit:'contain' }}
                   />
                 </div>
                 <h3 style={{ fontSize:16, fontWeight:700, color:'rgba(255,255,255,0.97)', margin:'0 0 3px', fontFamily:"'Georgia','Times New Roman',serif", textShadow:'0 2px 6px rgba(0,0,0,0.2)', textAlign:'center' }}>

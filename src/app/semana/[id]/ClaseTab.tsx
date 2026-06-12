@@ -6,11 +6,13 @@ import { useAppStore } from '@/lib/store'
 import ProtocoloTO from './ProtocoloTO'
 import HistoriaKawa from './HistoriaKawa'
 import CelebracionScreen from './CelebracionScreen'
+import { useRouter } from 'next/navigation'
 
 interface Props {
   week: Week
   weekColors: { main: string; light: string }
   activeProfile: SensoryProfile | null
+  weekId: number
 }
 
 // Solo 3 secciones reales — posturas viven dentro de la historia
@@ -82,7 +84,7 @@ function AudioBtn({ src, label, sublabel, color, bg, size = 'normal' }: {
 }
 
 // Componente principal
-export default function ClaseTab({ week, weekColors, activeProfile }: Props) {
+export default function ClaseTab({ week, weekColors, activeProfile, weekId }: Props) {
   const [view, setView]                     = useState<View>('mapa')
   const [completedSections, setCompleted]   = useState<Set<Section>>(new Set())
   const [historiaStep, setHistoriaStep]     = useState(0)
@@ -91,7 +93,8 @@ export default function ClaseTab({ week, weekColors, activeProfile }: Props) {
   const [mood, setMood]                     = useState<'great'|'good'|'okay'|'hard'>('good')
   const [notes, setNotes]                   = useState('')
 
-  const { logSession, activeChildId, userType, children } = useAppStore()
+  const router = useRouter()
+  const { logSession, activeChildId, userType, children, completedWeeks, completeWeek } = useAppStore()
   const activeChild = children.find(c => c.id === activeChildId) ?? children[0] ?? null
   const childName   = activeChild?.name || 'Guardián'
   const profile     = activeProfile ? PROFILES[activeProfile] : null
@@ -234,6 +237,28 @@ export default function ClaseTab({ week, weekColors, activeProfile }: Props) {
             </div>
           </button>
         </div>
+
+        {/* Botón completar semana — solo cuando las 3 secciones tienen estrella */}
+        {doneCount === totalSecs && !completedWeeks.includes(weekId) && (
+          <button
+            onClick={() => { completeWeek(weekId); router.push('/home') }}
+            style={{
+              width:'100%', padding:'15px', borderRadius:16,
+              background:'linear-gradient(135deg,#F4B880,#E89860)',
+              border:'none', cursor:'pointer', color:'white',
+              fontSize:15, fontWeight:600,
+              boxShadow:'0 4px 16px rgba(220,160,100,0.35)',
+              boxSizing:'border-box'
+            }}>
+            🌟 ¡Semana completada! Volver al inicio
+          </button>
+        )}
+
+        {completedWeeks.includes(weekId) && (
+          <div style={{ background:'#FFF8F0', borderRadius:14, padding:'12px 16px', textAlign:'center', border:'1px solid #F0D4B0' }}>
+            <p style={{ fontSize:13, color:'#C4735A', fontWeight:600, margin:0 }}>✓ Semana completada · ¡Bien hecho!</p>
+          </div>
+        )}
 
         {/* Protocolo TO */}
         {userType === 'profesional' && (

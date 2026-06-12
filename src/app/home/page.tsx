@@ -106,8 +106,10 @@ export default function HomePage() {
           <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:4 }}>
             <div>
               <p style={{ color:'rgba(187,247,208,0.8)', fontSize:13, margin:0 }}>Hola,</p>
-              <h1 style={{ color:'white', fontSize:22, fontWeight:500, margin:0, fontFamily:"'Georgia',serif", textTransform:'capitalize' }}>
-                {(activeChild?.name || 'Guardián').toLowerCase()}{' '}{activeChild?.gender==='female'?'👧':'👦'}
+              <h1 style={{ color:'white', fontSize:22, fontWeight:500, margin:0, fontFamily:"'Georgia',serif" }}>
+                {activeChild?.name
+                  ? activeChild.name.charAt(0).toUpperCase() + activeChild.name.slice(1).toLowerCase()
+                  : 'Guardián'}{' '}{activeChild?.gender==='female'?'👧':'👦'}
               </h1>
             </div>
             <div style={{ display:'flex', alignItems:'center', gap:8 }}>
