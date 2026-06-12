@@ -113,9 +113,10 @@ export default function HomePage() {
               </h1>
             </div>
             <div style={{ display:'flex', alignItems:'center', gap:8 }}>
-              {children.length > 1 && (
+              {/* Selector de niños — solo si hay más de 1 con nombres distintos */}
+              {children.filter((c,i,arr) => arr.findIndex(x=>x.name===c.name)===i).length > 1 && (
                 <div style={{ display:'flex', gap:4 }}>
-                  {children.map(child => (
+                  {children.filter((c,i,arr) => arr.findIndex(x=>x.name===c.name)===i).map(child => (
                     <button key={child.id} onClick={() => setActiveChild(child.id)} style={{ width:32, height:32, borderRadius:'50%', border:`2px solid ${child.id===activeChildId?'white':'transparent'}`, background:child.id===activeChildId?'rgba(255,255,255,0.25)':'rgba(255,255,255,0.1)', fontSize:14, cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center' }}>
                       {child.gender==='female'?'👧':'👦'}
                     </button>
@@ -271,9 +272,11 @@ export default function HomePage() {
           </div>
         </div>
 
-        {/* ── COACH — solo emoji + texto ── */}
+        {/* ── COACH — Kawa real + texto ── */}
         <div style={{ background:'#FFFDE7', borderRadius:16, padding:'12px 14px', marginBottom:14, display:'flex', gap:10, alignItems:'flex-start', border:'0.5px solid #FEF08A' }}>
-          <span style={{ fontSize:20, flexShrink:0 }}>🌱</span>
+          <div style={{ width:40, height:40, borderRadius:'50%', background:'rgba(255,255,255,0.8)', border:'1.5px solid #FEF08A', overflow:'hidden', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
+            <img src="/images/kawa-personaje.png" alt="Kawa" style={{ width:'90%', height:'90%', objectFit:'contain' }} onError={(e) => { (e.target as HTMLImageElement).style.display='none'; (e.target as HTMLImageElement).parentElement!.innerHTML='<span style="font-size:20px">🌱</span>' }} />
+          </div>
           <p style={{ fontSize:12, color:'#713F12', margin:0, lineHeight:1.6 }}>
             {practicedToday
               ? `¡Increíble, ${activeChild?.name || ''}! Ya practicaste hoy. Vuelve mañana para continuar el viaje.`

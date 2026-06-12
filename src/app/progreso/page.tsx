@@ -70,27 +70,35 @@ export default function ProgresoPage() {
         {/* ── ESTADO VACÍO ── */}
         {!hasData && (
           <div style={{ display:'flex', flexDirection:'column', alignItems:'center', padding:'32px 20px', textAlign:'center' }}>
-            {/* Los 5 mundos en silueta esperando */}
-            <div style={{ display:'flex', alignItems:'center', gap:8, marginBottom:24 }}>
-              {COURSE_WEEKS.map((week, i) => (
-                <div key={week.id} style={{ display:'flex', alignItems:'center' }}>
-                  {i > 0 && <div style={{ width:20, height:2, background:'#F0E8E0', marginRight:8 }} />}
-                  <div style={{ width:42, height:42, borderRadius:'50%', background:'#F5F0E8', border:'2px solid #EDE5DC', display:'flex', alignItems:'center', justifyContent:'center' }}>
-                    <img src={WORLD_SYMBOLS[week.id]} alt={week.element} style={{ width:'60%', height:'60%', objectFit:'contain', opacity:0.25 }} />
+            {/* Kawa + mundos en silueta */}
+            <div style={{ display:'flex', flexDirection:'column', alignItems:'center', marginBottom:20 }}>
+              <div style={{ width:90, height:90, borderRadius:'50%', background:'linear-gradient(135deg,#FFF8D6,#FFF0B0)', border:'2px solid rgba(220,190,80,0.3)', overflow:'hidden', display:'flex', alignItems:'center', justifyContent:'center', marginBottom:16, boxShadow:'0 4px 16px rgba(220,160,100,0.15)' }}>
+                <img src="/images/kawa-personaje.png" alt="Kawa" style={{ width:'90%', height:'90%', objectFit:'contain' }} />
+              </div>
+              <div style={{ display:'flex', alignItems:'center', gap:6, marginBottom:16 }}>
+                {COURSE_WEEKS.map((week, i) => (
+                  <div key={week.id} style={{ display:'flex', alignItems:'center' }}>
+                    {i > 0 && <div style={{ width:16, height:2, background:'#F0E8E0' }} />}
+                    <div style={{ width:36, height:36, borderRadius:'50%', background:'#F5F0E8', border:'1.5px solid #EDE5DC', display:'flex', alignItems:'center', justifyContent:'center' }}>
+                      <img src={WORLD_SYMBOLS[week.id]} alt={week.element} style={{ width:'58%', height:'58%', objectFit:'contain', opacity:0.22 }} />
+                    </div>
                   </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
-            <p style={{ fontSize:17, fontWeight:600, color:'#2D1808', margin:'0 0 8px', fontFamily:"'Georgia',serif" }}>
-              El mapa de {childName} florecerá aquí
+            <p style={{ fontSize:17, fontWeight:600, color:'#2D1808', margin:'0 0 8px', fontFamily:"'Georgia',serif", textAlign:'center' }}>
+              El diario de {childName} está vacío
             </p>
-            <p style={{ fontSize:13, color:'#C4A090', margin:'0 0 24px', lineHeight:1.6, maxWidth:260 }}>
-              Cada clase que completes quedará guardada en este diario. Tu primer ⭐ te espera.
+            <p style={{ fontSize:13, color:'#C4A090', margin:'0 0 6px', lineHeight:1.6, maxWidth:260, textAlign:'center' }}>
+              Kawa te está esperando. Cada clase que completes quedará guardada aquí.
+            </p>
+            <p style={{ fontSize:13, color:'#C4A090', margin:'0 0 24px', lineHeight:1.6, maxWidth:260, textAlign:'center' }}>
+              Tu primer ⭐ te espera hoy.
             </p>
             <button
               onClick={() => router.push(`/semana/${currentWeek}`)}
               style={{ background:'linear-gradient(135deg,#F4B880,#E89860)', border:'none', borderRadius:14, padding:'13px 28px', color:'white', fontSize:14, fontWeight:600, cursor:'pointer', boxShadow:'0 4px 16px rgba(220,160,100,0.35)' }}>
-              Hacer mi primera clase →
+              Comenzar con Kawa →
             </button>
           </div>
         )}
