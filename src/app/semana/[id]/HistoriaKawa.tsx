@@ -312,8 +312,8 @@ export default function HistoriaKawa({ week, weekColors, onComplete, isCompleted
               {/* Imagen de postura de fondo */}
               {bgImgSrc && (
                 <div style={{ position:'absolute', inset:0, overflow:'hidden', pointerEvents:'none' }}>
-                  <img src={bgImgSrc} alt="" style={{ position:'absolute', right:0, bottom:0, height:'100%', width:'auto', objectFit:'contain', objectPosition:'bottom right', opacity:0.38 }} />
-                  <div style={{ position:'absolute', inset:0, background:'linear-gradient(to right,rgba(0,0,0,0.5) 0%,rgba(0,0,0,0.15) 55%,transparent 80%)' }} />
+                  <img src={bgImgSrc} alt="" style={{ position:'absolute', right:0, bottom:0, height:'108%', width:'auto', objectFit:'contain', objectPosition:'bottom right', opacity:0.92 }} />
+                  <div style={{ position:'absolute', inset:0, background:'linear-gradient(to right,rgba(0,0,0,0.55) 0%,rgba(0,0,0,0.3) 45%,transparent 68%)' }} />
                 </div>
               )}
 
@@ -378,8 +378,8 @@ export default function HistoriaKawa({ week, weekColors, onComplete, isCompleted
                   {postura.emoji}
                 </div>
                 <div style={{ flex:1, textAlign:'left' }}>
-                  <p style={{ fontSize:9, color:config.color, fontWeight:700, margin:0, textTransform:'uppercase', letterSpacing:'0.05em' }}>Postura de esta parte</p>
-                  <p style={{ fontSize:12, fontWeight:600, color:'#1F2937', margin:0 }}>{postura.name} · "{postura.magic}"</p>
+                  <p style={{ fontSize:11, color:config.color, fontWeight:600, margin:'0 0 1px', fontFamily:"'Georgia',serif", fontStyle:'italic' }}>Ahora: {postura.name}</p>
+                  <p style={{ fontSize:11, color:'rgba(80,60,20,0.6)', margin:0, fontStyle:'italic' }}>"{postura.magic}"</p>
                 </div>
                 <div style={{ width:24, height:24, borderRadius:'50%', background:`${config.color}15`, display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0, transition:'transform 0.25s', transform:posturaOpen?'rotate(180deg)':'none' }}>
                   <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke={config.color} strokeWidth="2.5" strokeLinecap="round"><path d="M6 9l6 6 6-6"/></svg>
@@ -433,7 +433,12 @@ export default function HistoriaKawa({ week, weekColors, onComplete, isCompleted
               {isCompleted ? '⭐ Historia completada' : '⭐ Completar historia'}
             </button>
           )}
-          <button onClick={()=>goTo(current+1)} disabled={current===total-1} style={{ width:40, height:40, borderRadius:'50%', border:'1.5px solid #F0E8E0', background:'white', display:'flex', alignItems:'center', justifyContent:'center', fontSize:16, cursor:current===total-1?'default':'pointer', opacity:current===total-1?0.2:1, flexShrink:0 }}>→</button>
+          {current < total-1 && (
+            <button onClick={()=>goTo(current+1)} style={{ width:40, height:40, borderRadius:'50%', border:'1.5px solid #F0E8E0', background:'white', display:'flex', alignItems:'center', justifyContent:'center', fontSize:16, cursor:'pointer', flexShrink:0 }}>→</button>
+          )}
+          {current === total-1 && (
+            <div style={{ width:40, flexShrink:0 }} />
+          )}
         </div>
       </div>
     </>
