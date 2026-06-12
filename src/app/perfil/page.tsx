@@ -187,6 +187,24 @@ export default function PerfilPage() {
           </div>
         </div>
 
+        {/* Agregar niño/a */}
+        <button
+          onClick={() => {
+            // Limpiar onboarding para agregar nuevo niño
+            localStorage.removeItem('kawa-coach-seen')
+            window.location.href = '/onboarding'
+          }}
+          style={{ width:'100%', padding:'13px', borderRadius:14, background:'linear-gradient(135deg,#F4B880,#E89860)', border:'none', color:'white', fontSize:13, fontWeight:600, cursor:'pointer', boxSizing:'border-box', display:'flex', alignItems:'center', justifyContent:'center', gap:8 }}>
+          <span style={{ fontSize:18 }}>+</span> Agregar niño/a
+        </button>
+
+        {/* Test sensorial completo */}
+        <button
+          onClick={() => window.location.href = '/test-sensorial'}
+          style={{ width:'100%', padding:'13px', borderRadius:14, background:'white', border:'1.5px dashed #C4A090', color:'#C4A090', fontSize:13, cursor:'pointer', boxSizing:'border-box', display:'flex', alignItems:'center', justifyContent:'center', gap:8 }}>
+          <span style={{ fontSize:16 }}>🔍</span> Hacer el test sensorial completo
+        </button>
+
         {/* Resetear */}
         <button
           onClick={() => { if (confirm('¿Resetear todo el progreso?')) reset() }}
