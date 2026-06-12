@@ -195,6 +195,11 @@ function SmallPlayBtn({ src, label, sublabel, color, bg }: { src:string; label:s
 }
 
 // ── Modal de postura ──────────────────────────────────────────────────────────
+const AUDIO_MAP_MODAL: Record<string,string> = {
+  montana:'montana', indio:'posturaindio', tortuga:'posturatortuga',
+  gato:'gatolYII', arbol:'posturaarbol',
+}
+
 function PosturaModal({ postura, weekId, gender, color, onClose }:{
   postura: typeof POSTURA_POR_PARTE[1][StepKey]; weekId:number; gender:'male'|'female'; color:string; onClose:()=>void
 }) {
@@ -219,12 +224,34 @@ function PosturaModal({ postura, weekId, gender, color, onClose }:{
           </div>
           <button onClick={onClose} style={{ position:'absolute', top:14, right:14, width:30, height:30, borderRadius:'50%', background:'rgba(255,255,255,0.25)', border:'none', cursor:'pointer', fontSize:16, color:'white', display:'flex', alignItems:'center', justifyContent:'center' }}>×</button>
         </div>
-        <div style={{ overflow:'auto', padding:'16px 18px 28px' }}>
+        <div style={{ overflow:'auto', padding:'14px 16px 32px' }}>
+
+          {/* 2 plays — niño/a y adulto */}
+          <div style={{ display:'flex', gap:8, marginBottom:12 }}>
+            <SmallPlayBtn
+              src={`/audio/semana-${weekId}/s${weekId}postura${AUDIO_MAP_MODAL[postura.id] || postura.id}historia.m4a`}
+              label="Postura en cuento"
+              sublabel="✨ Para el niño/a"
+              color="#C07020"
+              bg="linear-gradient(135deg,#FFF8D0,#FFF0A8)"
+            />
+            <SmallPlayBtn
+              src={`/audio/semana-${weekId}/s${weekId}howto${AUDIO_MAP_MODAL[postura.id] || postura.id}.m4a`}
+              label="Guía del adulto"
+              sublabel="🧘 Para el adulto"
+              color="#C06858"
+              bg="linear-gradient(135deg,#FFF0F4,#FFE4EC)"
+            />
+          </div>
+
+          {/* Cómo hacerla */}
           <div style={{ background:`${color}10`, borderRadius:12, padding:'11px 13px', marginBottom:10, borderLeft:`3px solid ${color}` }}>
             <p style={{ fontSize:10, fontWeight:700, color:color, margin:'0 0 5px', textTransform:'uppercase', letterSpacing:'0.06em' }}>Cómo hacerla</p>
             <p style={{ fontSize:13, color:'#374151', margin:0, lineHeight:1.65 }}>{postura.howTo}</p>
             <p style={{ fontSize:11, fontWeight:600, color:color, margin:'6px 0 0' }}>⏱️ {postura.duration}</p>
           </div>
+
+          {/* Beneficios */}
           <div style={{ background:'#F8F7F4', borderRadius:12, padding:'11px 13px' }}>
             <p style={{ fontSize:10, fontWeight:700, color:'#9CA3AF', margin:'0 0 6px', textTransform:'uppercase', letterSpacing:'0.06em' }}>Beneficios sensoriales</p>
             {postura.benefits.map((b,i) => (
@@ -305,17 +332,12 @@ export default function HistoriaKawa({ week, weekColors, onComplete, isCompleted
             transition:animating?'all 0.28s ease':'none',
           }}>
 
-            {/* Header con imagen */}
-            <div style={{ background:config.bg, height:190, position:'relative', overflow:'hidden', display:'flex', flexDirection:'column', justifyContent:'flex-end', padding:'0 18px 14px' }}>
-              <div style={{ position:'absolute', top:-30, left:-30, width:100, height:100, borderRadius:'50%', background:'rgba(255,255,255,0.08)', pointerEvents:'none' }} />
+            {/* Header con KAWA CENTRAL — protagonista */}
+            <div style={{ background:config.bg, height:200, position:'relative', overflow:'hidden', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', padding:'0 18px' }}>
 
-              {/* Imagen de postura de fondo */}
-              {bgImgSrc && (
-                <div style={{ position:'absolute', inset:0, overflow:'hidden', pointerEvents:'none' }}>
-                  <img src={bgImgSrc} alt="" style={{ position:'absolute', right:0, bottom:0, height:'108%', width:'auto', objectFit:'contain', objectPosition:'bottom right', opacity:0.92 }} />
-                  <div style={{ position:'absolute', inset:0, background:'linear-gradient(to right,rgba(0,0,0,0.55) 0%,rgba(0,0,0,0.3) 45%,transparent 68%)' }} />
-                </div>
-              )}
+              {/* Círculo decorativo fondo */}
+              <div style={{ position:'absolute', top:-20, left:-20, width:80, height:80, borderRadius:'50%', background:'rgba(255,255,255,0.1)', pointerEvents:'none' }} />
+              <div style={{ position:'absolute', bottom:-10, right:-10, width:60, height:60, borderRadius:'50%', background:'rgba(255,255,255,0.08)', pointerEvents:'none' }} />
 
               {/* Stories bar */}
               <div style={{ position:'absolute', top:12, left:0, right:0, display:'flex', gap:4, padding:'0 14px', zIndex:2 }}>
@@ -324,28 +346,35 @@ export default function HistoriaKawa({ week, weekColors, onComplete, isCompleted
                 ))}
               </div>
 
-              {/* Badge Kawa — esquina superior derecha */}
-              <div style={{ position:'absolute', top:28, right:12, zIndex:3, display:'flex', flexDirection:'column', alignItems:'center', gap:3 }}>
-                <div style={{ width:56, height:56, borderRadius:'50%', background:'rgba(255,255,255,0.92)', border:'1.5px solid rgba(255,255,255,0.95)', overflow:'hidden', display:'flex', alignItems:'center', justifyContent:'center', boxShadow:'0 2px 10px rgba(0,0,0,0.15)' }}>
-                  <img src="/images/kawa-personaje.png" alt="Kawa" style={{ width:'85%', height:'85%', objectFit:'contain' }} />
+              {/* Badge parte — arriba izquierda */}
+              <div style={{ position:'absolute', top:26, left:14, display:'inline-flex', alignItems:'center', gap:5, background:'rgba(255,255,255,0.28)', borderRadius:20, padding:'3px 10px', border:'1px solid rgba(255,255,255,0.45)', zIndex:2 }}>
+                <div style={{ width:16, height:16, borderRadius:'50%', background:'rgba(255,255,255,0.9)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:9, fontWeight:700, color:config.dark }}>
+                  {current+1}
                 </div>
-                <div style={{ background:'rgba(255,255,255,0.85)', borderRadius:20, padding:'2px 8px', border:'1px solid rgba(255,255,255,0.9)' }}>
-                  <span style={{ fontSize:9, fontWeight:700, color:config.dark }}>Kawa</span>
-                </div>
+                <span style={{ fontSize:9, fontWeight:700, color:'rgba(255,255,255,0.95)', textTransform:'uppercase', letterSpacing:'0.07em' }}>{config.label}</span>
               </div>
 
-              {/* Número + label + título + estado de Kawa */}
-              <div style={{ position:'relative', zIndex:2, maxWidth:'62%' }}>
-                <div style={{ display:'inline-flex', alignItems:'center', gap:6, background:'rgba(255,255,255,0.25)', borderRadius:20, padding:'3px 12px', marginBottom:5, border:'1px solid rgba(255,255,255,0.4)' }}>
-                  <div style={{ width:18, height:18, borderRadius:'50%', background:'rgba(255,255,255,0.9)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:10, fontWeight:700, color:config.dark }}>
-                    {current+1}
-                  </div>
-                  <span style={{ fontSize:9, fontWeight:700, color:'rgba(255,255,255,0.95)', letterSpacing:'0.08em', textTransform:'uppercase' }}>{config.label}</span>
+              {/* KAWA — central y protagonista */}
+              <div style={{ display:'flex', flexDirection:'column', alignItems:'center', position:'relative', zIndex:2 }}>
+                <div style={{
+                  width:90, height:90, borderRadius:'50%',
+                  background:'rgba(255,255,255,0.92)',
+                  border:'2.5px solid rgba(255,255,255,0.98)',
+                  overflow:'hidden',
+                  display:'flex', alignItems:'center', justifyContent:'center',
+                  marginBottom:8,
+                  boxShadow:'0 6px 20px rgba(0,0,0,0.15)'
+                }}>
+                  <img
+                    src="/images/kawa-personaje.png"
+                    alt="Kawa"
+                    style={{ width:'90%', height:'90%', objectFit:'contain' }}
+                  />
                 </div>
-                <h3 style={{ fontSize:17, fontWeight:700, color:'rgba(255,255,255,0.97)', margin:'0 0 4px', fontFamily:"'Georgia','Times New Roman',serif", textShadow:'0 2px 8px rgba(0,0,0,0.3)' }}>
+                <h3 style={{ fontSize:16, fontWeight:700, color:'rgba(255,255,255,0.97)', margin:'0 0 3px', fontFamily:"'Georgia','Times New Roman',serif", textShadow:'0 2px 6px rgba(0,0,0,0.2)', textAlign:'center' }}>
                   {stepData.title}
                 </h3>
-                <p style={{ fontSize:10, color:'rgba(255,255,255,0.82)', margin:0, fontStyle:'italic', textShadow:'0 1px 4px rgba(0,0,0,0.3)' }}>
+                <p style={{ fontSize:10, color:'rgba(255,255,255,0.82)', margin:0, fontStyle:'italic', textShadow:'0 1px 4px rgba(0,0,0,0.2)', textAlign:'center' }}>
                   {(config as any).kawa}
                 </p>
               </div>
@@ -377,58 +406,25 @@ export default function HistoriaKawa({ week, weekColors, onComplete, isCompleted
               />
             </div>
 
-            {/* ══ ZONA 4: POSTURA — colapsable con un toque ══ */}
-            <div style={{ background:'#FFFAF6', borderTop:`1px solid ${config.color}15`, paddingBottom: posturaOpen ? 0 : 0 }}>
-              {/* Botón para abrir/cerrar zona postura */}
+            {/* ══ ZONA 4: POSTURA — botón único, acceso secundario ══ */}
+            <div style={{ background:'#FFFAF6', borderTop:`1px solid ${config.color}15`, padding:'8px 14px 10px' }}>
               <button
-                onClick={()=>setPosturaOpen(o=>!o)}
+                onClick={()=>setShowPostura(true)}
                 style={{
-                  width:'100%', padding:'11px 14px',
-                  background:'none', border:'none', cursor:'pointer',
-                  display:'flex', alignItems:'center', gap:10, boxSizing:'border-box'
+                  width:'100%', padding:'10px 14px', borderRadius:13,
+                  background:'white', border:`1px solid ${config.color}22`,
+                  display:'flex', alignItems:'center', gap:12,
+                  cursor:'pointer', textAlign:'left', boxSizing:'border-box'
                 }}>
-                <div style={{ width:36, height:36, borderRadius:10, background:`${config.color}15`, display:'flex', alignItems:'center', justifyContent:'center', fontSize:20, flexShrink:0 }}>
+                <div style={{ width:40, height:40, borderRadius:11, background:`linear-gradient(135deg,${config.color}20,${config.color}10)`, display:'flex', alignItems:'center', justifyContent:'center', fontSize:22, flexShrink:0 }}>
                   {postura.emoji}
                 </div>
-                <div style={{ flex:1, textAlign:'left' }}>
-                  <p style={{ fontSize:11, color:config.color, fontWeight:600, margin:'0 0 1px', fontFamily:"'Georgia',serif", fontStyle:'italic' }}>Ahora: {postura.name}</p>
-                  <p style={{ fontSize:11, color:'rgba(80,60,20,0.6)', margin:0, fontStyle:'italic' }}>"{postura.magic}"</p>
+                <div style={{ flex:1 }}>
+                  <p style={{ fontSize:10, color:config.color, fontWeight:700, margin:'0 0 1px', textTransform:'uppercase', letterSpacing:'0.05em' }}>Ver postura</p>
+                  <p style={{ fontSize:12, fontWeight:600, color:'#1F2937', margin:0 }}>{postura.name} · <span style={{ fontStyle:'italic', fontWeight:400, color:'rgba(80,60,20,0.6)' }}>"{postura.magic}"</span></p>
                 </div>
-                <div style={{ width:24, height:24, borderRadius:'50%', background:`${config.color}15`, display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0, transition:'transform 0.25s', transform:posturaOpen?'rotate(180deg)':'none' }}>
-                  <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke={config.color} strokeWidth="2.5" strokeLinecap="round"><path d="M6 9l6 6 6-6"/></svg>
-                </div>
+                <div style={{ width:28, height:28, borderRadius:'50%', background:`linear-gradient(135deg,${config.color},${config.dark})`, display:'flex', alignItems:'center', justifyContent:'center', color:'white', fontSize:13, flexShrink:0 }}>→</div>
               </button>
-
-              {/* Contenido expandido de postura */}
-              {posturaOpen && (
-                <div style={{ padding:'0 14px 12px', display:'flex', flexDirection:'column', gap:7 }}>
-                  <div style={{ display:'flex', gap:7 }}>
-                    <SmallPlayBtn
-                      src={`/audio/semana-${s}/s${s}postura${audioKey}historia.m4a`}
-                      label="Postura en cuento"
-                      sublabel="✨ Para el niño/a"
-                      color="#C07020"
-                      bg="linear-gradient(135deg,#FFF8D0,#FFF0A8)"
-                    />
-                    <SmallPlayBtn
-                      src={`/audio/semana-${s}/s${s}howto${audioKey}.m4a`}
-                      label="Guía del adulto"
-                      sublabel="🧘 Para el adulto"
-                      color="#C06858"
-                      bg="linear-gradient(135deg,#FFF0F4,#FFE4EC)"
-                    />
-                  </div>
-                  <button onClick={()=>setShowPostura(true)} style={{
-                    width:'100%', padding:'9px 12px', borderRadius:11,
-                    background:'white', border:`1px solid ${config.color}25`,
-                    display:'flex', alignItems:'center', justifyContent:'space-between',
-                    cursor:'pointer', boxSizing:'border-box'
-                  }}>
-                    <span style={{ fontSize:12, color:'#374151', fontWeight:500 }}>Ver instrucciones completas</span>
-                    <div style={{ width:24, height:24, borderRadius:'50%', background:`linear-gradient(135deg,${config.color},${config.dark})`, display:'flex', alignItems:'center', justifyContent:'center', color:'white', fontSize:11 }}>→</div>
-                  </button>
-                </div>
-              )}
             </div>
 
           </div>
