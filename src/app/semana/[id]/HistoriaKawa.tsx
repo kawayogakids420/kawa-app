@@ -5,11 +5,11 @@ import { useAppStore } from '@/lib/store'
 
 // ── Configuración por parte ───────────────────────────────────────────────────
 const STEP_CONFIG = {
-  inicio:        { label:'Inicio',        color:'#A87840', dark:'#6A4A10', text:'#3A2808', bg:'linear-gradient(145deg,#D4E8A0 0%,#C8D890 40%,#E8D4A0 100%)' },
-  desequilibrio: { label:'Desequilibrio', color:'#C06030', dark:'#8A3818', text:'#4A1808', bg:'linear-gradient(145deg,#F8C8A0 0%,#F0B090 40%,#F8A8B0 100%)' },
-  accion:        { label:'Acción',        color:'#4070B0', dark:'#1A4080', text:'#0A2050', bg:'linear-gradient(145deg,#A8C8F8 0%,#98B8F0 40%,#B8A8F8 100%)' },
-  catarsis:      { label:'Catarsis',      color:'#8858A8', dark:'#5A2878', text:'#380850', bg:'linear-gradient(145deg,#E0B8F8 0%,#D0A0F0 40%,#B8B0F8 100%)' },
-  ensenanza:     { label:'Enseñanza',     color:'#C06840', dark:'#883818', text:'#501808', bg:'linear-gradient(145deg,#F8E090 0%,#F0C880 40%,#F8B898 100%)' },
+  inicio:        { label:'Inicio',        color:'#A87840', dark:'#6A4A10', text:'#3A2808', bg:'linear-gradient(145deg,#D4E8A0 0%,#C8D890 40%,#E8D4A0 100%)', kawa:'Kawa acaba de caer del árbol más alto' },
+  desequilibrio: { label:'Desequilibrio', color:'#C06030', dark:'#8A3818', text:'#4A1808', bg:'linear-gradient(145deg,#F8C8A0 0%,#F0B090 40%,#F8A8B0 100%)', kawa:'Kawa está confundida y asustada' },
+  accion:        { label:'Acción',        color:'#4070B0', dark:'#1A4080', text:'#0A2050', bg:'linear-gradient(145deg,#A8C8F8 0%,#98B8F0 40%,#B8A8F8 100%)', kawa:'Kawa decide moverse y explorar' },
+  catarsis:      { label:'Catarsis',      color:'#8858A8', dark:'#5A2878', text:'#380850', bg:'linear-gradient(145deg,#E0B8F8 0%,#D0A0F0 40%,#B8B0F8 100%)', kawa:'Kawa llora y libera lo que cargaba' },
+  ensenanza:     { label:'Enseñanza',     color:'#C06840', dark:'#883818', text:'#501808', bg:'linear-gradient(145deg,#F8E090 0%,#F0C880 40%,#F8B898 100%)', kawa:'Oma le entrega el regalo a Kawa' },
 }
 const STEP_KEYS = ['inicio','desequilibrio','accion','catarsis','ensenanza'] as const
 type StepKey = typeof STEP_KEYS[number]
@@ -324,17 +324,30 @@ export default function HistoriaKawa({ week, weekColors, onComplete, isCompleted
                 ))}
               </div>
 
-              {/* Badge número + label */}
-              <div style={{ position:'relative', zIndex:2 }}>
-                <div style={{ display:'inline-flex', alignItems:'center', gap:6, background:'rgba(255,255,255,0.25)', borderRadius:20, padding:'3px 12px', marginBottom:6, border:'1px solid rgba(255,255,255,0.4)' }}>
+              {/* Badge Kawa — esquina superior derecha */}
+              <div style={{ position:'absolute', top:28, right:12, zIndex:3, display:'flex', flexDirection:'column', alignItems:'center', gap:3 }}>
+                <div style={{ width:56, height:56, borderRadius:'50%', background:'rgba(255,255,255,0.92)', border:'1.5px solid rgba(255,255,255,0.95)', overflow:'hidden', display:'flex', alignItems:'center', justifyContent:'center', boxShadow:'0 2px 10px rgba(0,0,0,0.15)' }}>
+                  <img src="/images/kawa-personaje.png" alt="Kawa" style={{ width:'85%', height:'85%', objectFit:'contain' }} />
+                </div>
+                <div style={{ background:'rgba(255,255,255,0.85)', borderRadius:20, padding:'2px 8px', border:'1px solid rgba(255,255,255,0.9)' }}>
+                  <span style={{ fontSize:9, fontWeight:700, color:config.dark }}>Kawa</span>
+                </div>
+              </div>
+
+              {/* Número + label + título + estado de Kawa */}
+              <div style={{ position:'relative', zIndex:2, maxWidth:'62%' }}>
+                <div style={{ display:'inline-flex', alignItems:'center', gap:6, background:'rgba(255,255,255,0.25)', borderRadius:20, padding:'3px 12px', marginBottom:5, border:'1px solid rgba(255,255,255,0.4)' }}>
                   <div style={{ width:18, height:18, borderRadius:'50%', background:'rgba(255,255,255,0.9)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:10, fontWeight:700, color:config.dark }}>
                     {current+1}
                   </div>
-                  <span style={{ fontSize:10, fontWeight:700, color:'rgba(255,255,255,0.95)', letterSpacing:'0.08em', textTransform:'uppercase' }}>{config.label}</span>
+                  <span style={{ fontSize:9, fontWeight:700, color:'rgba(255,255,255,0.95)', letterSpacing:'0.08em', textTransform:'uppercase' }}>{config.label}</span>
                 </div>
-                <h3 style={{ fontSize:18, fontWeight:700, color:'rgba(255,255,255,0.97)', margin:0, fontFamily:"'Georgia','Times New Roman',serif", textShadow:'0 2px 8px rgba(0,0,0,0.3)', maxWidth:'65%' }}>
+                <h3 style={{ fontSize:17, fontWeight:700, color:'rgba(255,255,255,0.97)', margin:'0 0 4px', fontFamily:"'Georgia','Times New Roman',serif", textShadow:'0 2px 8px rgba(0,0,0,0.3)' }}>
                   {stepData.title}
                 </h3>
+                <p style={{ fontSize:10, color:'rgba(255,255,255,0.82)', margin:0, fontStyle:'italic', textShadow:'0 1px 4px rgba(0,0,0,0.3)' }}>
+                  {(config as any).kawa}
+                </p>
               </div>
             </div>
 
