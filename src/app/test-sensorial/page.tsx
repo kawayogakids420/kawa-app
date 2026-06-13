@@ -175,7 +175,7 @@ export default function TestSensorialPage() {
               </div>
               <div>
                 <p style={{ fontSize:17, fontWeight:700, color:dom.color, margin:'0 0 3px' }}>{dom.name}</p>
-                <p style={{ fontSize:12, color:'#4A3020', margin:0, lineHeight:1.5 }}>{dom.desc}</p>
+                <p style={{ fontSize:12, color:'#4A3020', margin:0, lineHeight:1.5 }}>{dom.description}</p>
               </div>
             </div>
           </div>
