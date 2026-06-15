@@ -21,7 +21,7 @@ const FASES = [
   {
     label: 'El guardián',
     texto: 'Entonces aparece Oma la Tortuga. Muy despacio, planta sus cuatro patas y dice: "Siente el suelo, Kawa. Él ya te sostiene."',
-    kawaSrc: '/kawa/guardian-oma.png',
+    kawaSrc: '/kawa/kawa-guardian.png',
     boca: 'M50 80 Q60 82 70 80',
     mejillas: 0.15,
   },
@@ -35,7 +35,7 @@ const FASES = [
   {
     label: 'Enseñanza',
     texto: 'Oma le entrega una piedra suave y verde: "Cuando el mundo se mueva, sostenla. Recuerda: tú eres una montaña. Nada puede moverte." 🪨',
-    kawaSrc: '/kawa/kawa-ensenanza.png',
+    kawaSrc: '/kawa/kawa-enseñanza.png',
     boca: 'M50 74 Q60 90 70 74',
     mejillas: 0.28,
   },
