@@ -1,0 +1,177 @@
+.screen {
+  flex: 1;
+  overflow-y: auto;
+  transition: background 0.4s ease;
+}
+
+/* Story banner */
+.banner {
+  margin: 14px 16px 0;
+  border-radius: 20px;
+  padding: 20px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 110px;
+  transition: background 0.4s ease;
+}
+
+.bannerMeta { flex: 1; }
+
+.weekLabel {
+  font-size: 11px;
+  font-weight: 700;
+  color: rgba(255,255,255,0.75);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.bannerTitle {
+  font-size: 18px;
+  font-weight: 900;
+  color: #FFFFFF;
+  margin: 4px 0 2px;
+}
+
+.bannerSub {
+  font-size: 12px;
+  font-weight: 500;
+  color: rgba(255,255,255,0.75);
+}
+
+.playBtn {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: none;
+  color: white;
+  font-size: 16px;
+  cursor: pointer;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.3s ease;
+}
+
+/* Posturas section */
+.section {
+  background: white;
+  border-radius: 24px 24px 0 0;
+  margin-top: 16px;
+  padding: 20px 16px;
+  min-height: 300px;
+}
+
+.sectionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.sectionTitle {
+  font-size: 17px;
+  font-weight: 800;
+  color: #2D2416;
+}
+
+.sectionCount {
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.posturaCard {
+  border: none;
+  border-radius: 14px;
+  padding: 10px 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: transform 0.15s ease;
+}
+
+.breathGrid {
+  display: grid;
+  gap: 12px;
+}
+
+.breathCard {
+  width: 100%;
+  border: none;
+  border-radius: 22px;
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  text-align: left;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.breathCard:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.08);
+}
+
+.breathCard.locked {
+  cursor: default;
+  opacity: 0.7;
+}
+
+.breathTitle {
+  font-size: 16px;
+  font-weight: 800;
+  color: #2D2416;
+}
+
+.breathSub {
+  font-size: 13px;
+  color: #6B5B4A;
+}
+
+.breathPattern {
+  align-self: flex-start;
+  font-size: 12px;
+  font-weight: 700;
+  color: #4A5F68;
+}
+
+.posturaCard:active { transform: scale(0.95); }
+
+.posturaImg {
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: 10px;
+  background: repeating-linear-gradient(
+    45deg,
+    rgba(255,255,255,0.5) 0px,
+    rgba(255,255,255,0.5) 4px,
+    rgba(0,0,0,0.04) 4px,
+    rgba(0,0,0,0.04) 8px
+  );
+  min-height: 60px;
+}
+
+.posturaName {
+  font-size: 13px;
+  font-weight: 800;
+  color: #2D2416;
+  text-align: center;
+}
+
+.posturaTag {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-align: center;
+}

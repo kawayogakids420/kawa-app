@@ -1,20 +1,17 @@
-@import "tailwindcss";
+@tailwind base;
+@tailwind utilities;
 
-* {
-  -webkit-tap-highlight-color: transparent;
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  font-family: var(--font-sans), sans-serif;
+  background: #E8DDD4;
+  color: #2D2416;
+  -webkit-font-smoothing: antialiased;
 }
 
-body {
-  max-width: 430px;
-  margin: 0 auto;
-  min-height: 100vh;
-  background: #f9fafb;
+h1, h2, h3 {
+  font-family: var(--font-display), sans-serif;
 }
 
-button {
-  cursor: pointer;
-}
-
-textarea, input {
-  font-family: inherit;
-}
+button { font-family: inherit; }

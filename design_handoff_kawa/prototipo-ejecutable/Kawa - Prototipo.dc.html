@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@300;400;500;600;700&family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; }
+  ::-webkit-scrollbar { width: 0; height: 0; }
+  @keyframes kawaFloat { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-7px); } }
+  @keyframes kawaBreathe { 0%,100% { transform: scale(.82); } 50% { transform: scale(1.1); } }
+  @keyframes fadeUp { from { transform: translateY(26px); } to { transform: translateY(0); } }
+</style>
+</helmet>
+
+<div style="min-height:100vh;background:#E7E1D6;display:flex;align-items:center;justify-content:center;padding:30px;font-family:'Nunito',sans-serif;">
+<x-import component="IOSDevice" from="./ios-frame.jsx" hint-size="402px,874px">
+<div style="position:relative;height:100%;width:100%;font-family:'Nunito',sans-serif;color:#3D3A34;">
+
+  <!-- ============ HOME (niño) ============ -->
+  <sc-if value="{{ isHome }}" hint-placeholder-val="{{ true }}">
+  <div style="{{ kidBg }}">
+    <div style="padding:58px 22px 0;position:relative;">
+      <div style="display:flex;align-items:center;justify-content:space-between;">
+        <span style="font-family:'Fredoka',sans-serif;font-weight:600;font-size:21px;color:#C8825D;letter-spacing:.5px;">kawa</span>
+        {{ challengeRing }}
+      </div>
+      <div style="margin-top:22px;">
+        <div style="font-size:16px;font-weight:700;color:#C8825D;">Hola, {{ name }}</div>
+        <h2 style="font-family:'Fredoka',sans-serif;font-weight:500;font-size:27px;line-height:1.16;margin:5px 0 0;color:#5A4032;">¿Cómo se siente<br>tu cuerpo hoy?</h2>
+      </div>
+      <div style="position:relative;height:152px;margin-top:4px;display:flex;align-items:flex-end;justify-content:center;">
+        <div style="{{ homeHill1 }}"></div>
+        <div style="{{ homeHill2 }}"></div>
+        <div style="animation:kawaFloat 6s ease-in-out infinite;position:relative;width:160px;height:172px;background:url('img/kawa-inicio.png') center bottom/contain no-repeat;filter:drop-shadow(0 12px 14px rgba(120,80,40,.18));"></div>
+      </div>
+    </div>
+    <div style="background:#FBF8F2;border-radius:30px 30px 0 0;margin-top:-4px;padding:24px 22px 30px;box-shadow:0 -10px 30px rgba(200,140,90,.13);position:relative;">
+      <div style="display:flex;flex-direction:column;gap:11px;">
+        <button onClick="{{ moodCalma }}" style="display:flex;align-items:center;gap:14px;background:#F4F7F2;border:none;border-radius:20px;padding:15px 17px;text-align:left;cursor:pointer;" style-hover="transform:translateY(-2px)">
+          <span style="width:52px;height:52px;border-radius:16px;background:#EDF3EA url('img/kawa-base.png') center 58%/84% no-repeat;flex:none;"></span>
+          <span><span style="display:block;font-size:17px;font-weight:800;color:#3D3A34;">Necesito calma</span><span style="font-size:12.5px;color:#8A857B;">Respira y baja revoluciones</span></span></button>
+        <button onClick="{{ moodMover }}" style="display:flex;align-items:center;gap:14px;background:#FBF1E1;border:none;border-radius:20px;padding:15px 17px;text-align:left;cursor:pointer;" style-hover="transform:translateY(-2px)">
+          <span style="width:52px;height:52px;border-radius:16px;background:#FBF1DE url('img/kawa-catarsis.png') center/88% no-repeat;flex:none;"></span>
+          <span><span style="display:block;font-size:17px;font-weight:800;color:#3D3A34;">Quiero moverme</span><span style="font-size:12.5px;color:#8A857B;">Energía y juego activo</span></span></button>
+        <button onClick="{{ moodDificil }}" style="display:flex;align-items:center;gap:14px;background:#F8E9E2;border:none;border-radius:20px;padding:15px 17px;text-align:left;cursor:pointer;" style-hover="transform:translateY(-2px)">
+          <span style="width:52px;height:52px;border-radius:16px;background:#F6E2D8 url('img/kawa-desequilibrio.png') center/88% no-repeat;flex:none;"></span>
+          <span><span style="display:block;font-size:17px;font-weight:800;color:#3D3A34;">Día difícil</span><span style="font-size:12.5px;color:#8A857B;">Un S.O.S. de 3 minutos</span></span></button>
+      </div>
+    </div>
+  </div>
+  </sc-if>
+
+  <!-- ============ PRACTICAR (niño) ============ -->
+  <sc-if value="{{ isPractice }}" hint-placeholder-val="{{ true }}">
+  <div style="{{ kidBg }}">
+    <div style="padding:58px 22px 22px;">
+      <div style="font-size:12px;letter-spacing:1.5px;text-transform:uppercase;color:#C8825D;font-weight:800;">Semana 1 · Tierra</div>
+      <h2 style="font-family:'Fredoka',sans-serif;font-weight:500;font-size:26px;margin:3px 0 18px;color:#5A4032;">Practicar</h2>
+      <button onClick="{{ openStory }}" style="width:100%;border:none;cursor:pointer;text-align:left;border-radius:26px;overflow:hidden;background:#34503A;padding:0;display:block;box-shadow:0 8px 24px rgba(52,80,58,.28);" style-hover="transform:translateY(-2px)">
+        <div style="height:150px;background:linear-gradient(180deg,#5C7C4C,#34503A);position:relative;overflow:hidden;display:flex;align-items:flex-end;justify-content:center;"><div style="width:134px;height:142px;background:url('img/kawa-guardian.png') center bottom/contain no-repeat;"></div></div>
+        <div style="padding:16px 18px;display:flex;align-items:center;gap:14px;">
+          <div style="{{ heroPlayStyle }}">▶</div>
+          <div style="flex:1;"><div style="font-family:'Fredoka',sans-serif;font-weight:500;font-size:18px;color:#fff;">La historia de Kawa</div><div style="font-size:12px;color:#BFD3BC;">Cap. 1 · La semilla que encontró sus raíces · 8 min</div></div>
+        </div>
+      </button>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin:24px 0 12px;">
+        <span style="font-family:'Fredoka',sans-serif;font-weight:500;font-size:18px;color:#5A4032;">Posturas de hoy</span>
+        <span style="font-size:12.5px;font-weight:700;color:#C8825D;">6 posturas</span>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:11px;">
+        <sc-for list="{{ poses }}" as="p" hint-placeholder-count="6">
+          <button onClick="{{ p.onClick }}" style="{{ p.cardStyle }}" style-hover="transform:translateY(-3px)">
+            <div style="{{ p.imgStyle }}">postura</div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:2px;"><span style="{{ p.nameStyle }}">{{ p.name }}</span><span style="{{ p.tagStyle }}">{{ p.tag }}</span></div>
+          </button>
+        </sc-for>
+      </div>
+      <div style="font-family:'Fredoka',sans-serif;font-weight:500;font-size:18px;color:#5A4032;margin:24px 0 12px;">Respiraciones</div>
+      <button onClick="{{ openBreath }}" style="width:100%;border:none;cursor:pointer;text-align:left;background:#E9F0F4;border-radius:20px;padding:16px;display:flex;align-items:center;gap:14px;" style-hover="transform:translateY(-2px)">
+        <div style="width:48px;height:48px;border-radius:16px;background:#7E9DB5;flex:none;"></div>
+        <div style="flex:1;"><div style="font-family:'Fredoka',sans-serif;font-weight:500;font-size:16px;color:#3D3A34;">Respiración Globo</div><div style="font-size:12.5px;color:#7E8C95;">4 tiempos · 4 tiempos · Calma el cuerpo</div></div>
+        <span style="color:#7E9DB5;font-size:22px;">▶</span>
+      </button>
+      <div style="width:100%;background:#F1EFEA;border-radius:20px;padding:16px;display:flex;align-items:center;gap:14px;margin-top:10px;opacity:.72;">
+        <div style="width:48px;height:48px;border-radius:16px;background:#CFC6B6;flex:none;"></div>
+        <div style="flex:1;"><div style="font-family:'Fredoka',sans-serif;font-weight:500;font-size:16px;color:#8A857B;">Respiración Estrella</div><div style="font-size:12.5px;color:#A89E89;">Se desbloquea en Semana 2</div></div>
+        <span style="font-size:11px;font-weight:800;color:#B7AE9D;background:#E4DDCD;border-radius:999px;padding:4px 10px;">S2</span>
+      </div>
+      <div style="font-family:'Fredoka',sans-serif;font-weight:500;font-size:18px;color:#5A4032;margin:24px 0 12px;">Relajación y música</div>
+      <button onClick="{{ openStory }}" style="width:100%;border:none;cursor:pointer;text-align:left;background:#F0EAF2;border-radius:20px;padding:16px;display:flex;align-items:center;gap:14px;" style-hover="transform:translateY(-2px)">
+        <div style="width:48px;height:48px;border-radius:16px;background:#9A86A8;flex:none;"></div>
+        <div style="flex:1;"><div style="font-family:'Fredoka',sans-serif;font-weight:500;font-size:16px;color:#3D3A34;">Bosque al atardecer</div><div style="font-size:12.5px;color:#8A857B;">Sonidos suaves · 6 min</div></div>
+        <span style="color:#9A86A8;font-size:22px;">▶</span>
+      </button>
+    </div>
+  </div>
+  </sc-if>
+
+  <!-- ============ CALMA (niño · S.O.S.) ============ -->
+  <sc-if value="{{ isCalm }}" hint-placeholder-val="{{ true }}">
+  <div style="{{ kidBg }}">
+    <div style="padding:58px 22px 22px;display:flex;flex-direction:column;min-height:100%;box-sizing:border-box;">
+      <div style="text-align:center;">
+        <div style="font-size:12px;letter-spacing:1.5px;text-transform:uppercase;color:#C8825D;font-weight:800;">Momento de calma</div>
+        <h2 style="font-family:'Fredoka',sans-serif;font-weight:500;font-size:26px;margin:4px 0 0;color:#5A4032;">Volvamos al centro</h2>
+      </div>
+      <div style="display:flex;justify-content:center;align-items:center;margin:24px 0;">
+        <div style="position:relative;width:170px;height:170px;display:flex;align-items:center;justify-content:center;">
+          <div style="position:absolute;inset:0;border-radius:50%;background:rgba(157,184,154,.22);animation:kawaBreathe 8s ease-in-out infinite;"></div>
+          <div style="position:absolute;inset:26px;border-radius:50%;background:rgba(157,184,154,.36);animation:kawaBreathe 8s ease-in-out infinite;"></div>
+          <div style="width:120px;height:120px;background:url('img/kawa-base.png') center/contain no-repeat;animation:kawaBreathe 8s ease-in-out infinite;"></div>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:11px;">
+        <button onClick="{{ openBreath }}" style="display:flex;align-items:center;gap:14px;background:#fff;border:none;border-radius:20px;padding:16px;text-align:left;cursor:pointer;box-shadow:0 2px 10px rgba(120,90,60,.1);" style-hover="transform:translateY(-2px)">
+          <span style="width:44px;height:44px;border-radius:14px;background:#7E9DB5;flex:none;"></span>
+          <span style="flex:1;"><span style="display:block;font-size:16px;font-weight:800;color:#3D3A34;">Respiración Globo</span><span style="font-size:12.5px;color:#8A857B;">3 minutos para soltar</span></span>
+          <span style="color:#7E9DB5;font-size:20px;">▶</span></button>
+        <button onClick="{{ openBreath }}" style="display:flex;align-items:center;gap:14px;background:#fff;border:none;border-radius:20px;padding:16px;text-align:left;cursor:pointer;box-shadow:0 2px 10px rgba(120,90,60,.1);" style-hover="transform:translateY(-2px)">
+          <span style="width:44px;height:44px;border-radius:14px;background:#9A86A8;flex:none;"></span>
+          <span style="flex:1;"><span style="display:block;font-size:16px;font-weight:800;color:#3D3A34;">Sonidos del bosque</span><span style="font-size:12.5px;color:#8A857B;">Ambiente para descansar</span></span>
+          <span style="color:#9A86A8;font-size:20px;">▶</span></button>
+        <button onClick="{{ openStory }}" style="display:flex;align-items:center;gap:14px;background:#fff;border:none;border-radius:20px;padding:16px;text-align:left;cursor:pointer;box-shadow:0 2px 10px rgba(120,90,60,.1);" style-hover="transform:translateY(-2px)">
+          <span style="width:48px;height:48px;border-radius:14px;background:#FBEFD8 url('img/kawa-guardian.png') center 60%/86% no-repeat;flex:none;"></span>
+          <span style="flex:1;"><span style="display:block;font-size:16px;font-weight:800;color:#3D3A34;">Un abrazo de Kawa</span><span style="font-size:12.5px;color:#8A857B;">Cuento corto para calmar</span></span>
+          <span style="color:#E4B05C;font-size:20px;">▶</span></button>
+      </div>
+    </div>
+  </div>
+  </sc-if>
+
+  <!-- ============ PERFIL (adulto · mosaico) ============ -->
+  <sc-if value="{{ isProfile }}" hint-placeholder-val="{{ true }}">
+  <div style="{{ adultBg }}">
+    <div style="background:linear-gradient(135deg,#2C4631,#3C5A41);padding:62px 22px 22px;color:#fff;display:flex;align-items:center;gap:14px;">
+      <span style="width:62px;height:62px;border-radius:50%;flex:none;background:repeating-linear-gradient(45deg,rgba(255,255,255,.08) 0 6px,transparent 6px 12px),#42624A;border:1.5px dashed #7E9A7A;color:#C7E0C2;font-family:monospace;font-size:8px;display:flex;align-items:center;justify-content:center;">foto</span>
+      <div style="flex:1;">
+        <div style="font-size:10.5px;letter-spacing:1.5px;text-transform:uppercase;color:#A9C3A6;font-weight:800;">Niño/a</div>
+        <div style="font-family:'Fredoka',sans-serif;font-weight:500;font-size:24px;line-height:1.1;">{{ name }}</div>
+        <span style="display:inline-block;font-size:11px;font-weight:800;color:#3C5A41;background:#E7C8DC;border-radius:999px;padding:3px 10px;margin-top:5px;">Muy Sensible · 3–4 años</span>
+      </div>
+      <span style="color:#A9C3A6;font-size:22px;">›</span>
+    </div>
+    <div style="padding:22px;">
+      <div style="font-size:13px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:#A89E89;margin-bottom:10px;">¿Cómo usas la app?</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:11px;">
+        <div style="background:#fff;border:2px solid #C8825D;border-radius:18px;padding:15px;">
+          <div style="width:34px;height:34px;border-radius:11px;background:#F4DCD2;margin-bottom:9px;"></div>
+          <div style="font-weight:800;font-size:14px;color:#3D3A34;">Familia</div>
+          <div style="font-size:11.5px;color:#8A857B;">Guía para casa</div>
+        </div>
+        <div style="background:#fff;border:1px solid #E4DCCC;border-radius:18px;padding:15px;opacity:.65;">
+          <div style="width:34px;height:34px;border-radius:11px;background:#EDEAE2;margin-bottom:9px;"></div>
+          <div style="font-weight:800;font-size:14px;color:#3D3A34;">Profesional</div>
+          <div style="font-size:11.5px;color:#8A857B;">Terapeuta / salud</div>
+        </div>
+      </div>
+      <button style="width:100%;margin-top:11px;background:none;border:1.5px dashed #D8BFA8;border-radius:16px;padding:13px;font-family:'Nunito',sans-serif;font-weight:800;font-size:14px;color:#C8825D;cursor:pointer;">+ Agregar niño/a</button>
+      <div style="background:#F7E9F1;border-radius:16px;padding:13px 16px;margin-top:18px;display:flex;align-items:center;gap:11px;">
+        <span style="width:11px;height:11px;border-radius:50%;background:#C07BA0;flex:none;"></span>
+        <p style="margin:0;font-size:12.5px;line-height:1.45;color:#6B5C64;"><strong style="color:#C07BA0;">Perfil predominante: Muy Sensible.</strong> Percibe el mundo con gran intensidad; necesita suavidad.</p>
+      </div>
+      <div style="font-size:13px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:#A89E89;margin:22px 0 11px;">Perfiles sensoriales</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div style="position:relative;background:#F7E9F1;border:2px solid #C07BA0;border-radius:20px;padding:11px;">
+          <span style="position:absolute;top:10px;right:10px;font-size:9px;font-weight:800;color:#fff;background:#C07BA0;border-radius:999px;padding:3px 8px;">Tu perfil</span>
+          <div style="width:100%;height:66px;border-radius:14px;background:repeating-linear-gradient(45deg,rgba(0,0,0,.045) 0 6px,transparent 6px 12px),#EFD7E6;border:1.5px dashed #CFA0C0;color:#B16A93;font-family:monospace;font-size:8px;display:flex;align-items:center;justify-content:center;margin-bottom:9px;">imagen</div>
+          <div style="display:flex;align-items:center;gap:7px;"><span style="width:9px;height:9px;border-radius:50%;background:#C07BA0;"></span><span style="font-family:'Fredoka',sans-serif;font-weight:600;font-size:14px;color:#C07BA0;">Muy Sensible</span></div>
+        </div>
+        <div style="background:#FBF1D6;border-radius:20px;padding:11px;">
+          <div style="width:100%;height:66px;border-radius:14px;background:repeating-linear-gradient(45deg,rgba(0,0,0,.045) 0 6px,transparent 6px 12px),#F4E4BE;border:1.5px dashed #D7B863;color:#A87E1E;font-family:monospace;font-size:8px;display:flex;align-items:center;justify-content:center;margin-bottom:9px;">imagen</div>
+          <div style="display:flex;align-items:center;gap:7px;"><span style="width:9px;height:9px;border-radius:50%;background:#CE9226;"></span><span style="font-family:'Fredoka',sans-serif;font-weight:600;font-size:14px;color:#CE9226;">Buscador/a</span></div>
+        </div>
+        <div style="background:#E6F0F6;border-radius:20px;padding:11px;">
+          <div style="width:100%;height:66px;border-radius:14px;background:repeating-linear-gradient(45deg,rgba(0,0,0,.045) 0 6px,transparent 6px 12px),#D6E6F0;border:1.5px dashed #93B7CE;color:#5F8FB0;font-family:monospace;font-size:8px;display:flex;align-items:center;justify-content:center;margin-bottom:9px;">imagen</div>
+          <div style="display:flex;align-items:center;gap:7px;"><span style="width:9px;height:9px;border-radius:50%;background:#5F97BA;"></span><span style="font-family:'Fredoka',sans-serif;font-weight:600;font-size:14px;color:#5F97BA;">Bajo Registro</span></div>
+        </div>
+        <div style="background:#EAF0E7;border-radius:20px;padding:11px;">
+          <div style="width:100%;height:66px;border-radius:14px;background:repeating-linear-gradient(45deg,rgba(0,0,0,.045) 0 6px,transparent 6px 12px),#DCE7D5;border:1.5px dashed #A6BF9C;color:#6F9168;font-family:monospace;font-size:8px;display:flex;align-items:center;justify-content:center;margin-bottom:9px;">imagen</div>
+          <div style="display:flex;align-items:center;gap:7px;"><span style="width:9px;height:9px;border-radius:50%;background:#7E9A7A;"></span><span style="font-family:'Fredoka',sans-serif;font-weight:600;font-size:14px;color:#7E9A7A;">Planif. Motora</span></div>
+        </div>
+      </div>
+      <button style="width:100%;margin-top:18px;background:#C8825D;border:none;border-radius:16px;padding:15px;font-family:'Nunito',sans-serif;font-weight:800;font-size:15px;color:#fff;cursor:pointer;" style-hover="filter:brightness(1.05)">Hacer el test sensorial completo</button>
+      <button style="width:100%;margin-top:8px;background:none;border:none;padding:12px;font-family:'Nunito',sans-serif;font-weight:700;font-size:13.5px;color:#A89E89;cursor:pointer;">Resetear progreso</button>
+    </div>
+  </div>
+  </sc-if>
+
+  <!-- ============ RECURSOS (adulto · editorial) ============ -->
+  <sc-if value="{{ isResources }}" hint-placeholder-val="{{ true }}">
+  <div style="{{ adultBg }}">
+    <div style="background:linear-gradient(135deg,#2C4631,#3C5A41);padding:62px 22px 24px;color:#fff;">
+      <sc-if value="{{ resHome }}" hint-placeholder-val="{{ true }}">
+        <div style="font-size:11.5px;letter-spacing:1.5px;text-transform:uppercase;color:#A9C3A6;font-weight:800;">Modo adulto</div>
+        <h2 style="font-family:'Fredoka',sans-serif;font-weight:500;font-size:27px;margin:4px 0 2px;">Recursos</h2>
+        <div style="font-size:13.5px;color:#C7D8C4;">Todo para acompañar la práctica</div>
+      </sc-if>
+      <sc-if value="{{ resDetail }}" hint-placeholder-val="{{ true }}">
+        <button onClick="{{ backRes }}" style="background:rgba(255,255,255,.12);border:none;color:#fff;border-radius:999px;padding:7px 15px 7px 12px;font-family:'Nunito',sans-serif;font-weight:800;font-size:12.5px;cursor:pointer;" style-hover="background:rgba(255,255,255,.2)">‹ Recursos</button>
+        <h2 style="font-family:'Fredoka',sans-serif;font-weight:500;font-size:25px;margin:12px 0 0;">{{ resTitle }}</h2>
+      </sc-if>
+    </div>
+    <div style="padding:20px 22px;">
+
+      <!-- LANDING editorial -->
+      <sc-if value="{{ resHome }}" hint-placeholder-val="{{ true }}">
+        <div style="display:flex;flex-direction:column;gap:13px;">
+          <button onClick="{{ openAntes }}" style="border:none;cursor:pointer;text-align:left;padding:0;border-radius:22px;overflow:hidden;display:flex;height:108px;box-shadow:0 3px 12px rgba(120,90,60,.1);" style-hover="transform:translateY(-2px)">
+            <div style="width:116px;flex:none;background:repeating-linear-gradient(45deg,rgba(0,0,0,.05) 0 7px,transparent 7px 14px),#DCE6D6;border-right:1.5px dashed #A9BFA2;color:#7E9A7A;font-family:monospace;font-size:8px;display:flex;align-items:center;justify-content:center;">imagen</div>
+            <div style="flex:1;background:#EBF0E8;padding:14px 16px;display:flex;flex-direction:column;justify-content:center;">
+              <span style="font-size:10px;letter-spacing:1.2px;text-transform:uppercase;color:#7E9A7A;font-weight:800;">Preparación</span>
+              <span style="font-family:'Fredoka',sans-serif;font-weight:500;font-size:17px;color:#3D3A34;margin:2px 0 3px;">Antes de empezar</span>
+              <span style="font-size:12px;color:#8A857B;line-height:1.4;">Prepara el espacio y los materiales en 5 min.</span>
+            </div>
+          </button>
+          <button onClick="{{ openTips }}" style="border:none;cursor:pointer;text-align:left;padding:0;border-radius:22px;overflow:hidden;display:flex;height:108px;box-shadow:0 3px 12px rgba(120,90,60,.1);" style-hover="transform:translateY(-2px)">
+            <div style="width:116px;flex:none;background:repeating-linear-gradient(45deg,rgba(0,0,0,.05) 0 7px,transparent 7px 14px),#F4E6C9;border-right:1.5px dashed #D6B97E;color:#B58A3E;font-family:monospace;font-size:8px;display:flex;align-items:center;justify-content:center;">imagen</div>
+            <div style="flex:1;background:#FBF1E1;padding:14px 16px;display:flex;flex-direction:column;justify-content:center;">
+              <span style="font-size:10px;letter-spacing:1.2px;text-transform:uppercase;color:#C8A24E;font-weight:800;">Guía</span>
+              <span style="font-family:'Fredoka',sans-serif;font-weight:500;font-size:17px;color:#3D3A34;margin:2px 0 3px;">Tips por perfil</span>
+              <span style="font-size:12px;color:#8A857B;line-height:1.4;">Cómo acompañar según el perfil sensorial.</span>
+            </div>
+          </button>
+          <button onClick="{{ openMaterials }}" style="border:none;cursor:pointer;text-align:left;padding:0;border-radius:22px;overflow:hidden;display:flex;height:108px;box-shadow:0 3px 12px rgba(120,90,60,.1);" style-hover="transform:translateY(-2px)">
+            <div style="width:116px;flex:none;background:repeating-linear-gradient(45deg,rgba(0,0,0,.05) 0 7px,transparent 7px 14px),#F0DACE;border-right:1.5px dashed #D2A88E;color:#B5765A;font-family:monospace;font-size:8px;display:flex;align-items:center;justify-content:center;">imagen</div>
+            <div style="flex:1;background:#F6EAE3;padding:14px 16px;display:flex;flex-direction:column;justify-content:center;">
+              <span style="font-size:10px;letter-spacing:1.2px;text-transform:uppercase;color:#C99178;font-weight:800;">Clase</span>
+              <span style="font-family:'Fredoka',sans-serif;font-weight:500;font-size:17px;color:#3D3A34;margin:2px 0 3px;">Materiales</span>
+              <span style="font-size:12px;color:#8A857B;line-height:1.4;">Lo de la clase y los descargables.</span>
+            </div>
+          </button>
+          <button onClick="{{ openProtocols }}" style="border:none;cursor:pointer;text-align:left;padding:0;border-radius:22px;overflow:hidden;display:flex;height:108px;box-shadow:0 3px 12px rgba(120,90,60,.1);" style-hover="transform:translateY(-2px)">
+            <div style="width:116px;flex:none;background:repeating-linear-gradient(45deg,rgba(0,0,0,.05) 0 7px,transparent 7px 14px),#E6DCEA;border-right:1.5px dashed #B6A2C2;color:#8E76A2;font-family:monospace;font-size:8px;display:flex;align-items:center;justify-content:center;">imagen</div>
+            <div style="flex:1;background:#F0EAF2;padding:14px 16px;display:flex;flex-direction:column;justify-content:center;">
+              <span style="font-size:10px;letter-spacing:1.2px;text-transform:uppercase;color:#9A86A8;font-weight:800;">Clínico</span>
+              <span style="font-family:'Fredoka',sans-serif;font-weight:500;font-size:17px;color:#3D3A34;margin:2px 0 3px;">Protocolos</span>
+              <span style="font-size:12px;color:#8A857B;line-height:1.4;">Los marcos que guían cada sesión.</span>
+            </div>
+          </button>
+          <button onClick="{{ openLibrary }}" style="border:none;cursor:pointer;text-align:left;padding:0;border-radius:22px;overflow:hidden;display:flex;height:108px;box-shadow:0 3px 12px rgba(120,90,60,.1);" style-hover="transform:translateY(-2px)">
+            <div style="width:116px;flex:none;background:repeating-linear-gradient(45deg,rgba(0,0,0,.05) 0 7px,transparent 7px 14px),#D9E5EC;border-right:1.5px dashed #9DB8C6;color:#6E92A6;font-family:monospace;font-size:8px;display:flex;align-items:center;justify-content:center;">imagen</div>
+            <div style="flex:1;background:#E9F0F4;padding:14px 16px;display:flex;flex-direction:column;justify-content:center;">
+              <span style="font-size:10px;letter-spacing:1.2px;text-transform:uppercase;color:#7E9DB5;font-weight:800;">Catálogo</span>
+              <span style="font-family:'Fredoka',sans-serif;font-weight:500;font-size:17px;color:#3D3A34;margin:2px 0 3px;">Biblioteca de posturas</span>
+              <span style="font-size:12px;color:#8A857B;line-height:1.4;">Todas las posturas por elemento.</span>
+            </div>
+          </button>
+        </div>
+      </sc-if>
+
+      <!-- DETALLE · Antes de empezar -->
+      <sc-if value="{{ resAntes }}" hint-placeholder-val="{{ true }}">
+        <div style="font-size:13px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:#A89E89;margin-bottom:10px;">Prepara estos materiales</div>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <sc-for list="{{ materials }}" as="mt" hint-placeholder-count="4">
+            <div style="background:#fff;border-radius:16px;padding:14px;display:flex;align-items:center;gap:13px;box-shadow:0 1px 6px rgba(120,90,60,.07);">
+              <div style="width:42px;height:42px;border-radius:13px;background:repeating-linear-gradient(45deg,rgba(0,0,0,.045) 0 5px,transparent 5px 10px),#EFE7D9;border:1.5px dashed #CDBFA8;flex:none;"></div>
+              <div><div style="font-weight:800;font-size:14.5px;color:#3D3A34;">{{ mt.name }}</div><div style="font-size:12px;color:#8A857B;">{{ mt.sub }}</div></div>
+            </div>
+          </sc-for>
+        </div>
+        <div style="background:#FBF1E1;border-radius:20px;padding:18px;margin-top:20px;display:flex;gap:14px;align-items:center;">
+          <div style="flex:1;">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;"><span style="width:10px;height:10px;border-radius:50%;background:#E4B05C;"></span><span style="font-family:'Fredoka',sans-serif;font-weight:600;font-size:16px;color:#8A6420;">Para el adulto</span></div>
+            <p style="margin:0;font-size:13.5px;line-height:1.6;color:#6B5C44;">Esta semana, Kawa aprende a enraizar. Acompaña a tu niño sin corregir — solo acompaña. Tu calma es su mapa.</p>
+          </div>
+          <div style="width:78px;height:92px;flex:none;background:url('img/kawa-ensenanza.png') center/contain no-repeat;"></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:13px;background:#fff;border-radius:16px;padding:15px;margin-top:12px;box-shadow:0 1px 6px rgba(120,90,60,.07);">
+          <div style="width:42px;height:42px;border-radius:13px;background:#E1ECDD;flex:none;display:flex;align-items:center;justify-content:center;font-family:'Fredoka',sans-serif;font-weight:600;color:#7E9A7A;">45</div>
+          <div><div style="font-weight:800;font-size:14.5px;color:#3D3A34;">1 clase ≈ 45 minutos</div><div style="font-size:12px;color:#8A857B;">Puedes hacerla en partes durante el día</div></div>
+        </div>
+        <button onClick="{{ openStory }}" style="width:100%;margin-top:20px;background:#34503A;border:none;border-radius:16px;padding:15px;font-family:'Nunito',sans-serif;font-weight:800;font-size:15px;color:#fff;cursor:pointer;" style-hover="filter:brightness(1.08)">▶ Empezar la clase</button>
+      </sc-if>
+
+      <!-- DETALLE · Tips por perfil -->
+      <sc-if value="{{ resTips }}" hint-placeholder-val="{{ true }}">
+        <div style="display:flex;flex-direction:column;gap:11px;">
+          <sc-for list="{{ profiles }}" as="p" hint-placeholder-count="4">
+            <div style="{{ p.cardStyle }}">
+              <div style="{{ p.headStyle }}"><span style="{{ p.dotStyle }}"></span><span style="{{ p.nameStyle }}">{{ p.name }}</span></div>
+              <p style="margin:0;font-size:13.5px;line-height:1.55;color:#5C564C;">{{ p.tip }}</p>
+            </div>
+          </sc-for>
+        </div>
+      </sc-if>
+
+      <!-- DETALLE · Materiales -->
+      <sc-if value="{{ resMaterials }}" hint-placeholder-val="{{ true }}">
+        <div style="font-size:12.5px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:#A89E89;margin-bottom:10px;">Materiales de la clase</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:11px;">
+          <sc-for list="{{ materials }}" as="mt" hint-placeholder-count="4">
+            <div style="background:#fff;border-radius:18px;padding:15px;box-shadow:0 1px 6px rgba(120,90,60,.07);">
+              <div style="width:40px;height:40px;border-radius:13px;background:repeating-linear-gradient(45deg,rgba(0,0,0,.045) 0 5px,transparent 5px 10px),#EFE7D9;border:1.5px dashed #CDBFA8;margin-bottom:10px;"></div>
+              <div style="font-weight:800;font-size:13.5px;color:#3D3A34;">{{ mt.name }}</div>
+              <div style="font-size:11.5px;color:#8A857B;">{{ mt.sub }}</div>
+            </div>
+          </sc-for>
+        </div>
+        <div style="font-size:12.5px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:#A89E89;margin:22px 0 10px;">Descargables</div>
+        <div style="display:flex;flex-direction:column;gap:9px;">
+          <sc-for list="{{ downloads }}" as="d" hint-placeholder-count="4">
+            <div style="background:#fff;border-radius:14px;padding:14px 16px;display:flex;align-items:center;gap:12px;box-shadow:0 1px 5px rgba(120,90,60,.07);">
+              <div style="width:30px;height:36px;border-radius:6px;background:#E1ECDD;flex:none;"></div>
+              <span style="flex:1;font-weight:700;font-size:14px;color:#3D3A34;">{{ d }}</span>
+              <span style="font-size:18px;color:#7E9A7A;">↓</span>
+            </div>
+          </sc-for>
+        </div>
+      </sc-if>
+
+      <!-- DETALLE · Protocolos -->
+      <sc-if value="{{ resProtocols }}" hint-placeholder-val="{{ true }}">
+        <p style="margin:0 0 14px;font-size:13.5px;line-height:1.55;color:#6B655B;">Marcos clínicos que guían cada sesión de Kawa.</p>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <sc-for list="{{ protocols }}" as="pr" hint-placeholder-count="3">
+            <div style="background:#fff;border-radius:16px;padding:15px 17px;display:flex;align-items:flex-start;gap:12px;box-shadow:0 1px 5px rgba(120,90,60,.07);">
+              <span style="width:10px;height:10px;border-radius:50%;background:#7E9A7A;margin-top:5px;flex:none;"></span>
+              <div><div style="font-family:'Fredoka',sans-serif;font-weight:500;font-size:15.5px;color:#3D3A34;">{{ pr.name }}</div><div style="font-size:12.5px;color:#8A857B;margin-top:2px;">{{ pr.sub }}</div></div>
+            </div>
+          </sc-for>
+        </div>
+      </sc-if>
+
+      <!-- DETALLE · Biblioteca -->
+      <sc-if value="{{ resLibrary }}" hint-placeholder-val="{{ true }}">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+          <span style="font-family:'Fredoka',sans-serif;font-weight:500;font-size:17px;color:#3D3A34;">Por elemento · Tierra</span>
+          <span style="font-size:12px;font-weight:800;color:#fff;background:#7E63A8;border-radius:999px;padding:7px 13px;">+ Nueva</span>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:11px;">
+          <sc-for list="{{ poses }}" as="p" hint-placeholder-count="6">
+            <button onClick="{{ p.onClick }}" style="{{ p.cardStyle }}" style-hover="transform:translateY(-3px)">
+              <div style="{{ p.imgStyle }}">postura</div>
+              <span style="{{ p.nameStyle }}">{{ p.name }}</span>
+            </button>
+          </sc-for>
+        </div>
+      </sc-if>
+
+    </div>
+  </div>
+  </sc-if>
+
+  <!-- ============ NAV ============ -->
+  <sc-if value="{{ isKid }}" hint-placeholder-val="{{ true }}">{{ kidNav }}</sc-if>
+  <sc-if value="{{ isAdult }}" hint-placeholder-val="{{ true }}">{{ adultNav }}</sc-if>
+
+  <!-- ============ REPRODUCTOR · HISTORIA ============ -->
+  <sc-if value="{{ showStory }}" hint-placeholder-val="{{ true }}">
+  <div style="position:absolute;inset:0;z-index:30;background:linear-gradient(180deg,#243524 0%,#2C4631 60%,#34503A 100%);display:flex;flex-direction:column;">
+    <div style="padding:56px 22px 0;display:flex;justify-content:flex-end;">
+      <button onClick="{{ closeOverlay }}" style="width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.12);border:none;color:#fff;font-size:17px;cursor:pointer;">✕</button>
+    </div>
+    <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 30px;text-align:center;">
+      <div style="font-size:60px;font-family:'Fredoka',sans-serif;font-weight:300;color:rgba(255,255,255,.85);letter-spacing:2px;">{{ timeStr }}</div>
+      <div style="margin:22px 0;width:206px;height:206px;background:url('img/kawa-base.png') center/contain no-repeat;animation:kawaFloat 6s ease-in-out infinite;filter:drop-shadow(0 14px 18px rgba(0,0,0,.28));"></div>
+      <div style="font-family:'Fredoka',sans-serif;font-weight:500;font-size:22px;color:#fff;">La historia de Kawa</div>
+      <div style="font-size:13.5px;color:#A9C3A6;margin-top:4px;">Cap. 1 · La semilla que encontró sus raíces</div>
+    </div>
+    <div style="padding:0 30px 50px;">
+      <div style="height:4px;border-radius:99px;background:rgba(255,255,255,.18);margin-bottom:24px;"><div style="width:32%;height:100%;border-radius:99px;background:#9DB89A;"></div></div>
+      <div style="display:flex;align-items:center;justify-content:center;gap:34px;">
+        <button onClick="{{ closeOverlay }}" style="background:none;border:none;color:rgba(255,255,255,.7);font-size:21px;cursor:pointer;">↺</button>
+        <button onClick="{{ togglePlay }}" style="width:72px;height:72px;border-radius:50%;background:#9DB89A;border:none;color:#23391F;font-size:24px;cursor:pointer;display:flex;align-items:center;justify-content:center;">{{ playIcon }}</button>
+        <button style="background:none;border:none;color:rgba(255,255,255,.7);font-size:21px;cursor:pointer;">→</button>
+      </div>
+      <div style="text-align:center;margin-top:22px;font-size:13px;color:#A9C3A6;">Postura sugerida · <span style="color:#fff;font-weight:700;">Montaña</span></div>
+    </div>
+  </div>
+  </sc-if>
+
+  <!-- ============ DESAFÍO · SENDERO (overlay) ============ -->
+  <sc-if value="{{ showChallenge }}" hint-placeholder-val="{{ true }}">
+  <div onClick="{{ closeOverlay }}" style="position:absolute;inset:0;z-index:30;background:rgba(40,30,20,.42);display:flex;flex-direction:column;justify-content:flex-end;">
+    <div onClick="{{ stopProp }}" style="background:#FBF8F2;border-radius:30px 30px 0 0;padding:14px 24px 38px;">
+      <div style="width:42px;height:5px;border-radius:99px;background:#DDD4C4;margin:0 auto 16px;"></div>
+      <div style="text-align:center;">
+        <div style="font-size:11px;letter-spacing:1.6px;text-transform:uppercase;color:#C8825D;font-weight:800;">Desafío del mes</div>
+        <div style="font-family:'Fredoka',sans-serif;font-weight:500;font-size:24px;color:#5A4032;margin-top:3px;">7 días de raíces</div>
+        <div style="font-size:13px;color:#8A857B;margin-top:2px;">Postura Montaña cada mañana</div>
+      </div>
+      {{ challengeStones }}
+      <button onClick="{{ markDay }}" style="width:100%;margin-top:18px;background:#34503A;border:none;border-radius:14px;padding:14px;font-family:'Nunito',sans-serif;font-weight:800;font-size:14px;color:#fff;cursor:pointer;" style-hover="filter:brightness(1.08)">Marcar día de hoy ✓</button>
+    </div>
+  </div>
+  </sc-if>
+
+  <!-- ============ REPRODUCTOR · RESPIRACIÓN ============ -->
+  <sc-if value="{{ showBreath }}" hint-placeholder-val="{{ true }}">
+  <div style="position:absolute;inset:0;z-index:30;background:linear-gradient(180deg,#E9F0EC 0%,#DCEAE0 50%,#CFE0D2 100%);display:flex;flex-direction:column;align-items:center;">
+    <div style="width:100%;padding:56px 22px 0;display:flex;justify-content:flex-end;">
+      <button onClick="{{ closeOverlay }}" style="width:40px;height:40px;border-radius:50%;background:rgba(52,80,58,.1);border:none;color:#34503A;font-size:17px;cursor:pointer;">✕</button>
+    </div>
+    <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;width:100%;">
+      <div style="font-family:'Fredoka',sans-serif;font-weight:500;font-size:23px;color:#34503A;">Respiración Globo</div>
+      <div style="font-size:13.5px;color:#5E7A60;margin-top:4px;">Infla la pancita como un globo</div>
+      <div style="position:relative;width:240px;height:240px;display:flex;align-items:center;justify-content:center;margin:32px 0;">
+        <div style="position:absolute;inset:0;border-radius:50%;background:rgba(157,184,154,.22);animation:kawaBreathe 8s ease-in-out infinite;"></div>
+        <div style="position:absolute;inset:34px;border-radius:50%;background:rgba(157,184,154,.34);animation:kawaBreathe 8s ease-in-out infinite;"></div>
+        <div style="position:absolute;inset:44px;background:url('img/kawa-base.png') center/contain no-repeat;animation:kawaBreathe 8s ease-in-out infinite;"></div>
+      </div>
+      <div style="font-size:15px;font-weight:700;color:#5E7A60;">Inhala 4 · Exhala 4</div>
+    </div>
+    <button onClick="{{ closeOverlay }}" style="margin-bottom:52px;background:#34503A;border:none;border-radius:16px;padding:14px 40px;font-family:'Nunito',sans-serif;font-weight:800;font-size:15px;color:#fff;cursor:pointer;">Terminar</button>
+  </div>
+  </sc-if>
+
+  <!-- ============ DETALLE POSTURA ============ -->
+  <sc-if value="{{ showPose }}" hint-placeholder-val="{{ true }}">
+  <div onClick="{{ closeOverlay }}" style="position:absolute;inset:0;z-index:30;background:rgba(40,30,20,.42);display:flex;flex-direction:column;justify-content:flex-end;">
+    <div onClick="{{ stopProp }}" style="background:#FBF8F2;border-radius:30px 30px 0 0;padding:14px 24px 40px;">
+      <div style="width:42px;height:5px;border-radius:99px;background:#DDD4C4;margin:0 auto 18px;"></div>
+      <div style="display:flex;flex-direction:column;align-items:center;text-align:center;gap:13px;">
+        <div style="{{ poseImgStyle }}">postura</div>
+        <span style="{{ poseChipStyle }}">{{ poseTag }}</span>
+        <div style="font-family:'Fredoka',sans-serif;font-weight:500;font-size:26px;color:#3D3A34;">{{ poseName }}</div>
+        <p style="margin:0;font-size:15px;line-height:1.6;color:#6B655B;max-width:300px;">{{ poseDesc }}</p>
+      </div>
+      <button onClick="{{ openBreath }}" style="{{ poseBtnStyle }}" style-hover="filter:brightness(1.06)">Practicar postura</button>
+    </div>
+  </div>
+  </sc-if>
+
+</div>
+</x-import>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:462,&quot;height&quot;:934},&quot;childName&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;Ingo&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;element&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Tierra&quot;,&quot;Agua&quot;,&quot;Fuego&quot;,&quot;Aire&quot;,&quot;Espacio&quot;],&quot;default&quot;:&quot;Tierra&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  state = { mode:'kid', screen:'home', overlay:null, resourceTab:'home', pose:null, day:3, elapsed:0, playing:false, ringHint:false };
+
+  componentDidMount(){ this._scheduleHint(); }
+  _scheduleHint(){
+    this._hintA = setTimeout(()=>{
+      this.setState({ ringHint:true });
+      this._hintB = setTimeout(()=>{ this.setState({ ringHint:false }); this._scheduleHint(); }, 2900);
+    }, 6000);
+  }
+  openChallenge(){ this.setState({ overlay:'challenge', ringHint:false }); }
+
+  _tick(){ clearInterval(this._t); this._t = setInterval(()=>this.setState(s=>({ elapsed:s.elapsed+1 })),1000); }
+  go(s){ clearInterval(this._t); this.setState({ screen:s, overlay:null, playing:false, resourceTab:'home' }); }
+  setMode(m){ clearInterval(this._t); this.setState({ mode:m, screen: m==='kid'?'home':'profile', overlay:null, playing:false }); }
+  openBreath(){ this.setState({ overlay:'breath' }); }
+  openStory(){ this._tick(); this.setState({ overlay:'story', elapsed:0, playing:true }); }
+  openPose(p){ this.setState({ overlay:'pose', pose:p }); }
+  closeOverlay(){ clearInterval(this._t); this.setState({ overlay:null, pose:null, playing:false }); }
+  togglePlay(){ if(this.state.playing){ clearInterval(this._t); this.setState({ playing:false }); } else { this._tick(); this.setState({ playing:true }); } }
+  markDay(){ this.setState(s=>({ day: Math.min(7, s.day+1) })); }
+  setResourceTab(t){ this.setState({ resourceTab:t }); }
+  componentWillUnmount(){ clearInterval(this._t); clearTimeout(this._hintA); clearTimeout(this._hintB); }
+
+  renderVals(){
+    const S = this.state, P = this.props;
+    const elements = {
+      Tierra: { sky:'linear-gradient(180deg,#FBE3CF 0%,#F7E7D6 42%,#F3EFE4 100%)', accent:'#C8825D', hill:'#7E9A7A', hill2:'#9DB89A' },
+      Agua:   { sky:'linear-gradient(180deg,#CFE6F0 0%,#DEEBEF 42%,#EFF4F3 100%)', accent:'#3E83A0', hill:'#6FA8B0', hill2:'#9AC6CB' },
+      Fuego:  { sky:'linear-gradient(180deg,#FBD7C4 0%,#F8DCC8 42%,#F3ECE2 100%)', accent:'#D2693F', hill:'#C98A5A', hill2:'#E0AD7E' },
+      Aire:   { sky:'linear-gradient(180deg,#EAE3F0 0%,#EFEAF0 42%,#F3F0F2 100%)', accent:'#8A6FA8', hill:'#A98FB0', hill2:'#C6B4CE' },
+      Espacio:{ sky:'linear-gradient(180deg,#D9DAF3 0%,#E4E3F1 42%,#EFEEF6 100%)', accent:'#4B54C6', hill:'#7B80CE', hill2:'#A6A9DD' },
+    };
+    const el = elements[P.element] || elements.Tierra;
+    const accent = el.accent;
+    const name = P.childName || 'Ingo';
+
+    const base = { position:'absolute', inset:0, overflow:'auto', WebkitOverflowScrolling:'touch' };
+    const kidBg = Object.assign({}, base, { background: el.sky, paddingBottom:'100px' });
+    const adultBg = Object.assign({}, base, { background:'#F3EFE9', paddingBottom:'100px' });
+
+    const homeHill1 = { position:'absolute', bottom:0, left:'50%', transform:'translateX(-50%)', width:360, height:118, background:el.hill2, borderRadius:'50% 50% 0 0', opacity:.5 };
+    const homeHill2 = { position:'absolute', bottom:-8, left:'50%', transform:'translateX(-50%)', width:236, height:88, background:el.hill, borderRadius:'50% 50% 0 0' };
+
+    // ---- nav ----
+    const ico = (shape,color) => {
+      const b = { width:22, height:22, flex:'none' };
+      if(shape==='dot') return React.createElement('div',{style:Object.assign({},b,{ borderRadius:'50%', background:color })});
+      if(shape==='diamond') return React.createElement('div',{style:Object.assign({},b,{ width:18, height:18, borderRadius:5, background:color, transform:'rotate(45deg)' })});
+      if(shape==='ring') return React.createElement('div',{style:Object.assign({},b,{ borderRadius:'50%', border:'4px solid '+color, boxSizing:'border-box' })});
+      return React.createElement('div',{style:Object.assign({},b,{ borderRadius:7, background:color })});
+    };
+    const navItem = (shape,label,active,onClick) => React.createElement('button',{ key:label, onClick, style:{ flex:1, display:'flex', flexDirection:'column', alignItems:'center', gap:5, background:'none', border:'none', cursor:'pointer', padding:'4px 0' } },
+      ico(shape, active?accent:'#C6BCA9'),
+      React.createElement('span',{ style:{ fontSize:10.5, fontWeight:active?800:600, color:active?accent:'#A89E89', fontFamily:'Nunito,sans-serif', letterSpacing:'.2px' } }, label));
+    const navWrap = { position:'absolute', left:14, right:14, bottom:22, height:64, borderRadius:24, background:'rgba(255,255,255,0.9)', backdropFilter:'blur(16px) saturate(160%)', WebkitBackdropFilter:'blur(16px) saturate(160%)', boxShadow:'0 8px 26px rgba(120,90,60,0.18)', display:'flex', alignItems:'center', padding:'0 6px', zIndex:6, border:'1px solid rgba(255,255,255,0.7)', boxSizing:'border-box' };
+    const kidNav = React.createElement('div',{style:navWrap},
+      navItem('dot','Hoy', S.screen==='home', ()=>this.go('home')),
+      navItem('diamond','Practicar', S.screen==='practice', ()=>this.go('practice')),
+      navItem('ring','Calma', S.screen==='calm', ()=>this.go('calm')),
+      navItem('square','Adultos', false, ()=>this.setMode('adult')));
+    const adultNav = React.createElement('div',{style:navWrap},
+      navItem('dot','Perfil', S.screen==='profile', ()=>this.go('profile')),
+      navItem('diamond','Recursos', S.screen==='resources', ()=>this.go('resources')),
+      navItem('ring','Niño', false, ()=>this.setMode('kid')));
+
+    // ---- resource chips ----
+    const rchip = (label,key) => React.createElement('button',{ key, onClick:()=>this.setResourceTab(key), style:{ border:'none', cursor:'pointer', borderRadius:999, padding:'9px 15px', fontSize:13, fontWeight:700, fontFamily:'Nunito,sans-serif', background:S.resourceTab===key?'#fff':'rgba(255,255,255,.16)', color:S.resourceTab===key?'#34503A':'#D7E4D4', whiteSpace:'nowrap' } }, label);
+    const resourceChips = React.createElement('div',{ style:{ display:'flex', gap:8, overflowX:'auto', paddingBottom:2 } },
+      rchip('Tips','tips'), rchip('Materiales','materials'), rchip('Protocolos','protocols'), rchip('Biblioteca','library'));
+
+    // ---- poses ----
+    const mkPose = (nm,tag,ac,tint,desc) => ({
+      name:nm, tag, accent:ac, desc,
+      cardStyle:{ background:tint, border:'none', borderRadius:22, padding:'15px 11px 14px', cursor:'pointer', display:'flex', flexDirection:'column', alignItems:'center', gap:8 },
+      imgStyle:{ width:'100%', aspectRatio:'1', borderRadius:16, background:'repeating-linear-gradient(45deg,rgba(0,0,0,.045) 0 6px,rgba(0,0,0,0) 6px 12px), '+ac+'2e', border:'1.5px dashed '+ac+'aa', display:'flex', alignItems:'center', justifyContent:'center', fontFamily:'monospace', fontSize:8, color:ac },
+      nameStyle:{ fontFamily:'Fredoka,sans-serif', fontWeight:500, fontSize:14.5, color:'#3D3A34' },
+      tagStyle:{ fontSize:10, fontWeight:800, color:ac, letterSpacing:'.3px', textTransform:'uppercase' },
+      onClick:()=>this.openPose({ name:nm, tag, accent:ac, desc }),
+    });
+    const poses = [
+      mkPose('Montaña','Raíces','#7E9A7A','#EBF0E8','De pie, firme como una montaña. Siente cómo tus pies echan raíces en la tierra.'),
+      mkPose('Indio','Calma','#C99178','#F6EAE3','Sentado con las piernas cruzadas y la espalda larga. Un momento para volver al centro.'),
+      mkPose('Globo','Respira','#7E9DB5','#E9F0F4','Manos en la pancita. Ínflala como un globo al inhalar y desínflala al soltar el aire.'),
+      mkPose('Gato','Energía','#D9A23F','#FAF0D6','En cuatro patas: redondea y arquea la espalda, despacio, como un gato perezoso.'),
+      mkPose('Árbol','Raíces','#7E9A7A','#EBF0E8','De pie en un solo pie, brazos como ramas. Busca tu equilibrio sin prisa.'),
+      mkPose('Bosque','Calma','#9A86A8','#F0EAF2','Acostado, ojos suaves. Escucha el bosque y deja que el cuerpo descanse.'),
+    ];
+
+    // ---- sensory profiles ----
+    const mkProf = (nm,ac,tint,desc,tip) => ({
+      name:nm, accent:ac, desc, tip,
+      cardStyle:{ background:tint, borderRadius:20, padding:'15px 17px' },
+      headStyle:{ display:'flex', alignItems:'center', gap:9, marginBottom:7 },
+      dotStyle:{ width:11, height:11, borderRadius:'50%', background:ac, flex:'none' },
+      nameStyle:{ fontFamily:'Fredoka,sans-serif', fontWeight:600, fontSize:15.5, color:ac },
+    });
+    const profiles = [
+      mkProf('Muy Sensible','#C07BA0','#F7E9F1','Percibe el mundo con gran intensidad. Necesita previsibilidad y suavidad.','Avisa 5 min antes. Ropa sin etiquetas. Baja el volumen. Si rechaza una postura, ofrece otra sin insistir.'),
+      mkProf('Buscador/a','#CE9226','#FBF1D6','Busca estímulos. Necesita movimiento con propósito y resistencia.','Jalea 4 minutos antes. Guerrero y Perro primero para descargar. Desafía con ojos cerrados en Árbol.'),
+      mkProf('Bajo Registro','#5F97BA','#E6F0F6','Necesita estímulos intensos para registrar su propio cuerpo.','Presión activa en cada postura. Música más movida al inicio. Practica en piso irregular o hierba.'),
+      mkProf('Planif. Motora','#7E9A7A','#EAF0E7','Aprende los movimientos por mapas. Necesita repetición y orden.','Demuestra primero. Gato I y Gato II por separado. 5 repeticiones mínimo. Celebra cada intento.'),
+    ];
+
+    const materials = [
+      { name:'Piedra suave y fría', sub:'Objeto antiestrés' },
+      { name:'Colchoneta o manta', sub:'Para la postura' },
+      { name:'Música suave de bosque', sub:'Opcional · ambiental' },
+      { name:'Cojín suave', sub:'Apoyo · opcional' },
+    ];
+    const downloads = ['Guía de posturas · S1','Tarjetas para imprimir','Rutinas en casa · S1','Ficha de perfil sensorial'];
+    const protocols = [
+      { name:'Integración Sensorial', sub:'Marco basado en Ayres' },
+      { name:'Co-regulación primero', sub:'Acompañar antes de corregir' },
+      { name:'Aprendizaje gradual', sub:'Demostrar · repetir · celebrar' },
+    ];
+
+    const days = Array.from({length:7},(_,i)=>({ style:{ flex:1, height:24, borderRadius:8, background: i<S.day?'#9DB89A':'#2C4631' } }));
+    const dayLabels = ['L','M','X','J','V','S','D'];
+
+    // ---- sendero de piedras (desafío del mes) ----
+    const stone = (i) => {
+      const isDone = i < S.day, isCur = i === S.day;
+      let node;
+      if(isDone){
+        node = React.createElement('span',{style:{ width:30, height:30, borderRadius:'50%', background:'#9DB89A', display:'flex', alignItems:'center', justifyContent:'center', color:'#fff', fontSize:13, boxShadow:'0 3px 7px rgba(120,150,110,.45)' }},'✓');
+      } else if(isCur){
+        node = React.createElement('span',{style:{ width:40, height:40, borderRadius:'50%', background:'#FBF8F2', border:'2.5px solid #E4B05C', backgroundImage:"url('img/kawa-base.png')", backgroundSize:'78%', backgroundPosition:'center', backgroundRepeat:'no-repeat', boxShadow:'0 5px 12px rgba(228,176,92,.45)' }});
+      } else {
+        node = React.createElement('span',{style:{ width:30, height:30, borderRadius:'50%', background:'#fff', border:'2px solid #E7DAC4' }});
+      }
+      return React.createElement('div',{ key:i, style:{ display:'flex', flexDirection:'column', alignItems:'center', gap:6, marginTop:isCur?-5:0 } },
+        node,
+        React.createElement('span',{ style:{ fontSize:9, fontWeight:isCur?800:700, color:isCur?'#C8825D':(isDone?'#A89E89':'#BCB09A') } }, isCur?'HOY':dayLabels[i]));
+    };
+    const challengeStones = React.createElement('div',{ style:{ position:'relative', margin:'22px 2px 4px' } },
+      React.createElement('div',{ style:{ position:'absolute', left:15, right:15, top:15, borderTop:'2px dashed #E2CDA6' } }),
+      React.createElement('div',{ style:{ position:'relative', display:'flex', justifyContent:'space-between', alignItems:'flex-start' } }, [0,1,2,3,4,5,6].map(stone)));
+
+    // ---- anillo del desafío en la cabecera (opción D) ----
+    const hint = S.ringHint;
+    const deg = Math.min(1, S.day/7) * 360;
+    const ringWrap = {
+      position:'relative', width:46, height:46, flex:'none', borderRadius:'50%', padding:0, border:'none', cursor:'pointer',
+      background:'conic-gradient(#9DB89A 0 '+deg+'deg, #E7E0D0 '+deg+'deg 360deg)',
+      display:'flex', alignItems:'center', justifyContent:'center',
+      transformOrigin:'center center',
+      transform: hint ? 'scale(1.36)' : 'scale(1)',
+      boxShadow: hint ? '0 0 0 6px rgba(157,184,154,.18), 0 10px 22px rgba(120,150,110,.45)' : '0 2px 8px rgba(120,150,110,.28)',
+      transition:'transform .55s cubic-bezier(.34,1.56,.64,1), box-shadow .55s ease',
+      zIndex: hint ? 8 : 1,
+    };
+    const ringInner = { width:34, height:34, borderRadius:'50%', background:'#FBF6EE', display:'flex', alignItems:'center', justifyContent:'center', position:'relative' };
+    const ringNum = React.createElement('span',{ style:{ fontFamily:'Fredoka,sans-serif', fontWeight:600, fontSize:11.5, color:'#5E7A60', lineHeight:1, transform: hint?'translateY(-3px)':'none', transition:'transform .45s' } }, S.day+'/7');
+    const ringCurved = hint ? React.createElement('svg',{ viewBox:'0 0 52 52', width:34, height:34, style:{ position:'absolute', inset:0, overflow:'visible' } },
+      React.createElement('defs',null, React.createElement('path',{ id:'kawaArc', d:'M8,30 Q26,48 44,30', fill:'none' })),
+      React.createElement('text',{ fontFamily:'Nunito,sans-serif', fontWeight:800, fontSize:7, letterSpacing:1.2, fill:'#7E9A7A' },
+        React.createElement('textPath',{ href:'#kawaArc', startOffset:'50%', textAnchor:'middle' }, 'DESAFÍO'))) : null;
+    const challengeRing = React.createElement('button',{ onClick:()=>this.openChallenge(), 'aria-label':'Desafío del mes', style:ringWrap },
+      React.createElement('div',{ style:ringInner }, ringNum, ringCurved));
+
+    const mm = Math.floor(S.elapsed/60), ss = S.elapsed%60;
+    const timeStr = mm+':'+(ss<10?'0'+ss:ss);
+
+    const pose = S.pose || {};
+    const pAc = pose.accent || accent;
+
+    return {
+      isKid:S.mode==='kid', isAdult:S.mode==='adult',
+      isHome:S.screen==='home', isPractice:S.screen==='practice', isCalm:S.screen==='calm',
+      isProfile:S.screen==='profile', isBefore:S.screen==='before', isResources:S.screen==='resources',
+      showStory:S.overlay==='story', showBreath:S.overlay==='breath', showPose:S.overlay==='pose', showChallenge:S.overlay==='challenge',
+      challengeRing,
+      resHome:S.resourceTab==='home', resDetail:S.resourceTab!=='home',
+      resAntes:S.resourceTab==='antes', resTips:S.resourceTab==='tips', resMaterials:S.resourceTab==='materials', resProtocols:S.resourceTab==='protocols', resLibrary:S.resourceTab==='library',
+      resTitle: ({ antes:'Antes de empezar', tips:'Tips por perfil', materials:'Materiales', protocols:'Protocolos', library:'Biblioteca de posturas' })[S.resourceTab] || 'Recursos',
+      name, accent, kidBg, adultBg, homeHill1, homeHill2, kidNav, adultNav, challengeStones,
+      poses, profiles, materials, downloads, protocols, days, dayLabels,
+      dayCount:S.day, timeStr, playIcon: S.playing?'❙❙':'▶',
+      poseName:pose.name, poseTag:pose.tag, poseDesc:pose.desc,
+      poseImgStyle:{ width:140, height:140, borderRadius:32, background:'repeating-linear-gradient(45deg,rgba(0,0,0,.05) 0 7px,rgba(0,0,0,0) 7px 14px), '+pAc+'2e', border:'1.5px dashed '+pAc+'aa', display:'flex', alignItems:'center', justifyContent:'center', fontFamily:'monospace', fontSize:10, color:pAc },
+      poseChipStyle:{ display:'inline-block', fontSize:11, fontWeight:800, letterSpacing:'.4px', textTransform:'uppercase', color:pAc, background:pAc+'1f', borderRadius:999, padding:'4px 12px' },
+      poseBtnStyle:{ background:pAc, color:'#fff', width:'100%', marginTop:22, border:'none', borderRadius:18, padding:16, fontFamily:'Nunito,sans-serif', fontWeight:800, fontSize:16, cursor:'pointer' },
+      heroPlayStyle:{ width:54, height:54, borderRadius:'50%', background:accent, display:'flex', alignItems:'center', justifyContent:'center', color:'#fff', fontSize:19, flex:'none', boxShadow:'0 6px 16px '+accent+'66' },
+      moodCalma:()=>this.openBreath(), moodMover:()=>this.go('practice'), moodDificil:()=>this.openBreath(),
+      openBreath:()=>this.openBreath(), openStory:()=>this.openStory(), closeOverlay:()=>this.closeOverlay(),
+      togglePlay:()=>this.togglePlay(), markDay:()=>this.markDay(),
+      openAntes:()=>this.setResourceTab('antes'), openTips:()=>this.setResourceTab('tips'), openMaterials:()=>this.setResourceTab('materials'),
+      openProtocols:()=>this.setResourceTab('protocols'), openLibrary:()=>this.setResourceTab('library'), backRes:()=>this.setResourceTab('home'),
+      stopProp:(e)=>e.stopPropagation(),
+    };
+  }
+}
+</script>
+</body>
+</html>
